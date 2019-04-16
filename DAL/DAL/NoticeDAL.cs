@@ -1,5 +1,6 @@
 ﻿using DAL.IDAL;
 using DAL.Model;
+using DAL.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,15 +23,29 @@ namespace DAL.DAL
         {
             return GetListData().ToList();
         }
+
+        public class Notice_v:Notice
+        {
+            
+            public string Sendname { get; set; }
+        }
         /// <summary>
         /// 根据客户id检索通知消息
         /// </summary>
         /// <returns></returns>
-        public List<Notice> GetList(int clientid)
+        public List<Notice_v> GetList(int clientid)
         {
-            var list = GetListData();
-            list = list.Where(x => x.RecipientId == clientid&&x.IsRead==0);
-            return list.ToList();
+            List<Notice_v> ls = new List<Notice_v>();
+            Notice_v nv = null;
+            var list = _context.Notice.Where(x => x.ReceiveId == clientid && x.IsRead == 0);
+            foreach (var item in list)
+            {
+                nv = new Notice_v();
+                nv = Utils.TransReflection<Notice, Notice_v>(item);
+                nv.Sendname = _context.Client.FirstOrDefault(x => x.Id == item.SendId).Name;
+                ls.Add(nv);
+            }
+            return ls;
 
         }
         private IQueryable<Notice> GetListData()
@@ -46,10 +61,10 @@ namespace DAL.DAL
         {
             Notice notice = new Notice();
             notice.CreateTime = DateTime.Now;
-            notice.InitiatorId = comment_v.ClientId;
+            notice.SendId = comment_v.ClientId;
             var cpid = int.Parse(comment_v.ParentId.Substring(comment_v.ParentId.LastIndexOf(",") + 1));
             var clientid = _context.Comment.FirstOrDefault(x => x.Id == cpid).ClientId;
-            notice.RecipientId = clientid;
+            notice.ReceiveId = clientid;
             notice.ContentsUrl = comment_v.contenturl;
             _context.Notice.Add(notice);
             return _context.SaveChanges();
@@ -64,7 +79,7 @@ namespace DAL.DAL
             var notice = _context.Notice.FirstOrDefault(x => x.Id == id);
             notice.IsRead = 1;
             return _context.SaveChanges();
-            
+
         }
     }
 }

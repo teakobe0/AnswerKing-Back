@@ -3,6 +3,7 @@ using DAL.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using static DAL.DAL.NoticeDAL;
 
 namespace DAL.IDAL
 {
@@ -23,7 +24,7 @@ namespace DAL.IDAL
         /// 根据客户id检索通知消息
         /// </summary>
         /// <returns></returns>
-        List<Notice> GetList(int clientid);
+        List<Notice_v> GetList(int clientid);
         /// <summary>
         /// 修改通知状态
         /// </summary>

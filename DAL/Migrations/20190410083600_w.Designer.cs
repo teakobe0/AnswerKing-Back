@@ -4,14 +4,16 @@ using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DAL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20190410083600_w")]
+    partial class w
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,8 +83,6 @@ namespace DAL.Migrations
 
                     b.Property<int>("ClassId");
 
-                    b.Property<int>("ClientId");
-
                     b.Property<string>("CreateBy")
                         .HasMaxLength(50);
 
@@ -131,8 +131,6 @@ namespace DAL.Migrations
                     b.Property<int>("IsAudit");
 
                     b.Property<int>("RefId");
-
-                    b.Property<int>("Status");
 
                     b.Property<int>("UniversityId");
 
@@ -209,8 +207,6 @@ namespace DAL.Migrations
                     b.Property<DateTime>("EffectiveDate");
 
                     b.Property<string>("Email");
-
-                    b.Property<string>("Image");
 
                     b.Property<string>("Name");
 

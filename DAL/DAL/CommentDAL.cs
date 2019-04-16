@@ -18,9 +18,14 @@ namespace DAL.DAL
         /// 查询列表全部数据
         /// </summary>
         /// <returns></returns>
-        public List<Comment> GetList()
+        public List<Comment> GetListPage(int classinfoid)
         {
-            return GetListData().ToList();
+            var list = GetListData();
+            if (classinfoid != 0)
+            {
+                list = list.Where(x => x.ClassInfoId == classinfoid);
+            }
+            return list.ToList();
         }
 
         private IQueryable<Comment> GetListData()
@@ -49,7 +54,8 @@ namespace DAL.DAL
                     cv = Utils.TransReflection<Comment, Comment_v>(item);
                     cv.name = _context.Client.FirstOrDefault(x => x.Id == item.ClientId).Name;
                     ls.Add(cv);
-                    var son = list.Where(x => x.ParentId == item.Id.ToString());
+                   
+                    var son = list.Where(x => x.ParentId.Contains("," + item.Id) && x.ParentId.Substring(x.ParentId.LastIndexOf(",") + 1) == item.Id.ToString());
                     foreach (var ea in son)
                     {
                         cv = new Comment_v();
@@ -94,11 +100,10 @@ namespace DAL.DAL
         public int Del(int id)
         {
             var co = _context.Comment.FirstOrDefault(x => x.Id == id);
-            var dellist = _context.Comment.Where(x=>
-            x.ParentId==co.Id.ToString()
-            || (x.ParentId.Contains(co.Id + ",")&&x.ParentId.IndexOf(co.Id.ToString())==0)
-            || x.ParentId.Contains(","+co.Id+",")
-            ||( x.ParentId.Contains("," + co.Id)&&x.ParentId.Substring(x.ParentId.LastIndexOf(",") + 1)==co.Id.ToString()));
+            var dellist = _context.Comment.Where(x =>
+             x.ParentId.Contains("," + co.Id + ",")
+            || (x.ParentId.Contains("," + co.Id) && x.ParentId.Substring(x.ParentId.LastIndexOf(",") + 1) == co.Id.ToString()));
+            Utils.WriteInfoLog("Comment:Delete" + co.ToJson() + dellist.ToJson());
             _context.Comment.RemoveRange(dellist);
             _context.Comment.Remove(co);
             return _context.SaveChanges();

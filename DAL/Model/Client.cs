@@ -12,6 +12,8 @@ namespace DAL.Model
         public string Sex { get; set; }//性别
         public DateTime Birthday { get; set; }//生日
         public DateTime EffectiveDate { get; set; }//有效期
-      
+        public string Image { get; set; }//客户图像
+
+
     }
 }

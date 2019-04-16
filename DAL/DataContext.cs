@@ -24,5 +24,6 @@ namespace DAL
         public DbSet<ImportRecords> ImportRecords { get; set; }
         public DbSet<Comment> Comment { get; set; }
         public DbSet<Notice> Notice { get; set; }
+        public DbSet<Order> Order { get; set; }
     }
 }

@@ -12,7 +12,7 @@ namespace DAL.IDAL
         /// 查询列表全部数据
         /// </summary>
         /// <returns></returns>
-        List<Comment> GetList();
+        List<Comment> GetListPage(int classinfoid);
         /// <summary>
         /// 查询列表全部数据 根据条件
         /// </summary>

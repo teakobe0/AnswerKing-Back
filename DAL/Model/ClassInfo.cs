@@ -8,9 +8,13 @@ namespace DAL.Model
 {
     public class ClassInfo : BaseModel
     {
+        public int ClientId { get; set; }//客户id
         public int ClassId { get; set; }//课程id
         public int TotalGrade { get; set; }//总分
         public string Evaluate { get; set; }//评价
+        public int Use { get; set; } //有用
+        public int NoUse { get; set; }//没用
+        public int PageViews { get; set; }//浏览量
     }
 
     public class ClassWeek : BaseModel
@@ -38,6 +42,7 @@ namespace DAL.Model
         public int ClassInfoId { get; set; }//课程资料id
         public int UniversityId { get; set; }//学校id
         public int IsAudit { get; set; }//是否审核 0：未审核，1：已审核
+        public int Status { get; set; }//状态 0：未删除，-1：已删除
     }
 
 }

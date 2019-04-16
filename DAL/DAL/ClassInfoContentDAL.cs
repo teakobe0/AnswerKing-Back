@@ -30,7 +30,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public List<ClassInfoContent> GetList(string searchText)
         {
-            var list = GetListData();
+            var list = GetListData().Where(x => x.IsAudit ==1);
             if (!string.IsNullOrEmpty(searchText))
             {
                 list = list.Where(x => x.Contents.Contains(searchText));
@@ -126,7 +126,7 @@ namespace DAL.DAL
         }
         private IQueryable<ClassInfoContent> GetListData()
         {
-            return _context.ClassInfoContent.Where(x => 1 == 1);
+            return _context.ClassInfoContent.Where(x => x.Status==0);
         }
         /// <summary>
         /// 根据答案id检索
@@ -216,9 +216,8 @@ namespace DAL.DAL
         {
             if (id != 0)
             {
-                var classInfoContent = _context.ClassInfoContent.FirstOrDefault(x => x.Id == id);
-                Utils.WriteInfoLog("ClassInfoContent:Delete" + classInfoContent.ToJson());
-                _context.ClassInfoContent.Remove(classInfoContent);
+                var cic = _context.ClassInfoContent.FirstOrDefault(x => x.Id == id);
+                cic.Status = -1;
                 return _context.SaveChanges();
             }
             return 0;

@@ -83,7 +83,18 @@ namespace DAL.DAL
         {
             return _context.Client.FirstOrDefault(x => x.Id == id);
         }
-
+        /// <summary>
+        /// 修改客户有效期
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
+        public int ChangeEffectiveDate(int clientid,DateTime date)
+        {
+            var client = _context.Client.FirstOrDefault(x => x.Id == clientid);
+            client.Role = C_Role.vip;
+            client.EffectiveDate = date;
+            return _context.SaveChanges();
+        }
         /// <summary>
         /// 查询列表全部数据
         /// </summary>

@@ -45,6 +45,12 @@ namespace DAL.IDAL
         /// <returns></returns>
         List<Client> GetList();
         /// <summary>
+        /// 修改客户有效期
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
+        int ChangeEffectiveDate(int clientid, DateTime date);
+        /// <summary>
         /// 修改密码
         /// </summary>
         /// <param name="ID"></param>

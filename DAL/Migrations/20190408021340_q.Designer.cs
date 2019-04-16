@@ -4,14 +4,16 @@ using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DAL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20190408021340_q")]
+    partial class q
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,8 +83,6 @@ namespace DAL.Migrations
 
                     b.Property<int>("ClassId");
 
-                    b.Property<int>("ClientId");
-
                     b.Property<string>("CreateBy")
                         .HasMaxLength(50);
 
@@ -105,43 +105,6 @@ namespace DAL.Migrations
                     b.ToTable("ClassInfo");
                 });
 
-            modelBuilder.Entity("DAL.Model.ClassInfoContent", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("ClassId");
-
-                    b.Property<int>("ClassInfoId");
-
-                    b.Property<int>("ClassWeekId");
-
-                    b.Property<int>("ClassWeekTypeId");
-
-                    b.Property<string>("Contents");
-
-                    b.Property<string>("CreateBy")
-                        .HasMaxLength(50);
-
-                    b.Property<DateTime>("CreateTime");
-
-                    b.Property<int>("CwtParentId");
-
-                    b.Property<int>("IsAudit");
-
-                    b.Property<int>("RefId");
-
-                    b.Property<int>("Status");
-
-                    b.Property<int>("UniversityId");
-
-                    b.Property<string>("Url");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ClassInfoContent");
-                });
 
             modelBuilder.Entity("DAL.Model.ClassWeek", b =>
                 {
@@ -209,8 +172,6 @@ namespace DAL.Migrations
                     b.Property<DateTime>("EffectiveDate");
 
                     b.Property<string>("Email");
-
-                    b.Property<string>("Image");
 
                     b.Property<string>("Name");
 
