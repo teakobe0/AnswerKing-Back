@@ -1,5 +1,6 @@
 ﻿using DAL.IDAL;
 using DAL.Model;
+using DAL.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,7 +30,7 @@ namespace DAL.DAL
             }
             return null;
         }
-        
+
         /// <summary>
         /// 根据课程资料id检索
         /// </summary>
@@ -85,19 +86,62 @@ namespace DAL.DAL
             }
             return 0;
         }
+      /// <summary>
+      /// 修改课程资料有用、没用
+      /// </summary>
+      /// <param name="ID"></param>
+      /// <param name="classInfoId"></param>
+      /// <param name="type"></param>
+      /// <param name="check"></param>
+      /// <returns></returns>
+        public int Change(int ID, int classInfoId, string type, int check)
+        {
+            var ci = _context.ClassInfo.FirstOrDefault(x => x.Id == classInfoId);
+            UseRecords urs = null;
+            if (check == 1)
+            {
+                var ur = _context.UseRecords.Where(x => x.ClassInfoId == classInfoId && x.ClientId == ID).OrderByDescending(x => x.Id).FirstOrDefault();
+                if (ur != null)
+                {
+                    urs = new UseRecords();
+                    urs = Utils.TransReflection<UseRecords, UseRecords>(ur);
+                    urs.Id = 0;
+                    urs.Check = -1;
+                    urs.Type = ur.Type;
+                    urs.CreateTime = DateTime.Now;
+                    _context.UseRecords.Add(urs);
+                    if (ur.Type == "Y")
+                    {
+                        ci.Use -= 1;
+                    }
+                    else
+                    {
+                        ci.NoUse -= 1;
+                    }
+                }
+            }
+            if (type == "Y")
+            {
+                ci.Use += check;
+            }
+            else
+            {
+                ci.NoUse += check;
+            }
+            urs = new UseRecords();
+            urs.ClassInfoId = classInfoId;
+            urs.ClientId = ID;
+            urs.Check = check;
+            urs.Type = type;
+            urs.CreateTime = DateTime.Now;
+            _context.UseRecords.Add(urs);
+            return _context.SaveChanges();
+        }
         /// <summary>
         /// 修改课程资料
         /// </summary>
-        /// <param name="ID"></param>
         /// <param name="classInfo"></param>
         /// <returns></returns>
-        public int ChangeClassInfo(int ID, ClassInfo classInfo)
-        {
-            var data = _context.ClassInfo.FirstOrDefault(x => x.Id == ID);
-            data.Evaluate = classInfo.Evaluate;
-            data.TotalGrade = classInfo.TotalGrade;
-            return _context.SaveChanges();
-        }
         public int ChangeClassInfo(ClassInfo classInfo)
         {
             _context.ClassInfo.Update(classInfo);
@@ -123,7 +167,7 @@ namespace DAL.DAL
         public int GetImportMaxid()
         {
             var ci = _context.ClassInfo.Where(x => x.RefId != 0).OrderByDescending(x => x.RefId).FirstOrDefault();
-            return ci==null ? 0 : ci.RefId;
+            return ci == null ? 0 : ci.RefId;
 
         }
 

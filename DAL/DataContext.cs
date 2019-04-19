@@ -25,5 +25,6 @@ namespace DAL
         public DbSet<Comment> Comment { get; set; }
         public DbSet<Notice> Notice { get; set; }
         public DbSet<Order> Order { get; set; }
+        public DbSet<UseRecords> UseRecords { get; set; }
     }
 }

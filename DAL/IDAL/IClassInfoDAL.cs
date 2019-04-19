@@ -37,12 +37,11 @@ namespace DAL.IDAL
         /// <returns></returns>
         int Del(int id);
         /// <summary>
-        /// 修改课程资料
+        /// 修改课程资料(接口)
         /// </summary>
-        /// <param name="ID"></param>
         /// <param name="classInfo"></param>
         /// <returns></returns>
-        int ChangeClassInfo(int ID, ClassInfo classInfo);
+        int Change(int ID,int classInfoId, string type, int check);
         /// <summary>
         /// 修改课程资料
         /// </summary>
