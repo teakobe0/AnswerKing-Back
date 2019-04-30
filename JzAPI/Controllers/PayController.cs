@@ -54,13 +54,14 @@ namespace JzAPI.Controllers
                 case "3个月": product_id = "2"; break;
                 case "6个月": product_id = "3"; break;
             }
+           
             if (type == 1)
             {
                 //构造支付地址信息
                 WxPayService wxPayService = new WxPayService();
                 //获取请求ip     
-                string str = (Request.HttpContext.Connection.LocalIpAddress.MapToIPv4().ToString() + ":" + Request.HttpContext.Connection.LocalPort);
-                var ip = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+                //var ip = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+                var ip = HttpContext.Connection.RemoteIpAddress.ToString();
                 if (string.IsNullOrEmpty(ip))
                 {
                     ip = HttpContext.Connection.RemoteIpAddress.ToString();
@@ -147,12 +148,12 @@ namespace JzAPI.Controllers
 
                 AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
 
-              
+
                 request.BizContent = "{" +
                 "\"out_trade_no\":\"" + orderNo + "\"" +
                "}";
 
-                
+
                 AlipayTradeQueryResponse response = client.Execute(request);
 
 

@@ -95,7 +95,9 @@ namespace DAL.DAL
         public object GetListbycinid(int classinfoid, int status, int pagenum, int pagesize, out int PageTotal)
         {
             PageTotal = 0;
-            var ls = GetListData();
+            var ls = GetListData().Where(x => x.CwtParentId != 0 && x.ClassInfoId != -99);
+            //暂时隐藏url为空的答案
+            ls = ls.Where(x => x.Url != null);
             if (classinfoid != 0)
             {
                 ls = ls.Where(x => x.ClassInfoId == classinfoid);
@@ -119,7 +121,7 @@ namespace DAL.DAL
                            x.IsAudit
 
                        };
-            list = list.Where(x => x.CwtParentId != 0 && x.ClassInfoId != -99);
+           
             PageTotal = list.Count();
             list = list.Skip(pagesize * (pagenum - 1)).Take(pagesize).OrderBy(x => x.Id);
             return list.ToList();
@@ -145,7 +147,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public ClassInfoContent GetNext(int id)
         {
-            return _context.ClassInfoContent.FirstOrDefault(x => x.Id > id && x.IsAudit == 0 && x.CwtParentId != 0);
+            return _context.ClassInfoContent.FirstOrDefault(x => x.Id > id && x.IsAudit == 0 && x.CwtParentId != 0&&x.Status==0);
         }
 
         /// <summary>
@@ -187,7 +189,7 @@ namespace DAL.DAL
 
         }
         /// <summary>
-        /// 审核
+        /// 审核、取消审核
         /// </summary>
         /// <param name="classInfoContent"></param>
         /// <returns></returns>
@@ -196,7 +198,7 @@ namespace DAL.DAL
             var cic = _context.ClassInfoContent.FirstOrDefault(x => x.Id == classInfoContent.Id);
             if (cic.IsAudit == 1)
             {
-                return 0;
+                cic.IsAudit = 0;
             }
             else
             {
@@ -204,8 +206,8 @@ namespace DAL.DAL
                 cic.Url = classInfoContent.Url;
                 cic.Contents = classInfoContent.Contents;
                 Utils.WriteInfoLog("ClassInfoContent:Audit" + cic.ToJson());
-                return _context.SaveChanges();
             }
+            return _context.SaveChanges();
         }
         /// <summary>
         /// 删除

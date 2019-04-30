@@ -81,7 +81,7 @@ namespace JzAPI.Controllers
         /// <param name="classInfoid"></param>
         /// <returns></returns>
         [HttpGet]
-        [Authorize(Roles = C_Role.admin_vip)]
+        [Authorize(Roles = C_Role.all)]
         [Route("UseRecords")]
         public ResultModel UseRecords(int classInfoid)
         {

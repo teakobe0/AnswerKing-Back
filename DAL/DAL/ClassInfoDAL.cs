@@ -86,14 +86,14 @@ namespace DAL.DAL
             }
             return 0;
         }
-      /// <summary>
-      /// 修改课程资料有用、没用
-      /// </summary>
-      /// <param name="ID"></param>
-      /// <param name="classInfoId"></param>
-      /// <param name="type"></param>
-      /// <param name="check"></param>
-      /// <returns></returns>
+        /// <summary>
+        /// 修改课程资料有用、没用
+        /// </summary>
+        /// <param name="ID"></param>
+        /// <param name="classInfoId"></param>
+        /// <param name="type"></param>
+        /// <param name="check"></param>
+        /// <returns></returns>
         public int Change(int ID, int classInfoId, string type, int check)
         {
             var ci = _context.ClassInfo.FirstOrDefault(x => x.Id == classInfoId);
@@ -101,7 +101,7 @@ namespace DAL.DAL
             if (check == 1)
             {
                 var ur = _context.UseRecords.Where(x => x.ClassInfoId == classInfoId && x.ClientId == ID).OrderByDescending(x => x.Id).FirstOrDefault();
-                if (ur != null)
+                if (ur != null && ur.Check == 1)
                 {
                     urs = new UseRecords();
                     urs = Utils.TransReflection<UseRecords, UseRecords>(ur);

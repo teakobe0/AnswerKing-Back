@@ -106,6 +106,8 @@ namespace JzAPI
 
             app.UseMvc();
             app.UseCors("CorsPolicy");
+            app.UseStaticFiles();
+
         }
     }
 }

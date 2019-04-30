@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using DAL.IDAL;
 using DAL.Model;
+using DAL.Model.Const;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -24,17 +26,17 @@ namespace JzAPI.Controllers
         /// <summary>
         /// 根据客户id检索通知消息
         /// </summary>
-        /// <param name="clientid"></param>
         /// <returns></returns>
         [HttpGet]
         [Route("Notices")]
-        public ResultModel Notices(int clientid)
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Notices()
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _notdal.GetList(clientid);
+                r.Data = _notdal.GetList(ID);
 
             }
             catch (Exception ex)

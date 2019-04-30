@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using DAL.DAL;
 using DAL.IDAL;
 using DAL.Model;
+using DAL.Model.Const;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -54,6 +56,7 @@ namespace JzAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("Add")]
+        [Authorize(Roles = C_Role.admin_vip)]
         public ResultModel Add([FromBody] Comment_v comment)
         {
             ResultModel r = new ResultModel();
@@ -86,6 +89,7 @@ namespace JzAPI.Controllers
         /// <returns></returns>
         [HttpDelete]
         [Route("Del")]
+        [Authorize(Roles = C_Role.admin_vip)]
         public ResultModel Del(int id)
         {
             ResultModel r = new ResultModel();
