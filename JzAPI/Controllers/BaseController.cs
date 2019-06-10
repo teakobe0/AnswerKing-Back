@@ -60,7 +60,7 @@ namespace JzAPI.Controllers
                 issuer: "yourdomain.com",
                 audience: "yourdomain.com",
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(720),
+                expires: DateTime.Now.AddMinutes(1440),
                 signingCredentials: creds);
 
             return new

@@ -149,7 +149,7 @@ namespace DAL.DAL
         {
             return _context.ClassInfoContent.FirstOrDefault(x => x.Id > id && x.IsAudit == 0 && x.CwtParentId != 0&&x.Status==0);
         }
-
+        
         /// <summary>
         /// 新增答案
         /// </summary>
@@ -174,6 +174,7 @@ namespace DAL.DAL
         {
             var content = _context.ClassInfoContent.FirstOrDefault(x => x.Id == Id);
             content.Contents = classInfoContent.Contents;
+            content.Url = classInfoContent.Url;
             return _context.SaveChanges();
 
         }
@@ -234,7 +235,16 @@ namespace DAL.DAL
             return cic == null ? 0 : cic.RefId;
 
         }
-
+        /// <summary>
+        /// 查询url为空的数据
+        /// </summary>
+        /// <returns></returns>
+        public List<ClassInfoContent> Urls()
+        {
+            var ls = GetListData().Where(x => x.RefId != 0&&x.CwtParentId != 0 && x.ClassInfoId != -99);
+            ls = ls.Where(x => x.Url == null).OrderBy(x => x.Id);
+            return ls.ToList();
+        }
         /// <summary>
         /// 导入数据
         /// </summary>

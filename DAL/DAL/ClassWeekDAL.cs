@@ -48,24 +48,6 @@ namespace DAL.DAL
             }
             classWeek.CreateTime = DateTime.Now;
             _context.ClassWeek.Add(classWeek);
-            //var d = _context.SaveChanges();
-            //if (d > 0)
-            //{
-            //    var week = _context.ClassWeek.FirstOrDefault(x => x.No == classWeek.No && x.ClassInfoId == classWeek.ClassInfoId);
-            //    ClassWeekType cwt = null;
-            //    string[] defaultype = new string[4] { "Assignment", "Discussion", "Quiz", "Exam" };
-            //    foreach (var item in defaultype)
-            //    {
-            //        cwt = new ClassWeekType();
-            //        cwt.ClassWeekId = week.Id;
-            //        cwt.ContentType = item;
-            //        cwt.CreateTime = DateTime.Now;
-            //        cwt.ClassWeekTypeId = -1;
-            //        _context.ClassWeekType.Add(cwt);
-            //    }
-
-            //}
-
             return _context.SaveChanges();
 
         }
@@ -108,9 +90,6 @@ namespace DAL.DAL
                 var classweek = _context.ClassWeek.FirstOrDefault(x => x.Id == id);
                 Utils.WriteInfoLog("ClassWeek:Delete" + classweek.ToJson());
                 _context.ClassWeek.Remove(classweek);
-                //var type = _context.ClassWeekType.Where(x => x.ClassWeekId == id).ToList();
-                //Utils.WriteInfoLog("ClassWeekType:Delete" + type.ToJson());
-                //_context.ClassWeekType.RemoveRange(type);
                 return _context.SaveChanges();
             }
             return 0;
@@ -144,11 +123,11 @@ namespace DAL.DAL
         /// <summary>
         /// 导入数据
         /// </summary>
-        /// <param name="ls"></param>
+        /// <param name="cw"></param>
         /// <returns></returns>
         public int AddImportData(ClassWeek cw)
         {
-            _context.ClassWeek.AddRange(cw);
+            _context.ClassWeek.Add(cw);
             return _context.SaveChanges();
 
         }

@@ -25,11 +25,16 @@ namespace DAL.IDAL
         /// <returns></returns>
         List<ClassInfoContent> GetList();
         /// <summary>
+        /// 查询url为空的数据
+        /// </summary>
+        /// <returns></returns>
+        List<ClassInfoContent> Urls();
+        /// <summary>
         /// 根据答案id查询
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-      ClassInfoContent GetClassInfoContent(int id);
+        ClassInfoContent GetClassInfoContent(int id);
         /// <summary>
         /// 检索下一个未审核答案
         /// </summary>

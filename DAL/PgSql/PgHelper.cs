@@ -12,12 +12,19 @@ namespace DAL.PgSql
         private NpgsqlConnection conn;
         string path = AppConfig.Configuration["pg"];
 
-        public DataTable GetList(string table, int maxid)
+        public DataTable GetList(string table, int maxid, string refid="")
         {
             conn = new NpgsqlConnection(path);
             conn.Open();
             string sql = "";
-            sql = string.Format(@" select  * from " + table + " where id>" + maxid + " order by id");
+            if (refid == "")
+            {
+                sql = string.Format(@" select  * from " + table + " where id>" + maxid + " order by id");
+            }
+            else
+            {
+                sql = string.Format(@" select  * from " + table + " where id in ("+ refid + ") order by id");
+            }
 
             NpgsqlCommand command = new NpgsqlCommand(sql, conn);
             NpgsqlDataAdapter dataAdapter = new NpgsqlDataAdapter();

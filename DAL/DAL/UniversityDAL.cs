@@ -24,7 +24,7 @@ namespace DAL.DAL
             if (!string.IsNullOrEmpty(name))
                 list = list.Where(x => x.Name.Contains(name));
 
-            return list.ToList();
+            return list.OrderBy(x => x.Id).ToList();
 
         }
         /// <summary>
@@ -33,16 +33,28 @@ namespace DAL.DAL
         /// <returns></returns>
         public University GetUniversity(int id)
         {
-            return _context.University.FirstOrDefault(x => x.Id == id); 
+            return _context.University.FirstOrDefault(x => x.Id == id);
         }
         /// <summary>
         /// 检验学校名称是否存在
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public bool GetName(string name)
+        public bool GetName(string name, int id)
         {
-            return _context.University.Any(x => x.Name == name);
+            if (id == 0)
+            {
+                return _context.University.Any(x => x.Name.Trim() == name);
+            }
+            else
+            {
+                return _context.University.Any(x => x.Name.Trim() == name && x.Id != id);
+            }
+        }
+
+        public University GetUniversity(string name)
+        {
+            return _context.University.FirstOrDefault(x => x.Name.Trim() == name);
         }
         /// <summary>
         /// 新增
@@ -56,7 +68,6 @@ namespace DAL.DAL
             university.CreateTime = DateTime.Now;
             _context.University.Add(university);
             return _context.SaveChanges();
-
         }
         /// <summary>
         /// 根据学校名称检索学校id
@@ -105,7 +116,36 @@ namespace DAL.DAL
         /// <returns></returns>
         public int ChangeInfo(University university)
         {
-            _context.University.Update(university);
+            var model = _context.University.FirstOrDefault(x => x.Id == university.Id);
+            if (model.Name != university.Name)
+            {
+                model.Name = university.Name;
+                var clist = _context.Class.Where(x => x.UniversityId == university.Id);
+                if (clist.Count() > 0)
+                {
+                    foreach (var item in clist)
+                    {
+                        item.University = university.Name;
+                    }
+                }
+            }
+            model.Country = university.Country;
+            model.City = university.City;
+            model.State = university.State;
+            model.Address = university.Address;
+            model.Intro = university.Intro;
+            model.Image = university.Image;
+            return _context.SaveChanges();
+        }
+        /// <summary>
+        /// 隐藏学校
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public int Hide(int id)
+        {
+            var data = _context.University.FirstOrDefault(x => x.Id == id);
+            data.IsHide = -1;
             return _context.SaveChanges();
         }
         /// <summary>
@@ -135,7 +175,7 @@ namespace DAL.DAL
 
         private IQueryable<University> GetListData()
         {
-            return _context.University.Where(x => 1 == 1);
+            return _context.University.Where(x => x.IsHide == 0);
         }
 
         /// <summary>
@@ -169,7 +209,7 @@ namespace DAL.DAL
                         cs.UniversityId = target.Id;
                     }
                 }
-            }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+            }
             return _context.SaveChanges();
         }
         /// <summary>

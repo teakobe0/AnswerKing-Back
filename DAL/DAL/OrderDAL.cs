@@ -20,6 +20,21 @@ namespace DAL.DAL
         public List<Order> GetList()
         {
             return GetListData().ToList();
+        }
+        /// <summary>
+        /// 根据客户id检索订单
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
+        public List<Order> GetListByClientid(int clientid)
+        {
+            if (clientid != 0)
+            {
+                var list = GetListData();
+                list = list.Where(x => x.ClientId == clientid).OrderByDescending(x=>x.Id);
+                return list.ToList();
+            }
+            return null;
 
         }
         /// <summary>
@@ -38,7 +53,11 @@ namespace DAL.DAL
             _context.SaveChanges();
             return order.OrderNo;
         }
-
+        public int AddPaypal(Order order)
+        {
+            _context.Order.Add(order);
+            return _context.SaveChanges();
+        }
         /// <summary>
         /// 修改订单状态
         /// </summary>

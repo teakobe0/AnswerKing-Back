@@ -174,11 +174,11 @@ namespace DAL.DAL
         /// <summary>
         /// 导入数据
         /// </summary>
-        /// <param name="ls"></param>
+        /// <param name="ci"></param>
         /// <returns></returns>
         public int AddImportData(ClassInfo ci)
         {
-            _context.ClassInfo.AddRange(ci);
+            _context.ClassInfo.Add(ci);
             return _context.SaveChanges();
         }
         /// <summary>

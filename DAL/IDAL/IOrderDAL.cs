@@ -13,11 +13,18 @@ namespace DAL.IDAL
         /// <returns></returns> 
         List<Order> GetList();
         /// <summary>
+        /// 根据客户id检索订单
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
+        List<Order> GetListByClientid(int clientid);
+        /// <summary>
         /// 新增
         /// </summary>
         /// <param name="order"></param>
         /// <returns></returns>
         string Add(Order order);
+        int AddPaypal(Order order);
         /// <summary>
         /// 修改订单状态
         /// </summary>

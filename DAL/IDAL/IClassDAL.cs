@@ -87,12 +87,17 @@ namespace DAL.IDAL
         /// 查询所有学校名称
         /// </summary>
         /// <returns></returns>
-        List<Class> GetUnversitys();
+        List<Class> GetUnversitys(int classreid);
         /// <summary>
         /// 更新
         /// </summary>
         /// <param name="cla"></param>
         /// <returns></returns>
          int Update(Class cla);
+        /// <summary>
+        /// 根据学校id查询
+        /// </summary>
+        /// <returns></returns> 
+        List<Class> GetClasses(int universityid);
     }
 }

@@ -158,13 +158,21 @@ namespace DAL.DAL
             return 0;
         }
         /// <summary>
+        /// 根据学校id查询
+        /// </summary>
+        /// <returns></returns> 
+        public List<Class> GetClasses(int universityid)
+        {
+            var list = GetListData().Where(x => x.UniversityId == universityid);
+            return list.ToList();
+        }
+        /// <summary>
         /// 查询所有学校名称
         /// </summary>
         /// <returns></returns>
-        public List<Class> GetUnversitys()
+        public List<Class> GetUnversitys(int classreid)
         {
-            var list = _context.Class.DistinctBy(x => x.University);
-          
+            var list = _context.Class.Where(x => x.RefId > classreid).DistinctBy(x => x.University);
             return list.ToList();
         }
         /// <summary>

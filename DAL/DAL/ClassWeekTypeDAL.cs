@@ -63,8 +63,8 @@ namespace DAL.DAL
         public object GetList(int classinfoid, int pagenum, int pagesize, out int PageTotal)
         {
             PageTotal = 0;
-
-            var list = from x in GetListData()
+            var ls = GetListData().Where(x => x.ClassWeekTypeId != 0);
+            var list = from x in ls
                        join cw in _context.ClassWeek on x.ClassWeekId equals cw.Id
                        join ci in _context.ClassInfo on cw.ClassInfoId equals ci.Id
 
@@ -82,10 +82,7 @@ namespace DAL.DAL
             if (classinfoid != 0)
             {
                 list = list.Where(x => x.ClassInfo == classinfoid);
-
             }
-
-            list = list.Where(x => x.ClassWeekTypeId != 0);
             PageTotal = list.Count();
             list = list.Skip(pagesize * (pagenum - 1)).Take(pagesize).OrderBy(x=>x.Id);
             return list.ToList();
