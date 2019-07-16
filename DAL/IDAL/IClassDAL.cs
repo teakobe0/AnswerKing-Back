@@ -72,12 +72,12 @@ namespace DAL.IDAL
         /// <returns></returns>
         int GetImportMaxid();
         /// <summary>
-        /// 导入数据
+        /// 导入数据ls
         /// </summary>
         /// <param name="ls"></param>
         /// <returns></returns>
+        int AddImportData(List<Class> ls);
         int Combine(List<Class> cbrows, int targetid);
-        int AddImportData(Class cc);
         /// <summary>
         /// 查询全部导入的数据
         /// </summary>

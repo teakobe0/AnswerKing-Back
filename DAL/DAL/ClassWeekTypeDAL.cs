@@ -141,14 +141,19 @@ namespace DAL.DAL
            
         }
         /// <summary>
-        /// 导入
+        /// 导入数据ls
         /// </summary>
-        /// <param name="cwt"></param>
+        /// <param name="ls"></param>
         /// <returns></returns>
-        public int AddImportData(ClassWeekType cwt)
+        public int AddImportData(List<ClassWeekType> ls)
         {
-            _context.ClassWeekType.Add(cwt);
-            return _context.SaveChanges();
+            int num = 0;
+            foreach (var item in ls)
+            {
+                _context.ClassWeekType.Add(item);
+                num += _context.SaveChanges();
+            }
+            return num;
         }
         /// <summary>
         /// 获取全部导入数据

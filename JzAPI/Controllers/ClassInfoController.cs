@@ -19,10 +19,18 @@ namespace JzAPI.Controllers
     {
         private IClassInfoDAL _clindal;
         private IUseRecordsDAL _urdal;
-        public ClassInfoController(IClassInfoDAL clindal, IUseRecordsDAL urdal)
+        private IClassWeekDAL _clwdal;
+        private IUniversityDAL _undal;
+        private IClassDAL _clasdal;
+        private IClientDAL _clientdal;
+        public ClassInfoController(IClassInfoDAL clindal, IClassWeekDAL clwdal, IUseRecordsDAL urdal,IUniversityDAL undal, IClassDAL clasdal, IClientDAL clientdal)
         {
             _clindal = clindal;
-            _urdal= urdal;
+            _urdal = urdal;
+            _clwdal = clwdal;
+            _undal = undal;
+            _clasdal = clasdal;
+            _clientdal = clientdal;
         }
         /// <summary>
         /// 根据课程id检索课程资料
@@ -35,11 +43,18 @@ namespace JzAPI.Controllers
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
-
             try
             {
-                r.Data = _clindal.GetList(classid);
-
+                var cils = _clindal.GetList(classid);
+                foreach (var item in cils)
+                {
+                    var cwls = _clwdal.GetListByClassinfoid(item.Id);
+                    if (cwls.Count() > 0)
+                    {
+                        item.TotalGrade = cwls.Sum(x => x.Grade) / cwls.Count();
+                    }
+                }
+                r.Data = cils;
             }
             catch (Exception ex)
             {
@@ -48,24 +63,24 @@ namespace JzAPI.Controllers
             }
             return r;
         }
-       /// <summary>
-       /// 更改课程资料有用/没用
-       /// </summary>
-       /// <param name="classInfoId"></param>
-       /// <param name="type">有用:Y,没用:N</param>
-       /// <param name="check">选中:1，取消:-1</param>
-       /// <returns></returns>
+        /// <summary>
+        /// 更改课程资料有用/没用
+        /// </summary>
+        /// <param name="classInfoId"></param>
+        /// <param name="type">有用:Y,没用:N</param>
+        /// <param name="check">选中:1，取消:-1</param>
+        /// <returns></returns>
         [HttpPut]
-        [Authorize(Roles = C_Role.admin_vip)]
+        [Authorize(Roles = C_Role.all)]
         [Route("ChangeClassInfo")]
-        public ResultModel ChangeClassInfo(int classInfoId,string type,int check)
+        public ResultModel ChangeClassInfo(int classInfoId, string type, int check)
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             try
             {
-                 r.Data = _clindal.Change(ID, classInfoId, type, check);
-               
+                r.Data = _clindal.Change(ID, classInfoId, type, check);
+
 
             }
             catch (Exception ex)
@@ -89,10 +104,74 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                
+
                 r.Data = _urdal.GetUseRecords(ID, classInfoid);
-               
-          
+
+
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+
+            }
+            return r;
+        }
+
+        public class model
+        {
+            public string university_name { get; set; }
+            public int university_id { get; set; }
+            public int class_num { get; set; }
+
+            public int classinfo_num { get; set; }
+            public string class_name { get; set; }
+            public int class_id { get; set; }
+
+            public string client_name { get; set; }
+            public int client_num { get; set; }
+        }
+        /// <summary>
+        /// 首页查询题库，课程，贡献者
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("ClassInfo")]
+        public ResultModel ClassInfo()
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            List<model> ls = new List<model>();
+            try
+            {
+                var clas = _clasdal.GetList();
+                var num = new Random().Next(1, clas.Count() - 15);
+                var eachclas = clas.Where(x=>x.Id>num).Take(15);
+                var classinfos = _clindal.GetList();
+                model m = null;
+                foreach(var item in eachclas)
+                {
+                    m = new model();
+                    m.university_id = item.UniversityId;
+                    m.university_name = item.University;
+                    m.class_num = clas.Count();
+                    m.class_name = item.Name;
+                    m.class_id = item.Id;
+                    m.classinfo_num = classinfos.Count();
+                    var classinfo = _clindal.GetList(item.Id);
+                    foreach(var i in classinfo)
+                    {
+                        var client = _clientdal.GetClientById(i.ClientId);
+                        if (client != null)
+                        {
+                            m.client_name = client.Name;
+                            break;
+                        }
+                    }
+                    m.client_num = _clindal.GetClients();
+                    ls.Add(m);
+                }
+              
+                r.Data = ls;
             }
             catch (Exception ex)
             {

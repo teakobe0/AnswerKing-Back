@@ -65,7 +65,7 @@ namespace DAL.Tools
                     //检查DataTable是否包含此列（列名==对象的属性名）    
                     if (!dt.Columns.Contains(tmpName)) continue;
                     //取值  
-                    object value = dr[tmpName];
+                    object value = Convert.ChangeType(dr[tmpName], p.PropertyType);
                     //如果非空，则赋给对象的属性  
                     if (value != DBNull.Value)
                     {
@@ -76,6 +76,55 @@ namespace DAL.Tools
                 list.Add(entity);
             }
             return list;
+        }
+        public  DataTable ToDataTable(List<T> entities)
+        {
+            if (entities == null || entities.Count == 0)
+            {
+                return null;
+            }
+
+            var result = CreateTable();
+            FillData(result, entities);
+            return result;
+        }
+
+        private static DataTable CreateTable()
+        {
+            var result = new DataTable();
+            var type = typeof(T);
+            foreach (var property in type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+            {
+                var propertyType = property.PropertyType;
+                if ((propertyType.IsGenericType) && (propertyType.GetGenericTypeDefinition() == typeof(Nullable<>)))
+                    propertyType = propertyType.GetGenericArguments()[0];
+                result.Columns.Add(property.Name, propertyType);
+            }
+            return result;
+        }
+        /// <summary>
+        /// 填充数据
+        /// </summary>
+        private static void FillData(DataTable dt, IEnumerable<T> entities)
+        {
+            foreach (var entity in entities)
+            {
+                dt.Rows.Add(CreateRow(dt, entity));
+            }
+        }
+
+        /// <summary>
+        /// 创建行
+        /// </summary>
+        private static DataRow CreateRow(DataTable dt, T entity)
+        {
+            DataRow row = dt.NewRow();
+            var type = typeof(T);
+            foreach (var property in type.GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+            {
+                row[property.Name] = property.GetValue(entity) ?? DBNull.Value;
+            }
+            return row;
         }
     }
 }

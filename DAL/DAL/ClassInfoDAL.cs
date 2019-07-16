@@ -58,6 +58,11 @@ namespace DAL.DAL
 
 
         }
+        public int GetClients()
+        {
+            return GetListData().Count(x => x.ClientId != 0);
+
+        }
         /// <summary>
         /// 新增
         /// </summary>
@@ -89,18 +94,18 @@ namespace DAL.DAL
         /// <summary>
         /// 修改课程资料有用、没用
         /// </summary>
-        /// <param name="ID"></param>
+        /// <param name="clientId"></param>
         /// <param name="classInfoId"></param>
         /// <param name="type"></param>
         /// <param name="check"></param>
         /// <returns></returns>
-        public int Change(int ID, int classInfoId, string type, int check)
+        public int Change(int clientId, int classInfoId, string type, int check)
         {
             var ci = _context.ClassInfo.FirstOrDefault(x => x.Id == classInfoId);
             UseRecords urs = null;
             if (check == 1)
             {
-                var ur = _context.UseRecords.Where(x => x.ClassInfoId == classInfoId && x.ClientId == ID).OrderByDescending(x => x.Id).FirstOrDefault();
+                var ur = _context.UseRecords.Where(x => x.ClassInfoId == classInfoId && x.ClientId == clientId).OrderByDescending(x => x.Id).FirstOrDefault();
                 if (ur != null && ur.Check == 1)
                 {
                     urs = new UseRecords();
@@ -117,6 +122,7 @@ namespace DAL.DAL
                     else
                     {
                         ci.NoUse -= 1;
+
                     }
                 }
             }
@@ -127,10 +133,20 @@ namespace DAL.DAL
             else
             {
                 ci.NoUse += check;
+
+
+            }
+            if (ci.Use == -1)
+            {
+                ci.Use = 0;
+            }
+            if (ci.NoUse == -1)
+            {
+                ci.NoUse = 0;
             }
             urs = new UseRecords();
             urs.ClassInfoId = classInfoId;
-            urs.ClientId = ID;
+            urs.ClientId = clientId;
             urs.Check = check;
             urs.Type = type;
             urs.CreateTime = DateTime.Now;
@@ -145,6 +161,17 @@ namespace DAL.DAL
         public int ChangeClassInfo(ClassInfo classInfo)
         {
             _context.ClassInfo.Update(classInfo);
+            return _context.SaveChanges();
+        }
+        /// <summary>
+        /// 更新分数
+        /// </summary>
+        /// <param name="classInfo"></param>
+        /// <returns></returns>
+        public int UpdateGrade(int id, int grade)
+        {
+            var ci = _context.ClassInfo.FirstOrDefault(x => x.Id == id);
+            ci.TotalGrade = grade;
             return _context.SaveChanges();
         }
         /// <summary>
@@ -170,16 +197,20 @@ namespace DAL.DAL
             return ci == null ? 0 : ci.RefId;
 
         }
-
         /// <summary>
-        /// 导入数据
+        /// 导入数据ls
         /// </summary>
-        /// <param name="ci"></param>
+        /// <param name="ls"></param>
         /// <returns></returns>
-        public int AddImportData(ClassInfo ci)
+        public int AddImportData(List<ClassInfo> ls)
         {
-            _context.ClassInfo.Add(ci);
-            return _context.SaveChanges();
+            int num = 0;
+            foreach (var item in ls)
+            {
+                _context.ClassInfo.Add(item);
+                num += _context.SaveChanges();
+            }
+            return num;
         }
         /// <summary>
         /// 查询全部导入的数据

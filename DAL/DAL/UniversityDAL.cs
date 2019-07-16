@@ -116,26 +116,37 @@ namespace DAL.DAL
         /// <returns></returns>
         public int ChangeInfo(University university)
         {
-            var model = _context.University.FirstOrDefault(x => x.Id == university.Id);
-            if (model.Name != university.Name)
+            try
             {
-                model.Name = university.Name;
-                var clist = _context.Class.Where(x => x.UniversityId == university.Id);
-                if (clist.Count() > 0)
+                var model = _context.University.FirstOrDefault(x => x.Id == university.Id);
+                if (model.Name != university.Name)
                 {
-                    foreach (var item in clist)
+                    model.Name = university.Name;
+                    var clist = _context.Class.Where(x => x.UniversityId == university.Id);
+                    if (clist.Count() > 0)
                     {
-                        item.University = university.Name;
+                        foreach (var item in clist)
+                        {
+                            item.University = university.Name;
+                        }
                     }
                 }
+                model.Country = university.Country;
+                model.City = university.City;
+                model.State = university.State;
+                model.Address = university.Address;
+                model.Intro = university.Intro;
+                model.Image = university.Image;
+                model.Website = university.Website;
+                _context.SaveChanges();
+                return 1;
             }
-            model.Country = university.Country;
-            model.City = university.City;
-            model.State = university.State;
-            model.Address = university.Address;
-            model.Intro = university.Intro;
-            model.Image = university.Image;
-            return _context.SaveChanges();
+            catch (Exception ex)
+            {
+                return 0;
+            }
+
+
         }
         /// <summary>
         /// 隐藏学校
@@ -194,7 +205,7 @@ namespace DAL.DAL
                 {
                     _context.University.Remove(item);
                     var data = _context.University.FirstOrDefault(x => x.Id == item.Id);
-                    Utils.WriteInfoLog("University:CombineDel" + data.ToJson());
+                    Utils.WriteInfoLog("University:CombineDel" + data.ToJson()+ ",targetid:" + targetid);
                     var classes = _context.Class.Where(x => x.UniversityId == item.Id);
                     foreach (var cs in classes)
                     {
@@ -230,6 +241,27 @@ namespace DAL.DAL
         {
             var max = _context.University.OrderByDescending(x => x.Id).FirstOrDefault();
             return max == null ? 0 : max.Id;
+        }
+        /// <summary>
+        /// 删除图片
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="img"></param>
+        /// <returns></returns>
+        public int DelImg(int id, string img)
+        {
+            var u = _context.University.FirstOrDefault(x => x.Id == id);
+            if (u.Image != null && u.Image != "")
+            {
+
+                u.Image = u.Image.Replace(img, "");
+                return _context.SaveChanges();
+            }
+            else
+            {
+                return 0;
+            }
+
         }
     }
 }

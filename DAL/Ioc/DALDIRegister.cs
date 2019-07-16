@@ -27,6 +27,8 @@ namespace DAL.Ioc
             services.AddTransient(typeof(INoticeDAL), typeof(NoticeDAL));
             services.AddTransient(typeof(IOrderDAL), typeof(OrderDAL));
             services.AddTransient(typeof(IUseRecordsDAL), typeof(UseRecordsDAL));
+            services.AddTransient(typeof(IFocusDAL), typeof(FocusDAL));
+            services.AddTransient(typeof(IFeedbackDAL), typeof(FeedbackDAL));
         }
     }
 }

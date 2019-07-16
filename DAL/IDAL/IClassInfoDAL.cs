@@ -18,6 +18,7 @@ namespace DAL.IDAL
         /// </summary>
         /// <returns></returns>
         List<ClassInfo> GetList();
+        int GetClients();
         /// <summary>
         /// 根据课程资料id检索
         /// </summary>
@@ -39,9 +40,12 @@ namespace DAL.IDAL
         /// <summary>
         /// 修改课程资料(接口)
         /// </summary>
-        /// <param name="classInfo"></param>
+        /// <param name="clientId"></param>
+        /// <param name="classInfoId"></param>
+        /// <param name="type"></param>
+        /// <param name="check"></param>
         /// <returns></returns>
-        int Change(int ID,int classInfoId, string type, int check);
+        int Change(int clientId,int classInfoId, string type, int check);
         /// <summary>
         /// 修改课程资料
         /// </summary>
@@ -60,16 +64,22 @@ namespace DAL.IDAL
         /// <returns></returns>
         int GetImportMaxid();
         /// <summary>
-        /// 导入数据
+        /// 导入数据ls
         /// </summary>
-        /// <param name="ci"></param>
+        /// <param name="ls"></param>
         /// <returns></returns>
-        int AddImportData(ClassInfo ci);
+        int AddImportData(List<ClassInfo> ls);
         /// <summary>
         /// 查询全部导入的数据
         /// </summary>
         /// <returns></returns>
-         List<ClassInfo> GetImportList();
+        List<ClassInfo> GetImportList();
+        /// <summary>
+        /// 更新分数
+        /// </summary>
+        /// <param name="classInfo"></param>
+        /// <returns></returns>
+        int UpdateGrade(int id, int grade);
 
     }
 }

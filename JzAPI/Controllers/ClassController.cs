@@ -25,6 +25,8 @@ namespace JzAPI.Controllers
             _cladal = cladal;
             _clindal = clindal;
         }
+
+      
         /// <summary>
         /// 根据课程名称检索 
         /// </summary>
@@ -34,16 +36,26 @@ namespace JzAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("ClassPage")]
-        public ResultModel ClassPage(string name, int pagenum = 1, int pagesize = 10)
+        public ResultModel ClassPage(string name, int pagenum = 1, int pagesize = 40)
         {
             ResultModel r = new ResultModel();
             PageData page = new PageData();
             r.Status = RmStatus.OK;
-
             try
             {
+                List<cinfo> ls = new List<cinfo>();
+                cinfo c = null;
                 var query = _cladal.GetList(name);
-                page.Data = query.Skip(pagesize * (pagenum - 1)).Take(pagesize).ToList();
+                var model = query.Skip(pagesize * (pagenum - 1)).Take(pagesize).ToList();
+                foreach (var item in model)
+                {
+                    c = new cinfo();
+                    c.cla = item;
+                    var classinfo = _clindal.GetList(item.Id);
+                    c.order = classinfo.Count();
+                    ls.Add(c);
+                }
+                page.Data = ls;
                 page.PageTotal = query.Count();
                 r.Data = page;
             }
@@ -53,7 +65,7 @@ namespace JzAPI.Controllers
             }
             return r;
         }
-        public class classinfo
+        public class cinfo
         {
             public Class cla { get; set; }
             public int order { get; set; }
@@ -67,18 +79,18 @@ namespace JzAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("Class")]
-        public ResultModel Class(int universityid, string alif,string name)
+        public ResultModel Class(int universityid, string alif, string name)
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             try
             {
-                List<classinfo> ls = new List<classinfo>();
-                classinfo info = null;
-                var cla = _cladal.GetList(universityid,alif,name);
+                List<cinfo> ls = new List<cinfo>();
+                cinfo info = null;
+                var cla = _cladal.GetList(universityid, alif, name);
                 foreach (var item in cla)
                 {
-                    info = new classinfo();
+                    info = new cinfo();
                     info.cla = item;
                     var clas = _clindal.GetList(item.Id);
                     info.order = clas.Count();

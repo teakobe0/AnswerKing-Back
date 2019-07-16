@@ -92,5 +92,12 @@ namespace DAL.IDAL
         /// <returns></returns>
         List<University> GetByCountry(string name, string state);
         University GetUniversity(string name);
+        /// <summary>
+        /// 删除图片
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="img"></param>
+        /// <returns></returns>
+        int DelImg(int id, string img);
     }
 }

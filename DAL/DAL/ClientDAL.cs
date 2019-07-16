@@ -54,6 +54,18 @@ namespace DAL.DAL
 
         }
         /// <summary>
+        /// 保存图片
+        /// </summary>
+        /// <param name="client"></param>
+        /// <returns></returns>
+        public int SaveImg(int ID,string url)
+        {
+            var client = _context.Client.FirstOrDefault(x => x.Id == ID);
+            client.Image = url;
+            return _context.SaveChanges();
+
+        }
+        /// <summary>
         /// 检验邮箱是否存在
         /// </summary>
         /// <param name="email"></param>
@@ -61,6 +73,15 @@ namespace DAL.DAL
         public bool GetEmail(string email)
         {
             return _context.Client.Any(x => x.Email == email);
+        }
+        /// <summary>
+        /// 根据邮箱查询客户
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        public Client GetClientByEmail(string email)
+        {
+            return _context.Client.FirstOrDefault(x => x.Email==email);
         }
         /// <summary>
         /// 查询列表 根据条件
@@ -147,6 +168,7 @@ namespace DAL.DAL
             data.Sex = client.Sex;
             data.Tel = client.Tel;
             data.Birthday = client.Birthday;
+            data.School = client.School;
             return _context.SaveChanges();
         }
         /// <summary>

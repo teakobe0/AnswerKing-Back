@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Authorization;
 using DAL.Model.Const;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
+using JzAPI.tool;
 
 namespace JzAPI.Controllers
 {
@@ -22,10 +25,12 @@ namespace JzAPI.Controllers
     {
         private IClientDAL _clidal;
         private readonly IConfiguration _configuration;
-        public ClientController(IClientDAL clidal, IConfiguration configuration)
+        private IHostingEnvironment _environment;
+        public ClientController(IClientDAL clidal, IConfiguration configuration, IHostingEnvironment environment)
         {
             _configuration = configuration;
             _clidal = clidal;
+            _environment = environment;
         }
         /// <summary>
         /// 注册
@@ -135,29 +140,39 @@ namespace JzAPI.Controllers
         [Authorize(Roles = C_Role.vip_guest)]
         [HttpPut]
         [Route("ChangePwd")]
-        public ResultModel ChangePwd(string NewPassword, string RepeatPwd)
+        public ResultModel ChangePwd(string OldPassword,string NewPassword, string RepeatPwd)
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             string errmsg = "";
             try
             {
-                if ((!string.IsNullOrEmpty(NewPassword) && (!string.IsNullOrEmpty(RepeatPwd))))
+                if ((!string.IsNullOrEmpty(OldPassword)&&!string.IsNullOrEmpty(NewPassword) && (!string.IsNullOrEmpty(RepeatPwd))))
                 {
-                    if (NewPassword == RepeatPwd)
+                    var client = _clidal.GetClientById(ID);
+                    if (client.Password != OldPassword)
                     {
-                        r.Data = _clidal.ChangePassword(ID, NewPassword, out errmsg);
-                        r.Msg = errmsg;
-                        if (r.Msg != "" || (int)r.Data == 0)
-                        {
-                            r.Status = RmStatus.Error;
-                        }
+                        r.Msg = "原密码输入错误";
+                        r.Status = RmStatus.Error;
+                        r.Data = 0;
                     }
                     else
                     {
-                        r.Msg = "两次输入的密码不一致";
-                        r.Status = RmStatus.Error;
-                        r.Data = 0;
+                        if (NewPassword == RepeatPwd)
+                        {
+                            r.Data = _clidal.ChangePassword(ID, NewPassword, out errmsg);
+                            r.Msg = errmsg;
+                            if (r.Msg != "" || (int)r.Data == 0)
+                            {
+                                r.Status = RmStatus.Error;
+                            }
+                        }
+                        else
+                        {
+                            r.Msg = "新密码与重复密码不一致";
+                            r.Status = RmStatus.Error;
+                            r.Data = 0;
+                        }
                     }
                 }
             }
@@ -256,6 +271,137 @@ namespace JzAPI.Controllers
             }
             return r;
         }
+        /// <summary>
+        /// 找回密码
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("ForgetPwd")]
+        public ResultModel ForgetPwd(string email)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                var client = _clidal.GetEmail(email);
 
+                if (client)
+                {
+                    var id = _clidal.GetClientByEmail(email).Id;
+                    Mail.SendEmail(email,id);
+                }
+                else
+                {
+                    r.Msg = "该邮箱不存在";
+                    r.Status = RmStatus.Error;
+                }
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+                r.Msg = ex.Message;
+            }
+            return r;
+        }
+
+        /// <summary>
+        /// 重置密码
+        /// </summary>
+        /// <param name="NewPassword"></param>
+        /// <param name="RepeatPwd"></param>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("ResetPwd")]
+        public ResultModel ResetPwd(string param, string NewPassword, string RepeatPwd)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            string errmsg = "";
+            var decrip = DES.Decode(param);
+            string[] array = decrip.Split("&");
+            int id =int.Parse(array[0]);
+            try
+            {
+                if ((!string.IsNullOrEmpty(NewPassword) && (!string.IsNullOrEmpty(RepeatPwd))))
+                {
+                    if (NewPassword == RepeatPwd)
+                    {
+                        r.Data = _clidal.ChangePassword(id, NewPassword, out errmsg);
+                        r.Msg = errmsg;
+                        if (r.Msg != "" || (int)r.Data == 0)
+                        {
+                            r.Status = RmStatus.Error;
+                        }
+                    }
+                    else
+                    {
+                        r.Msg = "两次输入的密码不一致";
+                        r.Status = RmStatus.Error;
+                        r.Data = 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+
+            return r;
+        }
+        /// <summary>
+        /// 上传图片
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <returns></returns>
+        [Authorize(Roles = C_Role.all)]
+        [HttpPost]
+        [Route("UploadImg")]
+        public ResultModel UploadImg(IFormCollection collection)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            var files = collection.Files;
+            long size = files.Sum(f => f.Length);
+            var filePath = "";
+            filePath = CheckDirectory();
+            foreach (var formFile in files)
+            {
+                if (formFile.Length > 0)
+                {
+                    string suffix = formFile.FileName.Substring(formFile.FileName.LastIndexOf("."));
+                    var number = Guid.NewGuid().ToString();
+                    string filename = number + suffix;
+                    string pathImg = Path.Combine(filePath, filename);
+                    try
+                    {
+                        using (var stream = new FileStream(pathImg, FileMode.CreateNew))
+                        {
+                            formFile.CopyTo(stream);
+                        }
+                        string cropimg = "/clientImg/" + filename.Replace(".", "_small.");
+                        bool isCompress = IMGHelper.CompressImage(_environment.WebRootPath + "/clientImg/" + filename, _environment.WebRootPath + cropimg);
+                        if (isCompress)
+                        {
+                           _clidal.SaveImg(ID, cropimg);
+                            r.Data = cropimg;
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        r.Msg = "该文件已存在！请重命名后重新上传";
+                        r.Status = RmStatus.Error;
+                    }
+                }
+            }
+            return r;
+        }
+
+        private string CheckDirectory()
+        {
+            var filePath = Path.Combine(_environment.WebRootPath, "clientImg");
+            if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
+            return filePath;
+        }
     }
 }

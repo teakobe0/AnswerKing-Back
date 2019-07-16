@@ -121,15 +121,19 @@ namespace DAL.DAL
 
         }
         /// <summary>
-        /// 导入数据
+        /// 导入数据ls
         /// </summary>
-        /// <param name="cw"></param>
+        /// <param name="ls"></param>
         /// <returns></returns>
-        public int AddImportData(ClassWeek cw)
+        public int AddImportData(List<ClassWeek> ls)
         {
-            _context.ClassWeek.Add(cw);
-            return _context.SaveChanges();
-
+            int num = 0;
+            foreach(var item in ls)
+            {
+                _context.ClassWeek.Add(item);
+               num+= _context.SaveChanges();
+            }
+            return num;
         }
         /// <summary>
         /// 获取全部导入数据
@@ -140,7 +144,16 @@ namespace DAL.DAL
             var list = GetListData().Where(x => x.RefId != 0);
             return list.ToList();
         }
-
+        /// <summary>
+        /// 根据课程资料id
+        /// </summary>
+        /// <param name="classinfoid"></param>
+        /// <returns></returns>
+        public List<ClassWeek> GetListByClassinfoid(int classinfoid)
+        {
+            var list = GetListData().Where(x => x.ClassInfoId == classinfoid&&x.Grade>0);
+            return list.ToList();
+        }
         /// <summary>
         /// 查询列表
         /// </summary>

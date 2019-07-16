@@ -22,12 +22,13 @@ namespace DAL.DAL
         /// <returns></returns>
         public List<Class> GetList(string name)
         {
-            var list = GetListData();
+            var list = GetListData().OrderBy(x=>x.Name.Replace("\"","").Trim()).ToList();
+            
             if (!string.IsNullOrEmpty(name))
             {
-                list = list.Where(x => x.Name.Contains(name));
+                list = list.Where(x => x.Name.ToLower().Contains(name.Trim().ToLower())).ToList();
             }
-            return list.ToList();
+            return list;
 
         }
         /// <summary>
@@ -198,14 +199,19 @@ namespace DAL.DAL
             return c == null ? 0 : c.RefId;
         }
         /// <summary>
-        /// 导入数据
+        /// 导入数据ls
         /// </summary>
         /// <param name="ls"></param>
         /// <returns></returns>
-        public int AddImportData(Class cc)
+        public int AddImportData(List<Class> ls)
         {
-            _context.Class.Add(cc);
-            return _context.SaveChanges();
+            int num = 0;
+            foreach (var item in ls)
+            {
+                _context.Class.Add(item);
+                num += _context.SaveChanges();
+            }
+            return num;
         }
         /// <summary>
         /// 查询全部导入的数据
@@ -230,7 +236,7 @@ namespace DAL.DAL
                 {
                     _context.Class.Remove(item);
                     var data = _context.Class.FirstOrDefault(x => x.Id == item.Id);
-                    Utils.WriteInfoLog("Class:CombineDel" + data.ToJson());
+                    Utils.WriteInfoLog("Class:CombineDel" + data.ToJson() + ",targetid:" + targetid);
                     var classinfo = _context.ClassInfo.Where(x => x.ClassId == item.Id);
                     foreach (var ci in classinfo)
                     {

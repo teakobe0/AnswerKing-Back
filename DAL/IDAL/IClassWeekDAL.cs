@@ -61,17 +61,24 @@ namespace DAL.IDAL
         /// <returns></returns>
         int GetImportMaxid();
         /// <summary>
-        /// 导入数据
-        /// </summary>
-        /// <param name="cw"></param>
-        /// <returns></returns>
-        int AddImportData(ClassWeek cw);
-        /// <summary>
         /// 获取全部导入数据
         /// </summary>
         /// <returns></returns>
         List<ClassWeek> GetImportList();
-       
+        /// <summary>
+        /// 根据课程资料id
+        /// </summary>
+        /// <param name="classinfoid"></param>
+        /// <returns></returns>
+        List<ClassWeek> GetListByClassinfoid(int classinfoid);
+        /// <summary>
+        /// 导入数据ls
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+        int AddImportData(List<ClassWeek> ls);
+
+
 
     }
 }

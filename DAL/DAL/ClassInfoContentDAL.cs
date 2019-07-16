@@ -97,7 +97,7 @@ namespace DAL.DAL
             PageTotal = 0;
             var ls = GetListData().Where(x => x.CwtParentId != 0 && x.ClassInfoId != -99);
             //暂时隐藏url为空的答案
-            ls = ls.Where(x => x.Url != null);
+            ls = ls.Where(x => x.Url != null&&x.Url!="");
             if (classinfoid != 0)
             {
                 ls = ls.Where(x => x.ClassInfoId == classinfoid);
@@ -221,6 +221,9 @@ namespace DAL.DAL
             {
                 var cic = _context.ClassInfoContent.FirstOrDefault(x => x.Id == id);
                 cic.Status = -1;
+                //修改得分
+                var cwt = _context.ClassWeekType.FirstOrDefault(x => x.Id == cic.ClassWeekTypeId);
+                cwt.Grade = 0;
                 return _context.SaveChanges();
             }
             return 0;
@@ -242,18 +245,23 @@ namespace DAL.DAL
         public List<ClassInfoContent> Urls()
         {
             var ls = GetListData().Where(x => x.RefId != 0&&x.CwtParentId != 0 && x.ClassInfoId != -99);
-            ls = ls.Where(x => x.Url == null).OrderBy(x => x.Id);
+            ls = ls.Where(x => x.Url == null||x.Url=="").OrderBy(x => x.Id);
             return ls.ToList();
         }
         /// <summary>
-        /// 导入数据
+        /// 导入数据ls
         /// </summary>
-        /// <param name="cic"></param>
+        /// <param name="ls"></param>
         /// <returns></returns>
-        public int AddImportData(ClassInfoContent cic)
+        public int AddImportData(List<ClassInfoContent> ls)
         {
-            _context.ClassInfoContent.AddRange(cic);
-            return _context.SaveChanges();
+            int num = 0;
+            foreach (var item in ls)
+            {
+                _context.ClassInfoContent.Add(item);
+                num += _context.SaveChanges();
+            }
+            return num;
         }
         /// <summary>
         /// 删除图片

@@ -76,5 +76,17 @@ namespace DAL.IDAL
         /// <param name="id"></param>
         /// <returns></returns>
         int Del(int id);
+        /// <summary>
+        /// 根据邮箱查询客户
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
+        Client GetClientByEmail(string email);
+        /// <summary>
+        /// 保存图片
+        /// </summary>
+        /// <param name="client"></param>
+        /// <returns></returns>
+        int SaveImg(int ID, string url);
     }
 }

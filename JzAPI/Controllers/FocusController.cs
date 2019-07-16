@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DAL.DAL;
 using DAL.IDAL;
 using DAL.Model;
 using DAL.Model.Const;
@@ -15,32 +14,29 @@ namespace JzAPI.Controllers
 {
     [EnableCors("CorsPolicy")]
     [Produces("application/json")]
-    [Route("api/Comment")]
-    public class CommentController : BaseController
+    [Route("api/Focus")]
+    public class FocusController : BaseController
     {
-        private ICommentDAL _comdal;
-        private INoticeDAL _notdal;
-
-        public CommentController(ICommentDAL comdal, INoticeDAL notdal)
+        private IFocusDAL _focusdal;
+      
+        public FocusController(IFocusDAL focusdal)
         {
-            _comdal = comdal;
-            _notdal = notdal;
+            _focusdal = focusdal;
         }
-
         /// <summary>
-        /// 根据课程资料id检索评论
+        /// 根据客户id检索关注
         /// </summary>
-        /// <param name="comment"></param>
         /// <returns></returns>
         [HttpGet]
-        [Route("Comments")]
-        public ResultModel Comments(int classinfoid)
+        [Route("Focus")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Focus()
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _comdal.GetList(classinfoid);
+                r.Data = _focusdal.GetListByClientid(ID);
 
             }
             catch (Exception ex)
@@ -50,32 +46,25 @@ namespace JzAPI.Controllers
             return r;
         }
         /// <summary>
-        /// 新增评论
+        /// 新增关注
         /// </summary>
-        /// <param name="comment"></param>
+        /// <param name="focus"></param>
         /// <returns></returns>
         [HttpPost]
         [Route("Add")]
         [Authorize(Roles = C_Role.all)]
-        public ResultModel Add([FromBody] Comment_v comment)
+        public ResultModel Add([FromBody] Focus focus)
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             try
             {
-                comment.ClientId = ID;
-                r.Data = _comdal.Add(comment);
-                if (comment.ParentId != "0")
-                {
-
-                    r.Data = _notdal.Add(comment);
-                }
-
+                focus.ClientId = ID;
+                r.Data = _focusdal.Add(focus);
                 if ((int)r.Data == 0)
                 {
                     r.Status = RmStatus.Error;
                 }
-
             }
             catch (Exception ex)
             {
@@ -84,7 +73,7 @@ namespace JzAPI.Controllers
             return r;
         }
         /// <summary>
-        /// 删除评论
+        /// 删除关注
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -97,7 +86,7 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _comdal.Del(id);
+                r.Data = _focusdal.Del(id);
                 if ((int)r.Data == 0)
                 {
                     r.Status = RmStatus.Error;
@@ -110,6 +99,32 @@ namespace JzAPI.Controllers
             }
             return r;
         }
-      
+        /// <summary>
+        /// 取消关注
+        /// </summary>
+        /// <param name="typeid"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        [Route("Cancel")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Cancel(string typeid)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                r.Data = _focusdal.Del(ID,typeid);
+                if ((int)r.Data == 0)
+                {
+                    r.Status = RmStatus.Error;
+                    r.Msg = "删除失败。";
+                }
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
     }
 }

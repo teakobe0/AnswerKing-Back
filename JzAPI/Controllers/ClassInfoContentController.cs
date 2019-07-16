@@ -22,7 +22,7 @@ namespace JzAPI.Controllers
         private IUniversityDAL _undal;
         private IClassDAL _classdal;
         private IClassWeekTypeDAL _cwtdal;
-        public ClassInfoContentController(IClassInfoContentDAL clicdal, IUniversityDAL undal, IClassDAL classdal,IClassWeekTypeDAL cwtdal)
+        public ClassInfoContentController(IClassInfoContentDAL clicdal, IUniversityDAL undal, IClassDAL classdal, IClassWeekTypeDAL cwtdal)
         {
             _clicdal = clicdal;
             _undal = undal;
@@ -147,9 +147,10 @@ namespace JzAPI.Controllers
             {
                 List<uinfo> ls = new List<uinfo>();
                 uinfo uinfo = null;
-                var content = _clicdal.GetList(name);
-                var classes = _classdal.GetList(name);
-                var university = _undal.GetList(name);
+                //var content = _clicdal.GetList(name);
+                var classes = _classdal.GetList(name).Take(10);
+
+                var university = _undal.GetList(name).Take(10);
                 foreach (var item in university)
                 {
                     uinfo = new uinfo();
@@ -158,8 +159,9 @@ namespace JzAPI.Controllers
                     uinfo.number = clas.Count();
                     ls.Add(uinfo);
                 }
-
-                r.Data = new { content, classes, ls };
+            
+                //r.Data = new { content, classes, ls };
+                r.Data = new { classes,ls };
 
             }
             catch (Exception ex)
@@ -195,13 +197,13 @@ namespace JzAPI.Controllers
         }
         [HttpGet]
         [Route("Contentls")]
-        public ResultModel Contentls( int classweektypeid,int id)
+        public ResultModel Contentls(int classweektypeid, int id)
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _clicdal.GetByTypeid(classweektypeid,id);
+                r.Data = _clicdal.GetByTypeid(classweektypeid, id);
 
             }
             catch (Exception ex)

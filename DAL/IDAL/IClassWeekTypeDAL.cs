@@ -49,12 +49,6 @@ namespace DAL.IDAL
         /// <returns></returns>
         int GetImportMaxid();
         /// <summary>
-        /// 导入
-        /// </summary>
-        /// <param name="cwt"></param>
-        /// <returns></returns>
-        int AddImportData(ClassWeekType cwt);
-        /// <summary>
         /// 获取全部导入数据
         /// </summary>
         /// <returns></returns>
@@ -65,7 +59,11 @@ namespace DAL.IDAL
         /// <param name="classWeekId"></param>
         /// <returns></returns>
         List<ClassWeekType> ClassWeekTypes(int classWeekId);
-
-
+        /// <summary>
+        /// 导入数据ls
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+        int AddImportData(List<ClassWeekType> ls);
     }
 }

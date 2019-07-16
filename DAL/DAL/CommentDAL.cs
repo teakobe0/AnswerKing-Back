@@ -52,7 +52,9 @@ namespace DAL.DAL
 
                     cv = new Comment_v();
                     cv = Utils.TransReflection<Comment, Comment_v>(item);
-                    cv.name = _context.Client.FirstOrDefault(x => x.Id == item.ClientId).Name;
+                    var model = _context.Client.FirstOrDefault(x => x.Id == item.ClientId);
+                    cv.name = model.Name;
+                    cv.img = model.Image;
                     ls.Add(cv);
                    
                     var son = list.Where(x => x.ParentId.Contains("," + item.Id) && x.ParentId.Substring(x.ParentId.LastIndexOf(",") + 1) == item.Id.ToString());
@@ -60,8 +62,12 @@ namespace DAL.DAL
                     {
                         cv = new Comment_v();
                         cv = Utils.TransReflection<Comment, Comment_v>(ea);
-                        cv.replyname = _context.Client.FirstOrDefault(x => x.Id == ea.ClientId).Name;
-                        cv.name = _context.Client.FirstOrDefault(x => x.Id == item.ClientId).Name;
+                        var reply = _context.Client.FirstOrDefault(x => x.Id == ea.ClientId);
+                        cv.replyname = reply.Name;
+                        cv.replyimg = reply.Image;
+                        var breply = _context.Client.FirstOrDefault(x => x.Id == item.ClientId);
+                        cv.name = breply.Name;
+                        cv.img = breply.Image;
                         ls.Add(cv);
                         var sonreply = list.Where(x => x.ParentId.Contains("," + ea.Id + ",") ||
                          (x.ParentId.Contains("," + ea.Id) && x.ParentId.Substring(x.ParentId.LastIndexOf(",") + 1) == ea.Id.ToString()));
@@ -69,9 +75,13 @@ namespace DAL.DAL
                         {
                             cv = new Comment_v();
                             cv = Utils.TransReflection<Comment, Comment_v>(cc);
-                            cv.replyname = _context.Client.FirstOrDefault(x => x.Id == cc.ClientId).Name;
+                            var re = _context.Client.FirstOrDefault(x => x.Id == cc.ClientId);
+                            cv.replyname =re.Name;
+                            cv.replyimg = re.Image;
                             int cid = _context.Comment.FirstOrDefault(x => x.Id == int.Parse(cc.ParentId.Substring(cc.ParentId.LastIndexOf(",") + 1))).ClientId;
-                            cv.name = _context.Client.FirstOrDefault(x => x.Id == cid).Name;
+                            var b = _context.Client.FirstOrDefault(x => x.Id == cid);
+                            cv.name =b .Name;
+                            cv.img = b.Image;
                             ls.Add(cv);
                         }
                     }
@@ -114,7 +124,9 @@ namespace DAL.DAL
     public class Comment_v : Comment
     {
         public string replyname { get; set; }//回复人昵称
+        public string replyimg { get; set; }//回复人图像
         public string name { get; set; }//被回复昵称
+        public string img { get; set; }//被回复图像
         public string contenturl { get; set; } //回复内容 地址
     }
 }

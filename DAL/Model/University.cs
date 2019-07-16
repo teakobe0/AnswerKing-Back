@@ -14,5 +14,6 @@ namespace DAL.Model
         public string City { get; set; }//城市
         public string Address { get; set; }//地址
         public int IsHide { get; set; } //是否隐藏 0：显示，-1:隐藏 
+        public string Website { get; set; }//学校网址
     }
 }

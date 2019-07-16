@@ -83,12 +83,6 @@ namespace DAL.IDAL
         /// <returns></returns>
         int GetImportMaxid();
         /// <summary>
-        /// 导入
-        /// </summary>
-        /// <param name="cic"></param>
-        /// <returns></returns>
-        int AddImportData(ClassInfoContent cic);
-        /// <summary>
         /// 删除图片
         /// </summary>
         /// <param name="id"></param>
@@ -101,6 +95,11 @@ namespace DAL.IDAL
         /// <param name="classweekid"></param>
         /// <returns></returns>
         List<ClassInfoContent> GetByTypeid(int classweektypeid,int id);
-       
+        /// <summary>
+        /// 导入数据ls
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+         int AddImportData(List<ClassInfoContent> ls);
     }
 }

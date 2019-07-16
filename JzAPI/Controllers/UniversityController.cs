@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DAL.IDAL;
@@ -7,6 +8,7 @@ using DAL.Model;
 using DAL.Model.Const;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,8 +27,8 @@ namespace JzAPI.Controllers
             _undal = undal;
             _areadal = areadal;
             _classdal = classdal;
+           
         }
-
         /// <summary>
         /// 根据学校名称检索 
         /// </summary>
@@ -167,5 +169,6 @@ namespace JzAPI.Controllers
             }
             return r;
         }
+       
     }
 }

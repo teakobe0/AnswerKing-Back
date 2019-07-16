@@ -26,5 +26,7 @@ namespace DAL
         public DbSet<Notice> Notice { get; set; }
         public DbSet<Order> Order { get; set; }
         public DbSet<UseRecords> UseRecords { get; set; }
+        public DbSet<Focus> Focus { get; set; }
+        public DbSet<Feedback> Feedback { get; set; }
     }
 }
