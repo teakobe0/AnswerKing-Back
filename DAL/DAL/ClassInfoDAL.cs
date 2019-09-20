@@ -41,6 +41,15 @@ namespace DAL.DAL
         {
             return _context.ClassInfo.FirstOrDefault(x => x.Id == id);
         }
+
+        public ClassInfo GetRandomClassInfo()
+        {
+            return _context.ClassInfo.Where(x => 1 == 1).OrderBy(x => Guid.NewGuid()).First();
+        }
+        public ClassInfo GetRandom()
+        {
+            return _context.ClassInfo.Where(x => x.ClientId == 0).OrderBy(x => Guid.NewGuid()).First();
+        }
         /// <summary>
         /// 根据课程资料单号查询
         /// </summary>
@@ -71,7 +80,7 @@ namespace DAL.DAL
         public int Add(ClassInfo classInfo)
         {
             //var maxclassinfo = _context.ClassInfo.OrderByDescending(x => x.Id).FirstOrDefault();
-            //classInfo.Id = maxclassinfo == null || maxclassinfo.Id < InitID ? InitID : maxclassinfo.Id + 1;
+             //classInfo.Id = maxclassinfo == null || maxclassinfo.Id < InitID ? InitID : maxclassinfo.Id + 1;
             classInfo.CreateTime = DateTime.Now;
             _context.ClassInfo.Add(classInfo);
             return _context.SaveChanges();
@@ -85,8 +94,9 @@ namespace DAL.DAL
         {
             if (id != 0)
             {
-                var classInfo = _context.ClassInfo.FirstOrDefault(x => x.Id == id);
-                _context.ClassInfo.Remove(classInfo);
+                ClassInfo classInfo = _context.ClassInfo.FirstOrDefault(x => x.Id == id);
+                classInfo.IsDel = true;
+                _context.ClassInfo.Update(classInfo);
                 return _context.SaveChanges();
             }
             return 0;
@@ -117,12 +127,12 @@ namespace DAL.DAL
                     _context.UseRecords.Add(urs);
                     if (ur.Type == "Y")
                     {
-                        ci.Use -= 1;
+                        ci.Use-= 1;
                     }
                     else
                     {
                         ci.NoUse -= 1;
-
+                        
                     }
                 }
             }
@@ -133,7 +143,7 @@ namespace DAL.DAL
             else
             {
                 ci.NoUse += check;
-
+               
 
             }
             if (ci.Use == -1)
@@ -168,7 +178,7 @@ namespace DAL.DAL
         /// </summary>
         /// <param name="classInfo"></param>
         /// <returns></returns>
-        public int UpdateGrade(int id, int grade)
+        public int UpdateGrade(int id,int grade)
         {
             var ci = _context.ClassInfo.FirstOrDefault(x => x.Id == id);
             ci.TotalGrade = grade;

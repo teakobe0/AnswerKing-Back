@@ -12,6 +12,7 @@ namespace DAL.Model
         public string Difficulty { get; set; } //难度系数
         public string Professor { get; set; }//教授
         public string Memo { get; set; }//备注
+        public bool IsDel { get; set; }//是否删除 0：未删除 1：已删除
 
     }
 }

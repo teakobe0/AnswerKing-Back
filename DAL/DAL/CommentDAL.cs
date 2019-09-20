@@ -27,10 +27,23 @@ namespace DAL.DAL
             }
             return list.ToList();
         }
-
+        /// <summary>
+        /// 根据客户id检索评论
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
+        public List<Comment> GetListByClientid(int clientid)
+        {
+            var list = GetListData();
+            if (clientid != 0)
+            {
+                list = list.Where(x => x.ClientId == clientid).OrderByDescending(x => x.Id);
+            }
+            return list.ToList();
+        }
         private IQueryable<Comment> GetListData()
         {
-            return _context.Comment.Where(x => 1 == 1);
+            return _context.Comment.Where(x =>x.IsDel==false);
         }
         /// <summary>
         /// 查询列表全部数据 根据条件
@@ -41,7 +54,7 @@ namespace DAL.DAL
             List<Comment_v> ls = new List<Comment_v>();
             Comment_v cv = null;
 
-            var list = _context.Comment.OrderBy(x => x.CreateTime).ToList();
+            var list = _context.Comment.Where(x=>x.IsDel==false).OrderBy(x => x.CreateTime).ToList();
 
             if (classInfoid != 0)
             {
@@ -49,7 +62,6 @@ namespace DAL.DAL
                 var parent = list.Where(x => x.ParentId == "0");
                 foreach (var item in parent)
                 {
-
                     cv = new Comment_v();
                     cv = Utils.TransReflection<Comment, Comment_v>(item);
                     var model = _context.Client.FirstOrDefault(x => x.Id == item.ClientId);
@@ -114,8 +126,13 @@ namespace DAL.DAL
              x.ParentId.Contains("," + co.Id + ",")
             || (x.ParentId.Contains("," + co.Id) && x.ParentId.Substring(x.ParentId.LastIndexOf(",") + 1) == co.Id.ToString()));
             Utils.WriteInfoLog("Comment:Delete" + co.ToJson() + dellist.ToJson());
-            _context.Comment.RemoveRange(dellist);
-            _context.Comment.Remove(co);
+            foreach(var item in dellist)
+            {
+                item.IsDel = true;
+            }
+            _context.Comment.UpdateRange(dellist);
+            co.IsDel = true;
+            _context.Comment.Update(co);
             return _context.SaveChanges();
         }
 

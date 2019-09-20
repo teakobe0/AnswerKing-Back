@@ -38,6 +38,21 @@ namespace DAL.DAL
         {
             return _context.UseRecords.Where(x => 1 == 1);
         }
+        /// <summary>
+        /// 根据客户的id检索
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
+        public List<UseRecords> GetUseRecords(int clientid)
+        {
+            var list = GetListData();
+            if (clientid != 0)
+            {
+                list=list.Where(x => x.ClientId == clientid).OrderByDescending(x => x.CreateTime);
+                return list.ToList();
+            }
+            return null;
 
+        }
     }
 }

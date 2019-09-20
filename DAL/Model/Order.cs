@@ -15,6 +15,7 @@ namespace DAL.Model
         public string Price { get; set; }//订单金额
         public string Currency { get; set; }//订单支付货币
         public string Memo { get; set; }//备注
+        public bool IsDel { get; set; }//是否删除 0：未删除 1：已删除
 
     }
 }

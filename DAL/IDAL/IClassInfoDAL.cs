@@ -18,13 +18,15 @@ namespace DAL.IDAL
         /// </summary>
         /// <returns></returns>
         List<ClassInfo> GetList();
-        int GetClients();
         /// <summary>
         /// 根据课程资料id检索
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         ClassInfo GetClassInfo(int id);
+        ClassInfo GetRandomClassInfo();
+        ClassInfo GetRandom();
+        int GetClients();
         /// <summary>
         /// 新增
         /// </summary>

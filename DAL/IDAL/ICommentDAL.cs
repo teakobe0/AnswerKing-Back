@@ -30,8 +30,11 @@ namespace DAL.IDAL
         /// <param name="id"></param>
         /// <returns></returns>
         int Del(int id);
-
-
-
+        /// <summary>
+        /// 根据客户id检索评论
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
+        List<Comment> GetListByClientid(int clientid);
     }
 }

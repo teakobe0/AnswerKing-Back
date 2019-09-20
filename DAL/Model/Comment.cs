@@ -11,5 +11,6 @@ namespace DAL.Model
         public int ClientId { get; set; }//客户id
         public string Contents { get; set; }//评论内容
         public int ClassInfoId { get; set; }//课程资料id
+        public bool IsDel { get; set; }//是否删除 0：未删除 1：已删除
     }
 }

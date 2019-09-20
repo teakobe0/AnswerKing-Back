@@ -14,6 +14,7 @@ namespace DAL.Model
         public DateTime EffectiveDate { get; set; }//有效期
         public string Image { get; set; }//客户图像
         public string School { get; set; }//学校
+        public bool IsDel { get; set; }//是否删除 0：未删除 1：已删除
 
     }
 }

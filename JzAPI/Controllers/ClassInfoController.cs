@@ -23,7 +23,7 @@ namespace JzAPI.Controllers
         private IUniversityDAL _undal;
         private IClassDAL _clasdal;
         private IClientDAL _clientdal;
-        public ClassInfoController(IClassInfoDAL clindal, IClassWeekDAL clwdal, IUseRecordsDAL urdal,IUniversityDAL undal, IClassDAL clasdal, IClientDAL clientdal)
+        public ClassInfoController(IClassInfoDAL clindal, IClassWeekDAL clwdal, IUseRecordsDAL urdal, IUniversityDAL undal, IClassDAL clasdal, IClientDAL clientdal, IFocusDAL focusdal, ICommentDAL comdal)
         {
             _clindal = clindal;
             _urdal = urdal;
@@ -45,23 +45,39 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
+                List<cinfo> ls = new List<cinfo>();
+                cinfo cinfo = null;
                 var cils = _clindal.GetList(classid);
                 foreach (var item in cils)
                 {
+                    cinfo = new cinfo();
+                    cinfo.classinfo = item;
+                    var client = _clientdal.GetClientById(item.ClientId);
+                    if (client != null)
+                    {
+                        cinfo.clientname = client.Name;
+                        cinfo.clientimg = client.Image;
+                    }
                     var cwls = _clwdal.GetListByClassinfoid(item.Id);
                     if (cwls.Count() > 0)
                     {
                         item.TotalGrade = cwls.Sum(x => x.Grade) / cwls.Count();
                     }
+                    ls.Add(cinfo);
                 }
-                r.Data = cils;
+                r.Data = ls;
             }
             catch (Exception ex)
             {
                 r.Status = RmStatus.Error;
-
             }
             return r;
+        }
+        public class cinfo
+        {
+            public ClassInfo classinfo { get; set; }
+            public string clientname { get; set; }
+            public string clientimg { get; set; }
         }
         /// <summary>
         /// 更改课程资料有用/没用
@@ -145,10 +161,10 @@ namespace JzAPI.Controllers
             {
                 var clas = _clasdal.GetList();
                 var num = new Random().Next(1, clas.Count() - 15);
-                var eachclas = clas.Where(x=>x.Id>num).Take(15);
+                var eachclas = clas.Where(x => x.Id > num).Take(15);
                 var classinfos = _clindal.GetList();
                 model m = null;
-                foreach(var item in eachclas)
+                foreach (var item in eachclas)
                 {
                     m = new model();
                     m.university_id = item.UniversityId;
@@ -158,7 +174,7 @@ namespace JzAPI.Controllers
                     m.class_id = item.Id;
                     m.classinfo_num = classinfos.Count();
                     var classinfo = _clindal.GetList(item.Id);
-                    foreach(var i in classinfo)
+                    foreach (var i in classinfo)
                     {
                         var client = _clientdal.GetClientById(i.ClientId);
                         if (client != null)
@@ -170,7 +186,7 @@ namespace JzAPI.Controllers
                     m.client_num = _clindal.GetClients();
                     ls.Add(m);
                 }
-              
+
                 r.Data = ls;
             }
             catch (Exception ex)
@@ -180,5 +196,7 @@ namespace JzAPI.Controllers
             }
             return r;
         }
+
+       
     }
 }

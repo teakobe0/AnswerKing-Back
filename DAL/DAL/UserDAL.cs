@@ -52,7 +52,8 @@ namespace DAL.DAL
             {
                 var user = _context.User.FirstOrDefault(x => x.Id == id);
                 Utils.WriteInfoLog("User:Delete" + user.ToJson());
-                _context.User.Remove(user);
+                user.isTerminated = true;
+                _context.User.Update(user);
                 return _context.SaveChanges();
             }
             return 0;

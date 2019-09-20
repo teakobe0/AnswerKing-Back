@@ -125,7 +125,8 @@ namespace DAL.DAL
             {
                 var classWeekType = _context.ClassWeekType.FirstOrDefault(x => x.Id == id);
                 Utils.WriteInfoLog("ClassWeekType:Delete" + classWeekType.ToJson());
-                _context.ClassWeekType.Remove(classWeekType);
+                classWeekType.IsDel = true;
+                _context.ClassWeekType.Update(classWeekType);
                 return _context.SaveChanges();
             }
             return 0;

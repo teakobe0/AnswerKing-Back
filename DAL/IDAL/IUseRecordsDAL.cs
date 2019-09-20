@@ -15,5 +15,11 @@ namespace DAL.IDAL
         /// <param name="classInfoid"></param>
         /// <returns></returns>
         UseRecords GetUseRecords(int ID, int classInfoid);
+        /// <summary>
+        /// 根据客户的id检索
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
+        List<UseRecords> GetUseRecords(int clientid);
     }
 }

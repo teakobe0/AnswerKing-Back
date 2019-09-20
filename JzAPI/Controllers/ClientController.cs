@@ -24,13 +24,23 @@ namespace JzAPI.Controllers
     public class ClientController : BaseController
     {
         private IClientDAL _clidal;
+        private IFocusDAL _focusdal;
+        private ICommentDAL _comdal;
         private readonly IConfiguration _configuration;
         private IHostingEnvironment _environment;
-        public ClientController(IClientDAL clidal, IConfiguration configuration, IHostingEnvironment environment)
+        private IClassInfoDAL _clindal;
+        private IUseRecordsDAL _urdal;
+        private IClassDAL _clasdal;
+        public ClientController(IClientDAL clidal, IConfiguration configuration, IHostingEnvironment environment, IFocusDAL focusdal, ICommentDAL comdal,IClassInfoDAL clindal,  IUseRecordsDAL urdal, IClassDAL clasdal)
         {
             _configuration = configuration;
             _clidal = clidal;
             _environment = environment;
+            _focusdal = focusdal;
+            _comdal = comdal;
+            _clindal = clindal;
+            _urdal = urdal;
+            _clasdal = clasdal;
         }
         /// <summary>
         /// 注册
@@ -402,6 +412,111 @@ namespace JzAPI.Controllers
             var filePath = Path.Combine(_environment.WebRootPath, "clientImg");
             if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
             return filePath;
+        }
+        /// <summary>
+        /// 根据客户id检索客户的行为记录
+        /// </summary>
+        /// <param name="Clientid"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Action")]
+        public ResultModel Action(int Clientid)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            List<actioninfo> ls = new List<actioninfo>();
+            actioninfo ac = null;
+            try
+            {
+                //有用、没用
+                var usels = _urdal.GetUseRecords(Clientid);
+                var classid = 0;
+                foreach (var item in usels)
+                {
+                    ac = new actioninfo();
+                    if (item.Check == 1)
+                    {
+                        ac.content = item.Type == "N" ? "点击无用" : "点击有用";
+                    }
+                    else
+                    {
+                        ac.content = item.Type == "N" ? "取消无用" : "取消有用";
+                    }
+                    classid = _clindal.GetClassInfo(item.ClassInfoId).ClassId;
+                    ac.classname = _clasdal.GetClass(classid)==null?null:_clasdal.GetClass(classid).Name;
+                    ac.CreateTime = item.CreateTime;
+                    ls.Add(ac);
+                }
+                //关注
+                var focusls = _focusdal.GetListByClientid(Clientid);
+                foreach (var i in focusls)
+                {
+                    ac = new actioninfo();
+                    if (i.IsDel == true)
+                    {
+                        ac.content = i.Type == 1 ? "取消关注课程" : "取消关注题库";
+                    }
+                    else
+                    {
+                        ac.content = i.Type == 1 ? "关注课程" : "关注题库";
+                    }
+                    ac.classname = i.Name;
+                    ac.CreateTime = i.CreateTime;
+                    ls.Add(ac);
+                }
+                //评论
+                var commentls = _comdal.GetListByClientid(Clientid);
+                foreach (var t in commentls)
+                {
+                    ac = new actioninfo();
+                    ac.content = t.IsDel == true ? "删除评论" : "发表评论";
+                    classid = _clindal.GetClassInfo(t.ClassInfoId).ClassId;
+                    ac.classname = _clasdal.GetClass(classid).Name;
+                    ac.CreateTime = t.CreateTime;
+                    ls.Add(ac);
+                }
+                ls = ls.OrderByDescending(x => x.CreateTime).ToList();
+                r.Data = ls;
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+
+            }
+            return r;
+        }
+        public class actioninfo
+        {
+            public string classname { get; set; } //课程名称
+            public string content { get; set; }//行为内容
+            public DateTime CreateTime { get; set; }//创建时间
+        }
+        /// <summary>
+        /// 根据客户id检索
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("GetClientById")]
+        public ResultModel GetClientById(int id)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                r.Data = _clidal.GetClientById(id);
+                if (r.Data == null)
+                {
+                    r.Status = RmStatus.Error;
+                    r.Msg = "查询失败";
+                }
+
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
         }
     }
 }

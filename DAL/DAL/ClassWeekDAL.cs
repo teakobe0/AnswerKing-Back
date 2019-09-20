@@ -89,7 +89,8 @@ namespace DAL.DAL
             {
                 var classweek = _context.ClassWeek.FirstOrDefault(x => x.Id == id);
                 Utils.WriteInfoLog("ClassWeek:Delete" + classweek.ToJson());
-                _context.ClassWeek.Remove(classweek);
+                classweek.IsDel = true;
+                _context.ClassWeek.Update(classweek);
                 return _context.SaveChanges();
             }
             return 0;

@@ -15,6 +15,7 @@ namespace DAL.IDAL
         /// <param name="name"></param>
         /// <returns></returns>
         List<Class> GetList(string name);
+        List<Class> GetLs(string name);
         /// <summary>
         /// 查询列表 根据条件
         /// </summary>
@@ -53,6 +54,7 @@ namespace DAL.IDAL
         /// <param name="id"></param>
         /// <returns></returns>
         Class GetClass(int id);
+        Class GetRandomClass();
         /// <summary>
         /// 修改课程
         /// </summary>

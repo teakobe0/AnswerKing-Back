@@ -30,7 +30,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public List<ClassInfoContent> GetList(string searchText)
         {
-            var list = GetListData().Where(x => x.IsAudit ==1);
+            var list = GetListData().Where(x => x.IsAudit == 1);
             if (!string.IsNullOrEmpty(searchText))
             {
                 list = list.Where(x => x.Contents.Contains(searchText));
@@ -97,7 +97,7 @@ namespace DAL.DAL
             PageTotal = 0;
             var ls = GetListData().Where(x => x.CwtParentId != 0 && x.ClassInfoId != -99);
             //暂时隐藏url为空的答案
-            ls = ls.Where(x => x.Url != null&&x.Url!="");
+            ls = ls.Where(x => x.Url != null && x.Url != "");
             if (classinfoid != 0)
             {
                 ls = ls.Where(x => x.ClassInfoId == classinfoid);
@@ -121,14 +121,14 @@ namespace DAL.DAL
                            x.IsAudit
 
                        };
-           
+
             PageTotal = list.Count();
             list = list.Skip(pagesize * (pagenum - 1)).Take(pagesize).OrderBy(x => x.Id);
             return list.ToList();
         }
         private IQueryable<ClassInfoContent> GetListData()
         {
-            return _context.ClassInfoContent.Where(x => x.Status==0);
+            return _context.ClassInfoContent.Where(x => x.Status == 0);
         }
         /// <summary>
         /// 根据答案id检索
@@ -147,9 +147,9 @@ namespace DAL.DAL
         /// <returns></returns>
         public ClassInfoContent GetNext(int id)
         {
-            return _context.ClassInfoContent.FirstOrDefault(x => x.Id > id && x.IsAudit == 0 && x.CwtParentId != 0&&x.Status==0);
+            return _context.ClassInfoContent.FirstOrDefault(x => x.Id > id && x.IsAudit == 0 && x.CwtParentId != 0 && x.Status == 0);
         }
-        
+
         /// <summary>
         /// 新增答案
         /// </summary>
@@ -220,7 +220,7 @@ namespace DAL.DAL
             if (id != 0)
             {
                 var cic = _context.ClassInfoContent.FirstOrDefault(x => x.Id == id);
-                cic.Status = -1;
+                cic.Status = 1;
                 //修改得分
                 var cwt = _context.ClassWeekType.FirstOrDefault(x => x.Id == cic.ClassWeekTypeId);
                 cwt.Grade = 0;
@@ -244,8 +244,8 @@ namespace DAL.DAL
         /// <returns></returns>
         public List<ClassInfoContent> Urls()
         {
-            var ls = GetListData().Where(x => x.RefId != 0&&x.CwtParentId != 0 && x.ClassInfoId != -99);
-            ls = ls.Where(x => x.Url == null||x.Url=="").OrderBy(x => x.Id);
+            var ls = GetListData().Where(x => x.RefId != 0 && x.CwtParentId != 0 && x.ClassInfoId != -99);
+            ls = ls.Where(x => x.Url == null || x.Url == "").OrderBy(x => x.Id);
             return ls.ToList();
         }
         /// <summary>

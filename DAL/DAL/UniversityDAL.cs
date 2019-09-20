@@ -170,7 +170,8 @@ namespace DAL.DAL
             {
                 var university = _context.University.FirstOrDefault(x => x.Id == id);
                 Utils.WriteInfoLog("University:Delete" + university.ToJson());
-                _context.University.Remove(university);
+                university.IsDel = true;
+                _context.University.Update(university);
                 return _context.SaveChanges();
             }
             return 0;

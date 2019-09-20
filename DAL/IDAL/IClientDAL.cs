@@ -23,11 +23,22 @@ namespace DAL.IDAL
         /// <returns></returns>
         int Register(Client client);
         /// <summary>
+        /// 注册机器人
+        /// </summary>
+        /// <param name="client"></param>
+        /// <returns></returns>
+        int RegisterBot(Client client);
+        /// <summary>
         /// 检验邮箱是否存在
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
         bool GetEmail(string email);
+        /// <summary>
+        /// 查询机器人列表带条件
+        /// </summary>
+        /// <returns></returns>
+        List<Client> GetBotList(string search);
         /// <summary>
         /// 查询列表带条件
         /// </summary>

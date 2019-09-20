@@ -50,7 +50,8 @@ namespace DAL.DAL
             if (id != 0)
             {
                 var focus = _context.Focus.FirstOrDefault(x => x.Id == id);
-                _context.Focus.Remove(focus);
+                focus.IsDel = true;
+                _context.Focus.Update(focus);
                 return _context.SaveChanges();
             }
             else
@@ -69,7 +70,8 @@ namespace DAL.DAL
             if (ls.Count()>0&&!string.IsNullOrEmpty(typeid))
             {
                 var focus = ls.FirstOrDefault(x => x.TypeId == typeid);
-                _context.Focus.Remove(focus);
+                focus.IsDel = true;
+                _context.Focus.Update(focus);
                 return _context.SaveChanges();
             }
             else

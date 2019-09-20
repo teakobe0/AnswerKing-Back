@@ -53,6 +53,12 @@ namespace DAL.DAL
             return _context.SaveChanges();
 
         }
+        public int RegisterBot(Client client)
+        {
+            client.CreateTime = DateTime.Now;
+            _context.Client.Add(client);
+            return _context.SaveChanges();
+        }
         /// <summary>
         /// 保存图片
         /// </summary>
@@ -84,17 +90,29 @@ namespace DAL.DAL
             return _context.Client.FirstOrDefault(x => x.Email==email);
         }
         /// <summary>
-        /// 查询列表 根据条件
+        /// 查询真实客户列表 根据条件
         /// </summary>
         /// <returns></returns>
         public List<Client> GetList(string search)
         {
-            var list = GetListData();
+            var list = GetListData().Where(x => x.Role != "bot");
             if (!string.IsNullOrEmpty(search))
                 list = list.Where(x => x.Name.Contains(search) || x.Email.Contains(search));
 
             return list.ToList();
 
+        }
+        /// <summary>
+        /// 查询机器人列表 根据条件
+        /// </summary>
+        /// <returns></returns>
+        public List<Client> GetBotList(string search)
+        {
+            var list = GetListData().Where(x => x.Role == "bot");
+            if (!string.IsNullOrEmpty(search))
+                list = list.Where(x => x.Name.Contains(search) || x.Email.Contains(search));
+
+            return list.ToList();
         }
         /// <summary>
         /// 查询列表 根据条件
@@ -204,7 +222,8 @@ namespace DAL.DAL
             {
                 var client = _context.Client.FirstOrDefault(x => x.Id == id);
                 Utils.WriteInfoLog("Client:Delete" + client.ToJson());
-                _context.Client.Remove(client);
+                client.IsDel = true;
+                _context.Client.Update(client);
                 return _context.SaveChanges();
             }
             return 0;

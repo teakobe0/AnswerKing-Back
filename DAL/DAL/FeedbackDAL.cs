@@ -36,7 +36,8 @@ namespace DAL.DAL
             if (id != 0)
             {
                 var feedback = _context.Feedback.FirstOrDefault(x => x.Id == id);
-                _context.Feedback.Remove(feedback);
+                feedback.IsDel = true;
+                _context.Feedback.Update(feedback);
                 return _context.SaveChanges();
             }
             else

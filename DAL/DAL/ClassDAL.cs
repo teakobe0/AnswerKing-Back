@@ -31,6 +31,17 @@ namespace DAL.DAL
             return list;
 
         }
+        public List<Class> GetLs(string name)
+        {
+            var list = GetListData();
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                list = list.Where(x => x.Name.Contains(name));
+            }
+            return list.ToList();
+
+        }
         /// <summary>
         /// 新增课程
         /// </summary>
@@ -104,6 +115,10 @@ namespace DAL.DAL
             return _context.Class.FirstOrDefault(x => x.Id == id);
         }
 
+        public Class GetRandomClass()
+        {
+            return _context.Class.Where(x => 1 == 1).OrderBy(x => Guid.NewGuid()).First();
+        }
         /// <summary>
         /// 修改课程
         /// </summary>
@@ -151,9 +166,10 @@ namespace DAL.DAL
         {
             if (id != 0)
             {
-                var cla = _context.Class.FirstOrDefault(x => x.Id == id);
+                Class cla = _context.Class.FirstOrDefault(x => x.Id == id);
                 Utils.WriteInfoLog("Class:Delete" + cla.ToJson());
-                _context.Class.Remove(cla);
+                cla.IsDel = true;
+                _context.Class.Update(cla);
                 return _context.SaveChanges();
             }
             return 0;
