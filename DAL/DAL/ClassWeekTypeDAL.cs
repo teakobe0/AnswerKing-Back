@@ -32,25 +32,31 @@ namespace DAL.DAL
         public int Add(ClassWeekType classWeekType)
         {
             classWeekType.CreateTime = DateTime.Now;
-            classWeekType.ClassWeekTypeId = -1; 
+            classWeekType.ClassWeekTypeId = -1;
             _context.ClassWeekType.Add(classWeekType);
             return _context.SaveChanges();
         }
-            /// <summary>
-            /// 根据每周课程id检索课程类型(前台)
-            /// </summary>
-            /// <param name="classWeekId"></param>
-            /// <returns></returns>
-            public List<ClassWeekType> ClassWeekTypes(int classWeekId)
+        /// <summary>
+        /// 根据每周课程id检索课程类型(前台)
+        /// </summary>
+        /// <param name="classWeekId"></param>
+        /// <returns></returns>
+        public List<ClassWeekType> ClassWeekTypes(int classWeekId)
         {
 
             if (classWeekId != 0)
             {
-                var list = GetListData();
-                list = list.Where(x => x.ClassWeekId == classWeekId && (x.ClassWeekTypeId == 0 || x.ClassWeekTypeId == -1));
-                return list.ToList();
+                var list = GetListData().ToList();
+                list = list.Where(x => x.ClassWeekId == classWeekId && (x.ClassWeekTypeId == 0 || x.ClassWeekTypeId == -1)).ToList();
+                if (list.Count() > 1)
+                {
+                    var i = 0;
+                    list = list.OrderBy(x => { i = Array.IndexOf(new string[] {"Quiz", "Exam", "Assignment", "Discussion"  }, x.ContentType); if (i != -1) { return i; } else { return int.MaxValue; } }).ToList();
+                }
+                return list;
             }
-            return null;
+                return null;
+            
         }
         /// <summary>
         /// 根据课程资料单号检索
@@ -84,7 +90,7 @@ namespace DAL.DAL
                 list = list.Where(x => x.ClassInfo == classinfoid);
             }
             PageTotal = list.Count();
-            list = list.Skip(pagesize * (pagenum - 1)).Take(pagesize).OrderBy(x=>x.Id);
+            list = list.Skip(pagesize * (pagenum - 1)).Take(pagesize).OrderBy(x => x.Id);
             return list.ToList();
         }
         /// <summary>
@@ -137,9 +143,9 @@ namespace DAL.DAL
         /// <returns></returns>
         public int GetImportMaxid()
         {
-          var cwt=_context.ClassWeekType.Where(x => x.RefId!=0).OrderByDescending(x => x.RefId).FirstOrDefault();
+            var cwt = _context.ClassWeekType.Where(x => x.RefId != 0).OrderByDescending(x => x.RefId).FirstOrDefault();
             return cwt == null ? 0 : cwt.RefId;
-           
+
         }
         /// <summary>
         /// 导入数据ls
@@ -162,7 +168,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public List<ClassWeekType> GetImportList()
         {
-            var list = GetListData().Where(x => x.RefId != 0);
+            var list = _context.ClassWeekType.Where(x => x.RefId != 0);
             return list.ToList();
         }
         /// <summary>
@@ -176,7 +182,7 @@ namespace DAL.DAL
 
         private IQueryable<ClassWeekType> GetListData()
         {
-            return _context.ClassWeekType.Where(x => 1 == 1);
+            return _context.ClassWeekType.Where(x => x.IsDel==false);
         }
     }
 }

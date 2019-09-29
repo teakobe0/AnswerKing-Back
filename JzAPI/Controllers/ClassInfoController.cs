@@ -93,9 +93,10 @@ namespace JzAPI.Controllers
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
+         
             try
             {
-                r.Data = _clindal.Change(ID, classInfoId, type, check);
+                r.Data = _clindal.Change(ID, classInfoId, type, check,null);
 
 
             }
@@ -144,6 +145,7 @@ namespace JzAPI.Controllers
             public int class_id { get; set; }
 
             public string client_name { get; set; }
+            public int client_id { get; set; }
             public int client_num { get; set; }
         }
         /// <summary>
@@ -180,6 +182,7 @@ namespace JzAPI.Controllers
                         if (client != null)
                         {
                             m.client_name = client.Name;
+                            m.client_id = client.Id;
                             break;
                         }
                     }

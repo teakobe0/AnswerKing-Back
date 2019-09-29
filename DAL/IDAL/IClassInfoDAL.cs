@@ -47,7 +47,7 @@ namespace DAL.IDAL
         /// <param name="type"></param>
         /// <param name="check"></param>
         /// <returns></returns>
-        int Change(int clientId,int classInfoId, string type, int check);
+        int Change(int clientId,int classInfoId, string type, int check, DateTime? time);
         /// <summary>
         /// 修改课程资料
         /// </summary>

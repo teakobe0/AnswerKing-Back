@@ -14,7 +14,13 @@ namespace DAL.IDAL
         /// </summary>
         /// <param name="clientid"></param>
         /// <returns></returns>
-        List<Focus> GetListByClientid(int clientid);
+        List<Focus> GetListByClientid(int clientid, bool all);
+        /// <summary>
+        /// 根据客户id,类型id(课程id，课程资料id)检索关注
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
+        Focus GetFocus(int clientid, string typeid);
         /// <summary>
         /// 新增
         /// </summary>
@@ -27,6 +33,6 @@ namespace DAL.IDAL
         /// <param name="id"></param>
         /// <returns></returns>
         int Del(int id);
-        int Del(int clientid,string  typeid);
+
     }
 }

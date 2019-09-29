@@ -36,7 +36,7 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _focusdal.GetListByClientid(ID);
+                r.Data = _focusdal.GetListByClientid(ID,false);
 
             }
             catch (Exception ex)
@@ -87,33 +87,6 @@ namespace JzAPI.Controllers
             try
             {
                 r.Data = _focusdal.Del(id);
-                if ((int)r.Data == 0)
-                {
-                    r.Status = RmStatus.Error;
-                    r.Msg = "删除失败。";
-                }
-            }
-            catch (Exception ex)
-            {
-                r.Status = RmStatus.Error;
-            }
-            return r;
-        }
-        /// <summary>
-        /// 取消关注
-        /// </summary>
-        /// <param name="typeid"></param>
-        /// <returns></returns>
-        [HttpDelete]
-        [Route("Cancel")]
-        [Authorize(Roles = C_Role.all)]
-        public ResultModel Cancel(string typeid)
-        {
-            ResultModel r = new ResultModel();
-            r.Status = RmStatus.OK;
-            try
-            {
-                r.Data = _focusdal.Del(ID,typeid);
                 if ((int)r.Data == 0)
                 {
                     r.Status = RmStatus.Error;

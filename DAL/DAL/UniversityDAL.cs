@@ -196,7 +196,7 @@ namespace DAL.DAL
         /// <param name="cbrows"></param>
         /// <param name="targetid"></param>
         /// <returns></returns>
-        public int Combine(List<University> cbrows, int targetid)
+        public int Combine(List<University> cbrows, int targetid,int LoginId)
         {
             var target = _context.University.FirstOrDefault(x => x.Id == targetid);
 
@@ -204,9 +204,16 @@ namespace DAL.DAL
             {
                 if (item.Id != targetid)
                 {
-                    _context.University.Remove(item);
-                    var data = _context.University.FirstOrDefault(x => x.Id == item.Id);
-                    Utils.WriteInfoLog("University:CombineDel" + data.ToJson()+ ",targetid:" + targetid);
+                    //_context.University.Remove(item);
+                   UniversityCombine combine = new UniversityCombine();
+                    combine.OriginalId = item.Id;
+                    combine.TargetId = targetid;
+                    combine.CreateTime = DateTime.Now;
+                    combine.CreateBy = LoginId.ToString();
+                    _context.UniversityCombine.Add(combine);
+                    Utils.WriteInfoLog("University:CombineDel" + item.ToJson()+ ",targetid:" + targetid);
+                    item.IsDel = true;
+                    _context.University.Update(item);
                     var classes = _context.Class.Where(x => x.UniversityId == item.Id);
                     foreach (var cs in classes)
                     {

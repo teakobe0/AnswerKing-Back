@@ -67,7 +67,7 @@ namespace DAL.IDAL
         /// <param name="cbrows"></param>
         /// <param name="targetid"></param>
         /// <returns></returns>
-        int Combine(List<University> cbrows, int targetid);
+        int Combine(List<University> cbrows, int targetid,int LoginId);
         /// <summary>
         /// 导入数据
         /// </summary>

@@ -4,14 +4,16 @@ using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DAL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20190923070609_d")]
+    partial class d
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -85,8 +87,6 @@ namespace DAL.Migrations
                         .HasMaxLength(50);
 
                     b.Property<DateTime>("CreateTime");
-
-                    b.Property<bool>("IsDel");
 
                     b.Property<int>("OriginalId");
 
@@ -327,8 +327,6 @@ namespace DAL.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("CancelTime");
-
                     b.Property<int>("ClientId");
 
                     b.Property<string>("CreateBy")
@@ -491,8 +489,6 @@ namespace DAL.Migrations
                         .HasMaxLength(50);
 
                     b.Property<DateTime>("CreateTime");
-
-                    b.Property<bool>("IsDel");
 
                     b.Property<int>("OriginalId");
 

@@ -95,7 +95,7 @@ namespace DAL.DAL
         public object GetListbycinid(int classinfoid, int status, int pagenum, int pagesize, out int PageTotal)
         {
             PageTotal = 0;
-            var ls = GetListData().Where(x => x.CwtParentId != 0 && x.ClassInfoId != -99);
+            var ls = GetListData().Where(x => x.CwtParentId != 0 && x.ClassInfoId != -99&&x.UniversityId!=-99);
             //暂时隐藏url为空的答案
             ls = ls.Where(x => x.Url != null && x.Url != "");
             if (classinfoid != 0)
@@ -147,7 +147,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public ClassInfoContent GetNext(int id)
         {
-            return _context.ClassInfoContent.FirstOrDefault(x => x.Id > id && x.IsAudit == 0 && x.CwtParentId != 0 && x.Status == 0);
+            return _context.ClassInfoContent.FirstOrDefault(x => x.Id > id && x.IsAudit == 0 && x.CwtParentId != 0&&x.UniversityId!=-99 && x.Status == 0 && x.Url != null && x.Url != "");
         }
 
         /// <summary>

@@ -31,7 +31,7 @@ namespace JzAPI.Controllers
         private IClassInfoDAL _clindal;
         private IUseRecordsDAL _urdal;
         private IClassDAL _clasdal;
-        public ClientController(IClientDAL clidal, IConfiguration configuration, IHostingEnvironment environment, IFocusDAL focusdal, ICommentDAL comdal,IClassInfoDAL clindal,  IUseRecordsDAL urdal, IClassDAL clasdal)
+        public ClientController(IClientDAL clidal, IConfiguration configuration, IHostingEnvironment environment, IFocusDAL focusdal, ICommentDAL comdal, IClassInfoDAL clindal, IUseRecordsDAL urdal, IClassDAL clasdal)
         {
             _configuration = configuration;
             _clidal = clidal;
@@ -150,14 +150,14 @@ namespace JzAPI.Controllers
         [Authorize(Roles = C_Role.vip_guest)]
         [HttpPut]
         [Route("ChangePwd")]
-        public ResultModel ChangePwd(string OldPassword,string NewPassword, string RepeatPwd)
+        public ResultModel ChangePwd(string OldPassword, string NewPassword, string RepeatPwd)
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             string errmsg = "";
             try
             {
-                if ((!string.IsNullOrEmpty(OldPassword)&&!string.IsNullOrEmpty(NewPassword) && (!string.IsNullOrEmpty(RepeatPwd))))
+                if ((!string.IsNullOrEmpty(OldPassword) && !string.IsNullOrEmpty(NewPassword) && (!string.IsNullOrEmpty(RepeatPwd))))
                 {
                     var client = _clidal.GetClientById(ID);
                     if (client.Password != OldPassword)
@@ -299,7 +299,7 @@ namespace JzAPI.Controllers
                 if (client)
                 {
                     var id = _clidal.GetClientByEmail(email).Id;
-                    Mail.SendEmail(email,id);
+                    Mail.SendEmail(email, id);
                 }
                 else
                 {
@@ -330,7 +330,7 @@ namespace JzAPI.Controllers
             string errmsg = "";
             var decrip = DES.Decode(param);
             string[] array = decrip.Split("&");
-            int id =int.Parse(array[0]);
+            int id = int.Parse(array[0]);
             try
             {
                 if ((!string.IsNullOrEmpty(NewPassword) && (!string.IsNullOrEmpty(RepeatPwd))))
@@ -393,7 +393,7 @@ namespace JzAPI.Controllers
                         bool isCompress = IMGHelper.CompressImage(_environment.WebRootPath + "/clientImg/" + filename, _environment.WebRootPath + cropimg);
                         if (isCompress)
                         {
-                           _clidal.SaveImg(ID, cropimg);
+                            _clidal.SaveImg(ID, cropimg);
                             r.Data = cropimg;
                         }
                     }
@@ -443,26 +443,28 @@ namespace JzAPI.Controllers
                         ac.content = item.Type == "N" ? "取消无用" : "取消有用";
                     }
                     classid = _clindal.GetClassInfo(item.ClassInfoId).ClassId;
-                    ac.classname = _clasdal.GetClass(classid)==null?null:_clasdal.GetClass(classid).Name;
+                    ac.classname = _clasdal.GetClass(classid) == null ? null : _clasdal.GetClass(classid).Name;
                     ac.CreateTime = item.CreateTime;
                     ls.Add(ac);
                 }
                 //关注
-                var focusls = _focusdal.GetListByClientid(Clientid);
+                var focusls = _focusdal.GetListByClientid(Clientid,true);
                 foreach (var i in focusls)
                 {
                     ac = new actioninfo();
-                    if (i.IsDel == true)
-                    {
-                        ac.content = i.Type == 1 ? "取消关注课程" : "取消关注题库";
-                    }
-                    else
-                    {
-                        ac.content = i.Type == 1 ? "关注课程" : "关注题库";
-                    }
+                    ac.content = i.Type == 1 ? "关注课程" : "关注题库";
                     ac.classname = i.Name;
                     ac.CreateTime = i.CreateTime;
                     ls.Add(ac);
+
+                    if (i.CancelTime != DateTime.MinValue)
+                    {
+                        actioninfo accancel = new actioninfo();
+                        accancel.content = i.Type == 1 ? "取消关注课程" : "取消关注题库";
+                        accancel.classname = i.Name;
+                        accancel.CreateTime = i.CancelTime;
+                        ls.Add(accancel);
+                    }
                 }
                 //评论
                 var commentls = _comdal.GetListByClientid(Clientid);

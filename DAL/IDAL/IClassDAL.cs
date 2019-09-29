@@ -79,7 +79,7 @@ namespace DAL.IDAL
         /// <param name="ls"></param>
         /// <returns></returns>
         int AddImportData(List<Class> ls);
-        int Combine(List<Class> cbrows, int targetid);
+        int Combine(List<Class> cbrows, int targetid,int loginid);
         /// <summary>
         /// 查询全部导入的数据
         /// </summary>

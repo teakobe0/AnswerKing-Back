@@ -28,5 +28,8 @@ namespace DAL
         public DbSet<UseRecords> UseRecords { get; set; }
         public DbSet<Focus> Focus { get; set; }
         public DbSet<Feedback> Feedback { get; set; }
+        public DbSet<UniversityCombine> UniversityCombine { get; set; }
+        public DbSet<ClassCombine> ClassCombine { get; set; }
+
     }
 }

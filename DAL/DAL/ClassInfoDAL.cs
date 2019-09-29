@@ -69,7 +69,7 @@ namespace DAL.DAL
         }
         public int GetClients()
         {
-            return GetListData().Count(x => x.ClientId != 0);
+            return GetListData().Where(x=>x.ClientId!=0).GroupBy(x=>x.ClientId).Count();
 
         }
         /// <summary>
@@ -109,22 +109,22 @@ namespace DAL.DAL
         /// <param name="type"></param>
         /// <param name="check"></param>
         /// <returns></returns>
-        public int Change(int clientId, int classInfoId, string type, int check)
+        public int Change(int clientId, int classInfoId, string type, int check,DateTime? time)
         {
             var ci = _context.ClassInfo.FirstOrDefault(x => x.Id == classInfoId);
             UseRecords urs = null;
             if (check == 1)
             {
-                var ur = _context.UseRecords.Where(x => x.ClassInfoId == classInfoId && x.ClientId == clientId).OrderByDescending(x => x.Id).FirstOrDefault();
+                var ur = _context.UseRecords.Where(x => x.ClassInfoId == classInfoId && x.ClientId == clientId).OrderByDescending(x => x.CreateTime).FirstOrDefault();
                 if (ur != null && ur.Check == 1)
                 {
-                    urs = new UseRecords();
-                    urs = Utils.TransReflection<UseRecords, UseRecords>(ur);
-                    urs.Id = 0;
-                    urs.Check = -1;
-                    urs.Type = ur.Type;
-                    urs.CreateTime = DateTime.Now;
-                    _context.UseRecords.Add(urs);
+                    UseRecords urs1 = new UseRecords();
+                    urs1 = Utils.TransReflection<UseRecords, UseRecords>(ur);
+                    urs1.Id = 0;
+                    urs1.Check = -1;
+                    urs1.Type = ur.Type;
+                    urs1.CreateTime =time==null?DateTime.Now:(ur.CreateTime > time ?  time.Value.AddDays(1) : ur.CreateTime.AddDays(1));
+                    _context.UseRecords.Add(urs1);
                     if (ur.Type == "Y")
                     {
                         ci.Use-= 1;
@@ -159,7 +159,7 @@ namespace DAL.DAL
             urs.ClientId = clientId;
             urs.Check = check;
             urs.Type = type;
-            urs.CreateTime = DateTime.Now;
+            urs.CreateTime = time != null ? time.Value : DateTime.Now;
             _context.UseRecords.Add(urs);
             return _context.SaveChanges();
         }
@@ -195,7 +195,7 @@ namespace DAL.DAL
 
         private IQueryable<ClassInfo> GetListData()
         {
-            return _context.ClassInfo.Where(x => 1 == 1);
+            return _context.ClassInfo.Where(x => x.IsDel == false);
         }
         /// <summary>
         /// 获取导入数据最大的
@@ -228,7 +228,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public List<ClassInfo> GetImportList()
         {
-            var list = GetListData().Where(x => x.RefId != 0);
+            var list = _context.ClassInfo.Where(x => x.RefId != 0);
             return list.ToList();
         }
     }

@@ -244,15 +244,22 @@ namespace DAL.DAL
         /// <param name="cbrows"></param>
         /// <param name="targetid"></param>
         /// <returns></returns>
-        public int Combine(List<Class> cbrows, int targetid)
+        public int Combine(List<Class> cbrows, int targetid,int LoginId)
         {
             foreach (var item in cbrows)
             {
                 if (item.Id != targetid)
                 {
-                    _context.Class.Remove(item);
-                    var data = _context.Class.FirstOrDefault(x => x.Id == item.Id);
-                    Utils.WriteInfoLog("Class:CombineDel" + data.ToJson() + ",targetid:" + targetid);
+                    //_context.Class.Remove(item);
+                    ClassCombine combine = new ClassCombine();
+                    combine.OriginalId = item.Id;
+                    combine.TargetId = targetid;
+                    combine.CreateTime = DateTime.Now;
+                    combine.CreateBy = LoginId.ToString();
+                    _context.ClassCombine.Add(combine);
+                    Utils.WriteInfoLog("Class:CombineDel" + item.ToJson() + ",targetid:" + targetid);
+                    item.IsDel = true;
+                    _context.Class.Update(item);
                     var classinfo = _context.ClassInfo.Where(x => x.ClassId == item.Id);
                     foreach (var ci in classinfo)
                     {
