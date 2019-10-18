@@ -13,6 +13,7 @@ namespace DAL.Model
         public string Professor { get; set; }//教授
         public string Memo { get; set; }//备注
         public bool IsDel { get; set; }//是否删除 0：未删除 1：已删除
+        public int OriginUniversityId { get; set; }//合并前的学校id
 
     }
 }

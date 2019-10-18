@@ -187,7 +187,7 @@ namespace DAL.DAL
 
         private IQueryable<University> GetListData()
         {
-            return _context.University.Where(x => x.IsHide == 0);
+            return _context.University.Where(x => x.IsHide == 0&&x.IsDel==false);
         }
 
         /// <summary>
@@ -219,13 +219,14 @@ namespace DAL.DAL
                     {
                         cs.UniversityId = target.Id;
                         cs.University = target.Name;
+                        cs.OriginUniversityId = item.Id;
 
                     }
-
                     var cinfos = _context.ClassInfoContent.Where(x => x.UniversityId == item.Id);
-                    foreach (var cs in cinfos)
+                    foreach (var i in cinfos)
                     {
-                        cs.UniversityId = target.Id;
+                        i.UniversityId = target.Id;
+                        i.OriginUniversityId = item.Id;
                     }
                 }
             }

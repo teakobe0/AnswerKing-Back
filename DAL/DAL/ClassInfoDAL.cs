@@ -118,13 +118,13 @@ namespace DAL.DAL
                 var ur = _context.UseRecords.Where(x => x.ClassInfoId == classInfoId && x.ClientId == clientId).OrderByDescending(x => x.CreateTime).FirstOrDefault();
                 if (ur != null && ur.Check == 1)
                 {
-                    UseRecords urs1 = new UseRecords();
-                    urs1 = Utils.TransReflection<UseRecords, UseRecords>(ur);
-                    urs1.Id = 0;
-                    urs1.Check = -1;
-                    urs1.Type = ur.Type;
-                    urs1.CreateTime =time==null?DateTime.Now:(ur.CreateTime > time ?  time.Value.AddDays(1) : ur.CreateTime.AddDays(1));
-                    _context.UseRecords.Add(urs1);
+                    urs = new UseRecords();
+                    urs = Utils.TransReflection<UseRecords, UseRecords>(ur);
+                    urs.Id = 0;
+                    urs.Check = -1;
+                    urs.Type = ur.Type;
+                    urs.CreateTime =time==null?DateTime.Now:(ur.CreateTime > time ?  time.Value.AddDays(1) : ur.CreateTime.AddDays(1));
+                    _context.UseRecords.Add(urs);
                     if (ur.Type == "Y")
                     {
                         ci.Use-= 1;
@@ -195,7 +195,7 @@ namespace DAL.DAL
 
         private IQueryable<ClassInfo> GetListData()
         {
-            return _context.ClassInfo.Where(x => x.IsDel == false);
+            return _context.ClassInfo.Where(x => x.IsDel ==false);
         }
         /// <summary>
         /// 获取导入数据最大的

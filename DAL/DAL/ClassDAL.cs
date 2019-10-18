@@ -264,11 +264,13 @@ namespace DAL.DAL
                     foreach (var ci in classinfo)
                     {
                         ci.ClassId = targetid;
+                        ci.OriginClassId = item.Id;
                     }
                     var classinfocontent = _context.ClassInfoContent.Where(x => x.ClassId == item.Id);
                     foreach (var co in classinfocontent)
                     {
                         co.ClassId = targetid;
+                        co.OriginClassId = item.Id;
                     }
                 }
             }

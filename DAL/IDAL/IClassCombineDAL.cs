@@ -5,13 +5,13 @@ using System.Text;
 
 namespace DAL.IDAL
 {
-    public interface IUniversityCombineDAL
+    public interface IClassCombineDAL
     {
         /// <summary>
         /// 查询列表
         /// </summary>
         /// <returns></returns> 
-        List<UniversityCombine> GetList(int targetId);
+        List<ClassCombine> GetList(int targetId);
         /// <summary>
         /// 删除
         /// </summary>

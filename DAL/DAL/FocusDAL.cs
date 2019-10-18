@@ -19,14 +19,14 @@ namespace DAL.DAL
         /// </summary>
         /// <param name="clientid"></param>
         /// <returns></returns>
-        public List<Focus> GetListByClientid(int clientid,bool all)
+        public List<Focus> GetListByClientid(int clientid, bool all)
         {
-            var list= GetListData();
+            var list = GetListData();
             if (clientid != 0)
             {
                 list = list.Where(x => x.ClientId == clientid);
             }
-            if (all==false)
+            if (all == false)
             {
                 list = list.Where(x => x.IsDel == false);
             }
@@ -49,7 +49,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public int Add(Focus focus)
         {
-            focus.CreateTime =focus.CreateTime==DateTime.MinValue? DateTime.Now:focus.CreateTime;
+            focus.CreateTime = focus.CreateTime == DateTime.MinValue ? DateTime.Now : focus.CreateTime;
             _context.Focus.Add(focus);
             return _context.SaveChanges();
         }

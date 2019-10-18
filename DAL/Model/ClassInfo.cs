@@ -16,6 +16,7 @@ namespace DAL.Model
         public int NoUse { get; set; }//没用
         public int PageViews { get; set; }//浏览量
         public bool IsDel { get; set; }//是否删除 0：未删除 1：已删除
+        public int OriginClassId { get; set; }//合并前的课程id
     }
 
     public class ClassWeek : BaseModel
@@ -46,5 +47,7 @@ namespace DAL.Model
         public int UniversityId { get; set; }//学校id
         public int IsAudit { get; set; }//是否审核 0：未审核，1：已审核
         public int Status { get; set; }//状态 0：未删除，1：已删除
+        public int OriginUniversityId { get; set; }//合并前的学校id
+        public int OriginClassId { get; set; }//合并前的课程id
     }
 }
