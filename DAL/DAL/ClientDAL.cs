@@ -47,7 +47,21 @@ namespace DAL.DAL
         public int Register(Client client)
         {
             client.CreateTime = DateTime.Now;
-            client.Role = C_Role.guest;
+            if (client.Inviterid != 0)
+            {
+                client.Role = C_Role.vip;
+                client.EffectiveDate = DateTime.Now.AddDays(7);
+                var inviter = _context.Client.FirstOrDefault(x => x.Id == client.Inviterid);
+                if (inviter != null)
+                {
+                    inviter.Role = C_Role.vip;
+                    inviter.EffectiveDate = inviter.EffectiveDate==DateTime.MinValue? DateTime.Now.AddDays(7): inviter.EffectiveDate.AddDays(7);
+                }
+            }
+            else
+            {
+                client.Role = C_Role.guest;
+            }
             client.Name = "ak_" +  DateTimeToUnixTimestamp(client.CreateTime);
             _context.Client.Add(client);
             return _context.SaveChanges();
@@ -130,10 +144,24 @@ namespace DAL.DAL
         public int ChangeEffectiveDate(int clientid,DateTime date)
         {
             var client = _context.Client.FirstOrDefault(x => x.Id == clientid);
-            client.Role = C_Role.vip;
+            client.Role =C_Role.vip;
             client.EffectiveDate = date;
             return _context.SaveChanges();
         }
+        /// <summary>
+        /// 修改客户身份及有效期
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
+        public Client ChangeEffectiveDate(int clientid)
+        {
+            var client = _context.Client.FirstOrDefault(x => x.Id == clientid);
+            client.Role = C_Role.guest;
+            client.EffectiveDate = DateTime.MinValue;
+            _context.SaveChanges();
+            return client;
+        }
+
         /// <summary>
         /// 查询列表全部数据
         /// </summary>

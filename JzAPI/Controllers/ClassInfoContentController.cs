@@ -195,6 +195,12 @@ namespace JzAPI.Controllers
             }
             return r;
         }
+        /// <summary>
+        /// 根据类型id获取答案
+        /// </summary>
+        /// <param name="classweektypeid"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("Contentls")]
         public ResultModel Contentls(int classweektypeid, int id)

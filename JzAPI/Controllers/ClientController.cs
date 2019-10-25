@@ -112,7 +112,7 @@ namespace JzAPI.Controllers
         [HttpPost]
         [Route("Login")]
         public ResultModel Login([FromBody] TokenRequest request)
-        {
+         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             //登录错误返回msg
@@ -123,11 +123,16 @@ namespace JzAPI.Controllers
 
             if (client != null)
             {
+                if (client.Role=="vip"&& client.EffectiveDate < DateTime.Now)
+                {
+                   client = _clidal.ChangeEffectiveDate(client.Id);
+                }
                 TokenParam param = new TokenParam();
                 param.Id = client.Id;
                 param.Username = request.Username;
                 param.Role = client.Role;
                 param.configuration = _configuration;
+
 
                 r.Data = getToken(param);
             }

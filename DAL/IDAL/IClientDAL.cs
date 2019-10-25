@@ -62,6 +62,12 @@ namespace DAL.IDAL
         /// <returns></returns>
         int ChangeEffectiveDate(int clientid, DateTime date);
         /// <summary>
+        /// 修改客户身份及有效期
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
+        Client ChangeEffectiveDate(int clientid);
+        /// <summary>
         /// 修改密码
         /// </summary>
         /// <param name="ID"></param>
