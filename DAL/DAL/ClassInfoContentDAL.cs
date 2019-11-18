@@ -64,11 +64,10 @@ namespace DAL.DAL
             var list = GetListData();
             if (classweektypeid != 0)
             {
-                var cic = _context.ClassWeekType.FirstOrDefault(x => x.Id == classweektypeid).ClassWeekTypeId;
-                if (cic == 0)
+                var cic = _context.ClassWeekType.FirstOrDefault(x => x.Id == classweektypeid);
+                if (cic != null && cic.ClassWeekTypeId == 0)
                 {
-                    var refid = _context.ClassWeekType.FirstOrDefault(x => x.Id == classweektypeid).RefId;
-                    list = list.Where(x => x.CwtParentId == refid);
+                    list = list.Where(x => x.CwtParentId == cic.RefId);
                 }
                 else
                 {
@@ -157,13 +156,22 @@ namespace DAL.DAL
         /// <returns></returns>
         public int Add(ClassInfoContent classInfoContent)
         {
-            classInfoContent.ClassId = _context.ClassInfo.FirstOrDefault(x => x.Id == classInfoContent.ClassInfoId).ClassId;
-            classInfoContent.UniversityId = _context.Class.FirstOrDefault(x => x.Id == classInfoContent.ClassId).UniversityId;
-            classInfoContent.CwtParentId = _context.ClassWeekType.FirstOrDefault(x => x.Id == classInfoContent.ClassWeekTypeId).ClassWeekTypeId;
-            classInfoContent.IsAudit = 0;
-            classInfoContent.CreateTime = DateTime.Now;
-            _context.ClassInfoContent.Add(classInfoContent);
-            return _context.SaveChanges();
+            //该类型是否有答案
+            var cic = _context.ClassInfoContent.FirstOrDefault(x => x.ClassWeekTypeId == classInfoContent.ClassWeekTypeId);
+            if (cic == null)
+            {
+                classInfoContent.ClassId = _context.ClassInfo.FirstOrDefault(x => x.Id == classInfoContent.ClassInfoId).ClassId;
+                classInfoContent.UniversityId = _context.Class.FirstOrDefault(x => x.Id == classInfoContent.ClassId).UniversityId;
+                classInfoContent.CwtParentId = _context.ClassWeekType.FirstOrDefault(x => x.Id == classInfoContent.ClassWeekTypeId).ClassWeekTypeId;
+                classInfoContent.IsAudit = 0;
+                classInfoContent.CreateTime = DateTime.Now;
+                _context.ClassInfoContent.Add(classInfoContent);
+                return _context.SaveChanges();
+            }
+            else
+            {
+                return 0;
+            }
         }
         /// <summary>
         /// 编辑答案
@@ -271,18 +279,24 @@ namespace DAL.DAL
         /// <returns></returns>
         public int DelImg(int id, string img)
         {
-            var cic = _context.ClassInfoContent.FirstOrDefault(x => x.Id == id);
-            if (cic.Url != null && cic.Url != "")
+            if (id != 0)
             {
+                var cic = _context.ClassInfoContent.FirstOrDefault(x => x.Id == id);
+                if (cic.Url != null && cic.Url != "")
+                {
 
-                cic.Url = cic.Url.Replace(img, "");
-                return _context.SaveChanges();
+                    cic.Url = cic.Url.Replace(img, "");
+                    return _context.SaveChanges();
+                }
+                else
+                {
+                    return 0;
+                }
             }
             else
             {
                 return 0;
             }
-
         }
     }
 }

@@ -31,9 +31,44 @@ namespace DAL.DAL
         /// <returns></returns>
         public int Add(ClassWeekType classWeekType)
         {
+            //查询新增的类型是否存在父级
+            var parent = _context.ClassWeekType.FirstOrDefault(x => x.ClassWeekTypeId == 0 && x.ClassWeekId == classWeekType.ClassWeekId && x.ContentType == classWeekType.ContentType);
+            if (parent != null)
+            {
+                classWeekType.ClassWeekTypeId = parent.RefId;
+            }
+            else
+            {
+                classWeekType.ClassWeekTypeId = -1;
+            }
             classWeekType.CreateTime = DateTime.Now;
-            classWeekType.ClassWeekTypeId = -1;
             _context.ClassWeekType.Add(classWeekType);
+            _context.SaveChanges();
+            if (classWeekType.Grade != 0)
+            {
+                if (classWeekType.ClassWeekTypeId > 0)
+                {
+                    //更新父级分数
+                    var ls = _context.ClassWeekType.Where(x => x.ClassWeekTypeId == classWeekType.ClassWeekTypeId);
+                    if (ls.Count() > 0)
+                    {
+                        int num = ls.Count();
+                        int grade = ls.Sum(x => x.Grade);
+                        parent.Grade = grade / num;
+                        _context.ClassWeekType.Update(parent);
+                        _context.SaveChanges();
+                    }
+                }
+                //更新对应周的分数
+                var cw = _context.ClassWeek.FirstOrDefault(x => x.Id == classWeekType.ClassWeekId);
+                var cwtls = _context.ClassWeekType.Where(x => x.ClassWeekId == cw.Id && (x.ClassWeekTypeId == 0 || x.ClassWeekTypeId == -1)&&x.Grade>0);
+                if (cwtls.Count() > 0)
+                {
+                    int num = cwtls.Count();
+                    int grade = cwtls.Sum(x => x.Grade);
+                    cw.Grade = grade / num;
+                }
+            }
             return _context.SaveChanges();
         }
         /// <summary>
@@ -51,12 +86,12 @@ namespace DAL.DAL
                 if (list.Count() > 1)
                 {
                     var i = 0;
-                    list = list.OrderBy(x => { i = Array.IndexOf(new string[] {"Quiz", "Exam", "Assignment", "Discussion"  }, x.ContentType); if (i != -1) { return i; } else { return int.MaxValue; } }).ToList();
+                    list = list.OrderBy(x => { i = Array.IndexOf(new string[] { "Quiz", "Exam", "Assignment", "Discussion" }, x.ContentType); if (i != -1) { return i; } else { return int.MaxValue; } }).ToList();
                 }
                 return list;
             }
-                return null;
-            
+            return null;
+
         }
         /// <summary>
         /// 根据课程资料单号检索
@@ -117,8 +152,99 @@ namespace DAL.DAL
         /// <returns></returns>
         public int ChangeInfo(ClassWeekType classWeekType)
         {
-            _context.ClassWeekType.Update(classWeekType);
-            return _context.SaveChanges();
+            int num = 0;
+            if (classWeekType.ClassWeekTypeId == -1)
+            {
+                _context.ClassWeekType.Update(classWeekType);
+                _context.SaveChanges();
+                num = num + 1;
+            }
+            else
+            {
+                var model = _context.ClassWeekType.FirstOrDefault(x => x.Id == classWeekType.Id);
+                //更新该子集
+                model.Grade = classWeekType.Grade;
+                _context.ClassWeekType.Update(model);
+                _context.SaveChanges();
+                num = num + 1;
+                if (classWeekType.ClassWeekTypeId > 0)
+                {
+                    if (classWeekType.ContentType != model.ContentType)
+                    {
+                        model.ContentType = classWeekType.ContentType;
+                        if (classWeekType.RefId != 0)
+                        {
+                            var cwt = _context.ClassWeekType.FirstOrDefault(x => x.ClassWeekTypeId == 0 && x.ClassWeekId == classWeekType.ClassWeekId && x.ContentType == classWeekType.ContentType);
+                            if (cwt != null)
+                            {
+                                model.ClassWeekTypeId = cwt.RefId;
+                            }
+                            //更新对应答案里面的父级id
+                            if (classWeekType.ClassWeekTypeId != -1)
+                            {
+                                var cic = _context.ClassInfoContent.FirstOrDefault(x => x.ClassWeekTypeId == classWeekType.Id);
+                                if (cic != null)
+                                {
+                                    cic.CwtParentId = cwt.RefId;
+                                    _context.ClassInfoContent.Update(cic);
+                                }
+                            }
+                        }
+                        _context.ClassWeekType.Update(model);
+                        _context.SaveChanges();
+                        num = num + 1;
+                        //更新未修改之前的父级得分
+                        var bcwt = _context.ClassWeekType.FirstOrDefault(x => x.RefId == classWeekType.ClassWeekTypeId && x.ClassWeekTypeId == 0&&x.ContentType== classWeekType.ContentType);
+                        var bls = _context.ClassWeekType.Where(x => x.ClassWeekTypeId == bcwt.RefId && x.Grade > 0 && x.ClassWeekTypeId != 0 && x.ContentType == bcwt.ContentType);
+                        if (bls.Count() > 0)
+                        {
+                            int number = bls.Count();
+                            int grade = bls.Sum(x => x.Grade);
+                            bcwt.Grade = grade / number;
+                        }
+                        else
+                        {
+                            bcwt.Grade = 0;
+                        }
+                        _context.ClassWeekType.Update(bcwt);
+                        _context.SaveChanges();
+                        num = num + 1;
+                    }
+                    //更新类型对应的父级得分
+                    var cwtp = _context.ClassWeekType.FirstOrDefault(x => x.RefId == model.ClassWeekTypeId && x.ClassWeekTypeId == 0&&x.ContentType==model.ContentType);
+                    var pls = _context.ClassWeekType.Where(x => x.ClassWeekTypeId == cwtp.RefId && x.Grade > 0 && x.ClassWeekTypeId != 0 && x.ContentType == cwtp.ContentType);
+                    if (pls.Count() > 0)
+                    {
+                        int number = pls.Count();
+                        int grade = pls.Sum(x => x.Grade);
+                        cwtp.Grade = grade / number;
+                    }
+                    else
+                    {
+                        cwtp.Grade = 0;
+                    }
+                    _context.ClassWeekType.Update(cwtp);
+                    _context.SaveChanges();
+                    num = num + 1;
+                }
+            }
+            //更新对应周的总分
+            var cw = _context.ClassWeek.FirstOrDefault(x => x.Id == classWeekType.ClassWeekId);
+            var ls = _context.ClassWeekType.Where(x => x.ClassWeekId == cw.Id && (x.ClassWeekTypeId == 0 || x.ClassWeekTypeId == -1) && x.Grade > 0);
+            if (ls.Count() > 0)
+            {
+                int number = ls.Count();
+                int sgrade = ls.Sum(x => x.Grade);
+                cw.Grade = sgrade / number;
+            }
+            else
+            {
+                cw.Grade = 0;
+            }
+            _context.ClassWeek.Update(cw);
+            _context.SaveChanges();
+            num = num + 1;
+            return num;
         }
         /// <summary>
         /// 删除
@@ -182,7 +308,7 @@ namespace DAL.DAL
 
         private IQueryable<ClassWeekType> GetListData()
         {
-            return _context.ClassWeekType.Where(x => x.IsDel==false);
+            return _context.ClassWeekType.Where(x => x.IsDel == false);
         }
     }
 }
