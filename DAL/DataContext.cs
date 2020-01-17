@@ -30,6 +30,10 @@ namespace DAL
         public DbSet<Feedback> Feedback { get; set; }
         public DbSet<UniversityCombine> UniversityCombine { get; set; }
         public DbSet<ClassCombine> ClassCombine { get; set; }
+        public DbSet<ClassTest> ClassTest { get; set; }
+        public DbSet<UniversityTest> UniversityTest { get; set; }
+        public DbSet<ClassInfoTest> ClassInfoTest { get; set; }
+        public DbSet<ClassInfoContentTest> ClassInfoContentTest { get; set; }
 
     }
 }

@@ -12,6 +12,7 @@ namespace DAL.IDAL
         /// </summary>
         /// <returns></returns>
         object GetList(int classinfoid, int pagenum, int pagesize, out int PageTotal);
+        List<ClassWeekType> GetList();
         /// <summary>
         /// 根据每周课程类型id检索
         /// </summary>

@@ -20,10 +20,10 @@
 
   <ItemGroup>
     <Reference Include="aliyun-net-sdk-core">
-      <HintPath>..\..\..\..\Downloads\aliyun-net-sdk-dmV3.1.0\aliyun-net-sdk-core.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\aliyun-net-sdk-core.dll</HintPath>
     </Reference>
     <Reference Include="aliyun-net-sdk-dm">
-      <HintPath>..\..\..\..\Downloads\aliyun-net-sdk-dmV3.1.0\aliyun-net-sdk-dm.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\aliyun-net-sdk-dm.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.AspNetCore.Mvc.Core">
       <HintPath>..\..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\microsoft.aspnetcore.mvc.core\2.0.1\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.Core.dll</HintPath>

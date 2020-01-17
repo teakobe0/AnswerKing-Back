@@ -63,7 +63,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public int Add(University university)
         {
-            var unty = _context.University.OrderByDescending(x => x.Id).FirstOrDefault();
+            //var unty = _context.University.OrderByDescending(x => x.Id).FirstOrDefault();
             //university.Id = (unty == null || unty.Id < InitID) ? InitID : unty.Id + 1;
             university.CreateTime = DateTime.Now;
             _context.University.Add(university);

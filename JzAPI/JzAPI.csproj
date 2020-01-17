@@ -26,10 +26,10 @@
 
   <ItemGroup>
     <Reference Include="aliyun-net-sdk-core">
-      <HintPath>..\..\..\..\Downloads\aliyun-net-sdk-dmV3.1.0\aliyun-net-sdk-core.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\aliyun-net-sdk-core.dll</HintPath>
     </Reference>
     <Reference Include="aliyun-net-sdk-dm">
-      <HintPath>..\..\..\..\Downloads\aliyun-net-sdk-dmV3.1.0\aliyun-net-sdk-dm.dll</HintPath>
+      <HintPath>..\..\..\..\Downloads\aliyun-net-sdk-dm.dll</HintPath>
     </Reference>
   </ItemGroup>
 

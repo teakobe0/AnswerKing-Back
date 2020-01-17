@@ -156,7 +156,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public int Add(ClassInfoContent classInfoContent)
         {
-            //该类型是否有答案
+            //该类型是否存在答案
             var cic = _context.ClassInfoContent.FirstOrDefault(x => x.ClassWeekTypeId == classInfoContent.ClassWeekTypeId);
             if (cic == null)
             {

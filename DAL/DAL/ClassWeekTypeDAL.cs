@@ -128,6 +128,7 @@ namespace DAL.DAL
             list = list.Skip(pagesize * (pagenum - 1)).Take(pagesize).OrderBy(x => x.Id);
             return list.ToList();
         }
+      
         /// <summary>
         /// 根据每周课程id检索课程类型
         /// </summary>

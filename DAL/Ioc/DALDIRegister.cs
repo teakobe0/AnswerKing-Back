@@ -31,6 +31,10 @@ namespace DAL.Ioc
             services.AddTransient(typeof(IFeedbackDAL), typeof(FeedbackDAL));
             services.AddTransient(typeof(IUniversityCombineDAL), typeof(UniversityCombineDAL));
             services.AddTransient(typeof(IClassCombineDAL), typeof(ClassCombineDAL));
+            services.AddTransient(typeof(IClassTestDAL), typeof(ClassTestDAL));
+            services.AddTransient(typeof(IUniversityTestDAL), typeof(UniversityTestDAL));
+            services.AddTransient(typeof(IClassInfoTestDAL), typeof(ClassInfoTestDAL));
+            services.AddTransient(typeof(IClassInfoContentTestDAL), typeof(ClassInfoContentTestDAL));
 
         }
     }
