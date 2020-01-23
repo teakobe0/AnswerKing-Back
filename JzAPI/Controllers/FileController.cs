@@ -37,45 +37,52 @@ namespace JzAPI.Controllers
         [HttpPost]
         [Route("UploadImg")]
         [Authorize(Roles = C_Role.all)]
-        public async Task<IActionResult> UploadImg(IFormCollection collection, string classinfoid)
+        public async Task<IActionResult> UploadImg(IFormCollection collection, int classInfoTestId)
         {
-            ResultModel r = new ResultModel();
-            r.Status = RmStatus.OK;
-            var files = collection.Files;
-            long size = files.Sum(f => f.Length);
-            var filePath = "";
-            filePath = CheckDirectory(classinfoid);
-            string file = "";
-            foreach (var formFile in files)
+            
+            if (classInfoTestId==0)
             {
-                if (formFile.Length > 0)
+                return BadRequest("题库集单号不能为空");
+            }
+            else
+            {
+                var files = collection.Files;
+                long size = files.Sum(f => f.Length);
+                var filePath = "";
+                filePath = CheckDirectory(classInfoTestId);
+                string file = "";
+                foreach (var formFile in files)
                 {
-                    string suffix = formFile.FileName.Substring(formFile.FileName.LastIndexOf("."));
-                    var number = Guid.NewGuid().ToString();
-                    string filename = number + suffix;
-                    string pathImg = Path.Combine(filePath, filename);
-                    try
+                    if (formFile.Length > 0)
                     {
-                        using (var stream = new FileStream(pathImg, FileMode.CreateNew))
+                        string suffix = formFile.FileName.Substring(formFile.FileName.LastIndexOf("."));
+                        var number = Guid.NewGuid().ToString();
+                        string filename = number + suffix;
+                        string pathImg = Path.Combine(filePath, filename);
+                        try
                         {
-                            await formFile.CopyToAsync(stream);
+                            using (var stream = new FileStream(pathImg, FileMode.CreateNew))
+                            {
+                                await formFile.CopyToAsync(stream);
+                            }
+                            file = "/ClassinfoImg/" + classInfoTestId + "/" + filename;
                         }
-                        file = "/ClassinfoImg/"  + classinfoid + "/" + filename;
-                    }
-                    catch (IOException e)
-                    {
-                        return BadRequest("该文件已存在！请重命名后重新上传");
+                        catch (IOException e)
+                        {
+                            return BadRequest("该文件已存在！请重命名后重新上传");
+                        }
                     }
                 }
+                return Ok(new { count = files.Count, size, file });
             }
-            return Ok(new { count = files.Count, size, file });
         }
 
-        private string CheckDirectory(string classinfoid)
+        private string CheckDirectory(int classinfoid)
         {
-            var filePath = Path.Combine(_environment.WebRootPath, "ClassinfoImg");
+            string url = AppConfig.Configuration["imgurl"];
+            var filePath = Path.Combine(url, "ClassinfoImg");
             if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
-            filePath = Path.Combine(filePath, classinfoid);
+            filePath = Path.Combine(filePath, classinfoid.ToString());
             if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
 
             return filePath;

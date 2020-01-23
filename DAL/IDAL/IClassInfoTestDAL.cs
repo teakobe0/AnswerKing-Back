@@ -41,5 +41,12 @@ namespace DAL.IDAL
         /// <param name="id"></param>
         /// <returns></returns>
         int Del(int id);
+        /// <summary>
+        /// 查询该客户是否创建过该课程的订单
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <param name="classtestid"></param>
+        /// <returns></returns>
+        ClassInfoTest GetClassInfoTest(int clientid, int classtestid);
     }  
 }

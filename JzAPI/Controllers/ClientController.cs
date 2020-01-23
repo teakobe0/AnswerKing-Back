@@ -395,7 +395,7 @@ namespace JzAPI.Controllers
                             formFile.CopyTo(stream);
                         }
                         string cropimg = "/clientImg/" + filename.Replace(".", "_small.");
-                        bool isCompress = IMGHelper.CompressImage(_environment.WebRootPath + "/clientImg/" + filename, _environment.WebRootPath + cropimg);
+                        bool isCompress = IMGHelper.CompressImage(AppConfig.Configuration["imgurl"] + "/clientImg/" + filename, AppConfig.Configuration["imgurl"] + cropimg);
                         if (isCompress)
                         {
                             _clidal.SaveImg(ID, cropimg);
@@ -414,7 +414,8 @@ namespace JzAPI.Controllers
 
         private string CheckDirectory()
         {
-            var filePath = Path.Combine(_environment.WebRootPath, "clientImg");
+            string url = AppConfig.Configuration["imgurl"];
+            var filePath = Path.Combine(url, "clientImg");
             if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
             return filePath;
         }

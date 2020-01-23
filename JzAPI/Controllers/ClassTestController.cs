@@ -75,10 +75,9 @@ namespace JzAPI.Controllers
                     if (classTest.Id == 0)
                     {
                         //查询添加的课程是否存在
-                        bool name = _clatdal.GetName(classTest.UniversityTestId, classTest.Name);
+                        bool name = _clatdal.GetName(classTest.UniversityTestId, classTest.Name,0);
                         if (name == true)
                         {
-                            r.Data = null;
                             r.Status = RmStatus.Error;
                             r.Msg = "该课程名称已经存在";
                         }
@@ -97,12 +96,17 @@ namespace JzAPI.Controllers
                 //生成订单
                 if (r.Msg == null)
                 {
-                    cit = new ClassInfoTest();
-                    cit.ClassTestId = classTest.Id;
-                    cit.ClientId = classTest.ClientId;
-                    var clientName = _clientdal.GetClientById(ID).Name;
-                    cit.Name = clientName + "的题库集";
-                    var classInfoTest = _citdal.Add(cit);
+                    //该客户是否创建过该课程的题库集
+                    var classInfoTest = _citdal.GetClassInfoTest(ID, classTest.Id);
+                    if (classInfoTest==null)
+                    {
+                        cit = new ClassInfoTest();
+                        cit.ClassTestId = classTest.Id;
+                        cit.ClientId = classTest.ClientId;
+                        var clientName = _clientdal.GetClientById(ID).Name;
+                        cit.Name = clientName + "的题库集";
+                        classInfoTest = _citdal.Add(cit);
+                    }
                     r.Data = new { classtest, classInfoTest };
                 }
             }
@@ -119,8 +123,7 @@ namespace JzAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("GetClassTest")]
-        [Authorize(Roles = C_Role.all)]
-        public ResultModel GetClassTest(int classTestId)
+        public ResultModel GetClassTest(int id)
         {
             ResultModel r = new ResultModel();
             PageData page = new PageData();
@@ -128,7 +131,7 @@ namespace JzAPI.Controllers
             try
             {
 
-                var classTest = _clatdal.GeClassTest(classTestId);
+                var classTest = _clatdal.GeClassTest(id);
                 var universityName = _utdal.GetUniversityTest(classTest.UniversityTestId) == null ? null : _utdal.GetUniversityTest(classTest.UniversityTestId).Name;
                 r.Data = new { classTest, universityName };
             }
@@ -153,28 +156,33 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                if (classTest.ClientId == ID)
+                if (!string.IsNullOrEmpty(classTest.Name))
                 {
-                    //查询添加的课程是否存在
-                    bool name = _clatdal.GetName(classTest.UniversityTestId, classTest.Name);
-                    if (name == true)
+                    if (classTest.ClientId == ID)
                     {
-                        r.Data = null;
-                        r.Status = RmStatus.Error;
-                        r.Msg = "该课程名称已经存在";
+                        //查询添加的课程是否存在
+                        bool name = _clatdal.GetName(classTest.UniversityTestId, classTest.Name, classTest.Id);
+                        if (name == true)
+                        {
+                            r.Data = 0;
+                            r.Status = RmStatus.Error;
+                            r.Msg = "该课程名称已经存在";
+                        }
+                        else
+                        {
+                            r.Data = _clatdal.Edit(classTest);
+                        }
                     }
                     else
                     {
-                        r.Data = _clatdal.Edit(classTest);
+                        r.Status = RmStatus.Error;
+                        r.Msg = "你没有权限操作";
                     }
                 }
                 else
                 {
-                    r.Data = 0;
-                }
-                if ((int)r.Data == 0)
-                {
                     r.Status = RmStatus.Error;
+                    r.Msg = "课程名称不能为空";
                 }
             }
             catch (Exception ex)

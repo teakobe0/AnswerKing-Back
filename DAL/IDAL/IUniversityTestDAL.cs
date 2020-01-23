@@ -52,8 +52,8 @@ namespace DAL.IDAL
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        bool GetName(string name);
-
+        bool GetName(string name, int id);
+       
 
     }
 }

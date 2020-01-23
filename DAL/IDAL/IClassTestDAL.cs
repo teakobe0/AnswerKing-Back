@@ -53,7 +53,7 @@ namespace DAL.IDAL
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        bool GetName(int universityTestId, string name);
+        bool GetName(int universityTestId, string name, int id);
 
 
     }

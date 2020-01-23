@@ -35,7 +35,7 @@ namespace DAL.DAL
             var list = GetListData();
             if (!string.IsNullOrEmpty(name))
             {
-                list = list.Where(x => x.Name.ToLower().Contains(name.ToLower().Trim()));
+                list = list.Where(x => x.Name.Trim().Contains(name.Trim()));
             }
             return list.ToList();
 
@@ -54,9 +54,17 @@ namespace DAL.DAL
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public bool GetName(string name)
+        public bool GetName(string name,int id)
         {
-            return _context.UniversityTest.Any(x => x.Name.ToLower().Trim() == name.ToLower().Trim()); ;
+            if (id == 0)
+            {
+                return _context.UniversityTest.Any(x => x.Name.Trim() == name.Trim());
+            }
+            else
+            {
+                return _context.UniversityTest.Any(x =>x.Id!=id&& x.Name.Trim() == name.Trim());
+            }
+            
         }
         /// <summary>
         /// 新增

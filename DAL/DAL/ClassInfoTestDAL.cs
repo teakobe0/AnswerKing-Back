@@ -40,7 +40,7 @@ namespace DAL.DAL
             return cit;
         }
         /// <summary>
-        /// 根据课程资料id检索
+        /// 根据题库集id检索
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -74,6 +74,16 @@ namespace DAL.DAL
                 return _context.SaveChanges();
             }
             return 0;
+        }
+        /// <summary>
+        /// 查询该客户是否创建过该课程的订单
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <param name="classtestid"></param>
+        /// <returns></returns>
+        public ClassInfoTest GetClassInfoTest(int clientid, int classtestid)
+        {
+            return _context.ClassInfoTest.FirstOrDefault(x => x.IsDel==false&&x.ClientId == clientid && x.ClassTestId == classtestid);
         }
         /// <summary>
         /// 根据客户id检索课程资料

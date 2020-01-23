@@ -79,7 +79,7 @@ namespace DAL.DAL
                 list = list.Where(x => x.UniversityTestId == universityTestId);
                 if (!string.IsNullOrEmpty(name))
                 {
-                    list = list.Where(x => x.Name.ToLower().Contains(name.ToLower().Trim()));
+                    list = list.Where(x => x.Name.Trim().Contains(name.Trim()));
                 }
             }
             else
@@ -92,11 +92,22 @@ namespace DAL.DAL
         /// <summary>
         /// 查询同一学校的该课程名称是否存在
         /// </summary>
+        /// <param name="universityTestId"></param>
         /// <param name="name"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        public bool GetName(int universityTestId,string name)
+        public bool GetName(int universityTestId,string name,int id)
         {
-            return _context.ClassTest.Any(x=>x.UniversityTestId== universityTestId&& x.Name.ToLower().Trim() == name.ToLower().Trim()); ;
+            if (id == 0)
+            {
+             return _context.ClassTest.Any(x=>x.UniversityTestId == universityTestId && x.Name.Trim() == name.Trim());
+            }
+            else
+            {
+                return _context.ClassTest.Any(x =>x.Id!=id&& x.UniversityTestId == universityTestId && x.Name.Trim() == name.Trim());
+            }
+
+            
         }
         /// <summary>
         /// 根据课程id查询

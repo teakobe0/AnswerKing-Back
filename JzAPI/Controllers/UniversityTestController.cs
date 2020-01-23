@@ -46,10 +46,9 @@ namespace JzAPI.Controllers
                     {
                         universityTest.ClientId = ID;
                         //查询添加的学校是否存在
-                        bool name = _untdal.GetName(universityTest.Name);
+                        bool name = _untdal.GetName(universityTest.Name,0);
                         if (name == true)
                         {
-                            r.Data = null;
                             r.Status = RmStatus.Error;
                             r.Msg = "该学校名称已经存在";
                         }
@@ -88,28 +87,26 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                if (universityTest.ClientId == ID)
+                if (!string.IsNullOrEmpty(universityTest.Name))
                 {
-                    bool name = _untdal.GetName(universityTest.Name);
-                    if (name == true)
+                    if (universityTest.ClientId == ID)
                     {
-                        r.Data = null;
-                        r.Status = RmStatus.Error;
-                        r.Msg = "该学校名称已经存在";
+                        bool name = _untdal.GetName(universityTest.Name, universityTest.Id);
+                        if (name == true)
+                        {
+                            r.Status = RmStatus.Error;
+                            r.Msg = "该学校名称已经存在";
+                        }
+                        else
+                        {
+                            r.Data = _untdal.Edit(universityTest);
+                        }
                     }
-                    else
-                    {
-                        r.Data = _untdal.Edit(universityTest);
-                    }
-                   
                 }
                 else
                 {
-                    r.Data = 0;
-                }
-                if ((int)r.Data == 0)
-                {
                     r.Status = RmStatus.Error;
+                    r.Msg = "学校名称不能为空";
                 }
             }
             catch (Exception ex)
@@ -147,14 +144,13 @@ namespace JzAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("GetUniversityTest")]
-        [Authorize(Roles = C_Role.all)]
-        public ResultModel GetUniversityTest(int universityTestId)
+        public ResultModel GetUniversityTest(int id)
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _untdal.GetUniversityTest(universityTestId);
+                r.Data = _untdal.GetUniversityTest(id);
 
             }
             catch (Exception ex)
