@@ -34,8 +34,8 @@ namespace DAL.Model
     {
         public string Name { get; set; }//题目
         public string NameUrl { get; set; }//题目url
-        public string Contents { get; set; }//文字问题、答案内容
-        public string Url { get; set; }//图片问题、答案内容url
+        public string Contents { get; set; }//答案内容
+        public string Url { get; set; }//答案内容url
         public int ClassWeek { get; set; }//每周课程名称
         public string ClassWeekType { get; set; }//每周课程类型名称
         public int ClassTestId { get; set; }//课程id

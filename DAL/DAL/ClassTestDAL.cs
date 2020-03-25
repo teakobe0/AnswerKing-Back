@@ -132,5 +132,38 @@ namespace DAL.DAL
             }
             return list;
         }
+       /// <summary>
+       /// 根据课程名称检索
+       /// </summary>
+       /// <param name="name"></param>
+       /// <param name="status"></param>
+       /// <param name="pagenum"></param>
+       /// <param name="pagesize"></param>
+       /// <param name="PageTotal"></param>
+       /// <returns></returns>
+        public object GetListbyname(string name,  int pagenum, int pagesize, out int PageTotal)
+        {
+            PageTotal = 0;
+            var ls = GetListData();
+            if (!string.IsNullOrEmpty(name))
+            {
+                ls = ls.Where(x => x.Name.Trim().Contains(name.Trim()));
+            }
+            var list = from x in ls
+                       select new
+                       {
+                           x.Id,
+                           x.Name,
+                           x.ClientId,
+                           universityTest = _context.UniversityTest.FirstOrDefault(z => z.Id == x.UniversityTestId) != null ? _context.UniversityTest.FirstOrDefault(z => z.Id == x.UniversityTestId).Name : "",
+                           x.Professor,
+                           x.IsAudit,
+                           x.UniversityTestId
+                       };
+
+            PageTotal = list.Count();
+            list = list.Skip(pagesize * (pagenum - 1)).Take(pagesize).OrderBy(x => x.Id);
+            return list.ToList();
+        }
     }
 }

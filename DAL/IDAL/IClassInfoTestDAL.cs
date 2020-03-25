@@ -48,5 +48,12 @@ namespace DAL.IDAL
         /// <param name="classtestid"></param>
         /// <returns></returns>
         ClassInfoTest GetClassInfoTest(int clientid, int classtestid);
+        /// <summary>
+        /// 根据课程资料单号查询
+        /// </summary>
+        /// <param name="no"></param>
+        /// <returns></returns>
+         List<ClassInfoTest> GetListByno(int no);
+        
     }  
 }

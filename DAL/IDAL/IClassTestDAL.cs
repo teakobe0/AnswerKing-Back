@@ -54,7 +54,16 @@ namespace DAL.IDAL
         /// <param name="name"></param>
         /// <returns></returns>
         bool GetName(int universityTestId, string name, int id);
-
+        /// <summary>
+        /// 根据课程名称检索
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="status"></param>
+        /// <param name="pagenum"></param>
+        /// <param name="pagesize"></param>
+        /// <param name="PageTotal"></param>
+        /// <returns></returns>
+        object GetListbyname(string name, int pagenum, int pagesize, out int PageTotal);
 
     }
 }

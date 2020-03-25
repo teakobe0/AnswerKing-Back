@@ -34,6 +34,8 @@ namespace DAL
         public DbSet<UniversityTest> UniversityTest { get; set; }
         public DbSet<ClassInfoTest> ClassInfoTest { get; set; }
         public DbSet<ClassInfoContentTest> ClassInfoContentTest { get; set; }
-
+        public DbSet<Question> Question { get; set; }
+        public DbSet<Bidding> Bidding { get; set; }
+        public DbSet<Answer> Answer { get; set; }
     }
 }

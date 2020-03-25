@@ -98,5 +98,22 @@ namespace DAL.DAL
             }
             return list;
         }
+        /// <summary>
+        /// 根据课程资料单号查询
+        /// </summary>
+        /// <param name="no"></param>
+        /// <returns></returns>
+        public List<ClassInfoTest> GetListByno(int no)
+        {
+            var list = GetListData();
+            if (no != 0)
+            {
+                list = list.Where(x => x.Id == no);
+
+            }
+            return list.ToList();
+
+
+        }
     }
 }

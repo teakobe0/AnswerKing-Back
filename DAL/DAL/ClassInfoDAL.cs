@@ -48,7 +48,12 @@ namespace DAL.DAL
         }
         public ClassInfo GetRandom()
         {
-            return _context.ClassInfo.Where(x => x.ClientId == 0).OrderBy(x => Guid.NewGuid()).First();
+            var ClassInfo = _context.ClassInfo.Where(x => x.ClientId == 0);
+            if (ClassInfo.Count()>0)
+            {
+               return  _context.ClassInfo.Where(x => x.ClientId == 0).OrderBy(x => Guid.NewGuid()).First();
+            }
+            return null;
         }
         /// <summary>
         /// 根据课程资料单号查询

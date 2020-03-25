@@ -36,6 +36,8 @@ namespace DAL.DAL
         public int Add(ClassInfoContentTest classInfoContentTest)
         {
             classInfoContentTest.CreateTime = DateTime.Now;
+            classInfoContentTest.ClassTestId = _context.ClassInfoTest.FirstOrDefault(x => x.Id == classInfoContentTest.ClassInfoTestId).ClassTestId;
+            classInfoContentTest.UniversityTestId = _context.ClassTest.FirstOrDefault(x => x.Id == classInfoContentTest.ClassTestId).UniversityTestId;
             _context.ClassInfoContentTest.Add(classInfoContentTest);
             return _context.SaveChanges();
         }
@@ -88,23 +90,23 @@ namespace DAL.DAL
         /// <returns></returns>
         public int DelImg(int id, string img)
         {
-            var cict = _context.ClassInfoContentTest.FirstOrDefault(x => x.Id == id);
-            if ((!string.IsNullOrEmpty(cict.NameUrl) )||(!string.IsNullOrEmpty(cict.Url)))
+            if (id != 0)
             {
-                if (cict.NameUrl == img)
+                var cict = _context.ClassInfoContentTest.FirstOrDefault(x => x.Id == id);
+                if ((!string.IsNullOrEmpty(cict.NameUrl)) || (!string.IsNullOrEmpty(cict.Url)))
                 {
-                    cict.NameUrl = cict.NameUrl.Replace(img, "");
+                    if (cict.NameUrl == img)
+                    {
+                        cict.NameUrl = cict.NameUrl.Replace(img, "");
+                    }
+                    if (cict.Url == img)
+                    {
+                        cict.Url = cict.Url.Replace(img, "");
+                    }
+                    return _context.SaveChanges();
                 }
-                if (cict.Url == img)
-                {
-                    cict.Url = cict.Url.Replace(img, "");
-                }
-                return _context.SaveChanges();
             }
-            else
-            {
-                return 0;
-            }
+            return 0;
 
         }
         /// <summary>
@@ -143,6 +145,71 @@ namespace DAL.DAL
             _context.ClassInfoContentTest.Update(cict);
             return _context.SaveChanges();
         }
+        /// <summary>
+        /// 根据课程资料id检索
+        /// </summary>
+        /// <param name="classinfotestid"></param>
+        /// <param name="status"></param>
+        /// <param name="pagenum"></param>
+        /// <param name="pagesize"></param>
+        /// <param name="PageTotal"></param>
+        /// <returns></returns>
+        public object GetListbycinid(int classinfotestid, int status, int pagenum, int pagesize, out int PageTotal)
+        {
+            PageTotal = 0;
+            var ls = GetListData();
+            if (classinfotestid != 0)
+            {
+                ls = ls.Where(x => x.ClassInfoTestId == classinfotestid);
+            }
+            if (status != -1)
+            {
+                if (status == 1)
+                {
+                    ls = ls.Where(x => x.IsAudit == true);
+                }
+                else
+                {
+                    ls = ls.Where(x => x.IsAudit == false);
+                }
+            }
+            PageTotal = ls.Count();
+            ls = ls.Skip(pagesize * (pagenum - 1)).Take(pagesize).OrderBy(x => x.Id);
+            return ls.ToList();
+        }
+        /// <summary>
+        /// 审核、取消审核
+        /// </summary>
+        /// <param name="classInfoContentTest"></param>
+        /// <returns></returns>
+        public int Audit(ClassInfoContentTest classInfoContentTest)
+        {
+            var cict = _context.ClassInfoContentTest.FirstOrDefault(x => x.Id == classInfoContentTest.Id);
+            if (cict.IsAudit == true)
+            {
+                cict.IsAudit = false;
+            }
+            else
+            {
+                cict.IsAudit = true;
+                cict.Url = classInfoContentTest.Url;
+                cict.Contents = classInfoContentTest.Contents;
+                Utils.WriteInfoLog("ClassInfoContentTest:Audit" + cict.ToJson());
+            }
+            return _context.SaveChanges();
+        }
+        /// <summary>
+        /// 检索下一个未审核答案
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public ClassInfoContentTest GetNext(int id)
+        {
+            return _context.ClassInfoContentTest.FirstOrDefault(x => x.Id > id && x.IsAudit == false && x.Url != null && x.Url != "");
+        }
+
     }
 
 }
+
+

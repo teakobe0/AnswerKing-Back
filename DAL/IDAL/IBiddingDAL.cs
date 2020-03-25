@@ -1,0 +1,38 @@
+﻿
+using DAL.Model;
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace DAL.IDAL
+{
+    public interface IBiddingDAL
+    {
+        /// <summary>
+        /// 查询列表
+        /// </summary>
+        /// <returns></returns> 
+        List<Bidding> GetList();
+        /// <summary>
+        /// 新增
+        /// </summary>
+        /// <param name="bidding"></param>
+        /// <returns></returns>
+        int Add(Bidding bidding);
+        /// <summary>
+        /// 根据问题和客户id检索
+        /// </summary>
+        /// <param name="questionId"></param>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
+        Bidding GetBidding(int questionId, int clientId);
+        /// <summary>
+        /// 根据问题id检索
+        /// </summary>
+        /// <param name="questionid"></param>
+        /// <returns></returns>
+        List<Bidding> GetList(int questionid);
+    }
+}
+
+        

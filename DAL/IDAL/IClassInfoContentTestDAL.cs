@@ -56,6 +56,28 @@ namespace DAL.IDAL
         /// <param name="id"></param>
         /// <returns></returns>
         int Del(int id);
+        /// <summary>
+        ///  根据课程资料id检索
+        /// </summary>
+        /// <param name="classinfotestid"></param>
+        /// <param name="status"></param>
+        /// <param name="pagenum"></param>
+        /// <param name="pagesize"></param>
+        /// <param name="PageTotal"></param>
+        /// <returns></returns>
+        object GetListbycinid(int classinfotestid, int status, int pagenum, int pagesize, out int PageTotal);
+        /// <summary>
+        /// 审核、取消审核
+        /// </summary>
+        /// <param name="classInfoContentTest"></param>
+        /// <returns></returns>
+        int Audit(ClassInfoContentTest classInfoContentTest);
+        /// <summary>
+        /// 检索下一个未审核答案
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        ClassInfoContentTest GetNext(int id);
     }
 }
 
