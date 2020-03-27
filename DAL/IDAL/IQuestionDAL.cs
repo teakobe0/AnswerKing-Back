@@ -59,5 +59,10 @@ namespace DAL.IDAL
         /// <param name="clientid"></param>
         /// <returns></returns>
         List<Question> GetList(int clientid);
+        /// <summary>
+        /// 查询列表
+        /// </summary>
+        /// <returns></returns> 
+        object GetLs(int number, int pagenum, int pagesize, out int PageTotal);
     }
 }

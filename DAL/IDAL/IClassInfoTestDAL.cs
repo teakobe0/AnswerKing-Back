@@ -54,6 +54,11 @@ namespace DAL.IDAL
         /// <param name="no"></param>
         /// <returns></returns>
          List<ClassInfoTest> GetListByno(int no);
-        
+        /// <summary>
+        /// 更改题库集状态
+        /// </summary>
+        /// <param name="cit"></param>
+        /// <returns></returns>
+        int Change(int id);
     }  
 }

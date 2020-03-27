@@ -45,7 +45,7 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                if (!string.IsNullOrEmpty(classInfoContentTest.Url))
+                if (!string.IsNullOrEmpty(classInfoContentTest.Url)|| !string.IsNullOrEmpty(classInfoContentTest.Contents))
                 {
                     classInfoContentTest.ClientId = ID;
                     r.Data = _cictdal.Add(classInfoContentTest);
@@ -53,7 +53,7 @@ namespace JzAPI.Controllers
                 else
                 {
                     r.Status = RmStatus.Error;
-                    r.Msg = "答案图片不能为空";
+                    r.Msg = "答案图片/内容不能为空";
                 }
 
             }
@@ -255,11 +255,11 @@ namespace JzAPI.Controllers
         public ResultModel Edit([FromBody] ClassInfoContentTest classInfoContentTest)
         {
             ResultModel r = new ResultModel();
-            PageData page = new PageData();
+          
             r.Status = RmStatus.OK;
             try
             {
-                if (!string.IsNullOrEmpty(classInfoContentTest.Url))
+                if (!string.IsNullOrEmpty(classInfoContentTest.Url)|| !string.IsNullOrEmpty(classInfoContentTest.Contents))
                 {
                     if (classInfoContentTest.ClientId == ID)
                     {
@@ -274,7 +274,7 @@ namespace JzAPI.Controllers
                 else
                 {
                     r.Status = RmStatus.Error;
-                    r.Msg = "答案图片不能为空";
+                    r.Msg = "答案图片/内容不能为空";
                 }
             }
             catch (Exception ex)

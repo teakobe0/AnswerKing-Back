@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static DAL.Tools.EnumAll;
 
 namespace DAL.DAL
 {
@@ -35,6 +36,11 @@ namespace DAL.DAL
         /// <returns></returns>
         public int Add(ClassInfoContentTest classInfoContentTest)
         {
+            var cit = _context.ClassInfoTest.FirstOrDefault(x => x.Id == classInfoContentTest.ClassInfoTestId);
+            if (cit.Status ==(int) classInfoTestStatus.Audited)
+            {
+                cit.Status = (int)classInfoTestStatus.NoAudit;
+            }
             classInfoContentTest.CreateTime = DateTime.Now;
             classInfoContentTest.ClassTestId = _context.ClassInfoTest.FirstOrDefault(x => x.Id == classInfoContentTest.ClassInfoTestId).ClassTestId;
             classInfoContentTest.UniversityTestId = _context.ClassTest.FirstOrDefault(x => x.Id == classInfoContentTest.ClassTestId).UniversityTestId;
@@ -142,6 +148,12 @@ namespace DAL.DAL
         /// <returns></returns>
         public int Edit(ClassInfoContentTest cict)
         {
+            var cit = _context.ClassInfoTest.FirstOrDefault(x => x.Id == cict.ClassInfoTestId);
+            if (cit.Status == (int)classInfoTestStatus.Audited)
+            {
+                cit.Status = (int)classInfoTestStatus.NoAudit;
+            }
+            cict.IsAudit = false;
             _context.ClassInfoContentTest.Update(cict);
             return _context.SaveChanges();
         }

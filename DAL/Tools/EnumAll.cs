@@ -36,5 +36,21 @@ namespace DAL.Tools
             Complete = 6
 
         }
+        public enum classInfoTestStatus
+        {
+            /// <summary>
+            /// 未创建
+            /// </summary>
+            NoCreate = 0,
+            /// <summary>
+            /// 待审核
+            /// </summary>
+            NoAudit = 1,
+            /// <summary>
+            /// 已审核
+            /// </summary>
+            Audited = 2
+
+        }
     }
 }

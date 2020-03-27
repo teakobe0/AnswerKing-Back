@@ -140,5 +140,34 @@ namespace DAL.DAL
             return list.ToList();
 
         }
+        /// <summary>
+        /// 查询列表
+        /// </summary>
+        /// <returns></returns> 
+        public object GetLs(int number, int pagenum, int pagesize, out int PageTotal)
+        {
+            PageTotal = 0;
+            var ls = GetListData();
+            var list = from x in ls
+                       select new
+                       {
+                           x.Id,
+                           x.Content,
+                           x.Number,
+                           x.Answerer,
+                           cname =x.Answerer==0?"暂时无答题人": _context.Client.FirstOrDefault(z => z.Id == x.Answerer).Name,
+                          x.Status,
+                          x.EndTime,
+                          x.Currency,
+                          x.Title
+                       };
+            if (number != 0)
+            {
+                list = list.Where(x => x.Number == number);
+            }
+            PageTotal = list.Count();
+            list = list.Skip(pagesize * (pagenum - 1)).Take(pagesize).OrderBy(x => x.Id);
+            return list.ToList();
+        }
     }
 }

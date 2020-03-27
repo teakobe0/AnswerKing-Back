@@ -69,6 +69,14 @@ namespace JzAPI.Controllers
             }
             return r;
         }
+
+        public class info
+        {
+            public ClassInfoTest cict { get; set; }
+            public string university { get; set; }
+            public string clas { get; set; }
+
+        }
         /// <summary>
         /// 根据题库集id检索
         /// </summary>
@@ -83,8 +91,12 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-
-                r.Data = _citdal.GetClassInfoTest(id);
+                info info = new info();
+                info.cict = _citdal.GetClassInfoTest(id);
+                var cla = _ctdal.GeClassTest(info.cict.ClassTestId);
+                info.clas = cla.Name;
+                info.university = _utdal.GetUniversityTest(cla.UniversityTestId).Name;
+                r.Data = info;
             }
             catch (Exception ex)
             {
@@ -191,6 +203,36 @@ namespace JzAPI.Controllers
             public string type { get; set; }//类别 
             public DateTime CreateTime { get; set; }//创建时间
         }
-
+        /// <summary>
+        /// 更改题库集状态
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("Change")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Change(int id)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                var clientid = _citdal.GetClassInfoTest(id).ClientId;
+                if (clientid == ID)
+                {
+                    r.Data = _citdal.Change(id);
+                }
+                else
+                {
+                    r.Status = RmStatus.Error;
+                    r.Msg = "你没有权限操作";
+                }
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
     }
 }

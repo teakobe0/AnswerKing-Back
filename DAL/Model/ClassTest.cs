@@ -28,6 +28,7 @@ namespace DAL.Model
         public int ClientId { get; set; }//客户id
         public int ClassTestId { get; set; }//课程id
         public bool IsDel { get; set; }//是否删除 0：未删除 1：已删除
+        public int Status { get; set; } //状态 0：未创建 1：待审核  2：已审核
     }
 
     public class ClassInfoContentTest : BaseModel

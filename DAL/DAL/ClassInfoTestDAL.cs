@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static DAL.Tools.EnumAll;
 
 namespace DAL.DAL
 {
@@ -57,6 +58,18 @@ namespace DAL.DAL
         public int Edit(ClassInfoTest cit)
         {
             _context.ClassInfoTest.Update(cit);
+            return _context.SaveChanges();
+        }
+
+        /// <summary>
+        /// 更改题库集状态
+        /// </summary>
+        /// <param name="cit"></param>
+        /// <returns></returns>
+        public int Change(int id)
+        {
+            var cit = _context.ClassInfoTest.FirstOrDefault(x => x.Id == id);
+            cit.Status = (int)classInfoTestStatus.NoAudit;
             return _context.SaveChanges();
         }
         /// <summary>
