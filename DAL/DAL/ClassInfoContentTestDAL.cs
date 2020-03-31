@@ -217,9 +217,27 @@ namespace DAL.DAL
         /// <returns></returns>
         public ClassInfoContentTest GetNext(int id)
         {
-            return _context.ClassInfoContentTest.FirstOrDefault(x => x.Id > id && x.IsAudit == false && x.Url != null && x.Url != "");
+            var classInfoTestId= _context.ClassInfoContentTest.FirstOrDefault(x => x.Id == id).ClassInfoTestId;
+            
+            return _context.ClassInfoContentTest.FirstOrDefault(x => x.Id > id &&x.ClassInfoTestId== classInfoTestId && x.IsAudit == false&&x.IsDel==false );
         }
-
+        /// <summary>
+        /// 查询该订单未审核的答案
+        /// </summary>
+        /// <param name="classInfoTestId"></param>
+        /// <returns></returns>
+        public bool GetNoAudit(int classInfoTestId)
+        {
+            var cict = _context.ClassInfoContentTest.Where(x => x.ClassInfoTestId == classInfoTestId && x.IsAudit == false && x.IsDel == false);
+            if (cict.Count() > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 
 }

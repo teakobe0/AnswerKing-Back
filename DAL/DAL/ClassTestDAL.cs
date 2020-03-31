@@ -165,5 +165,31 @@ namespace DAL.DAL
             list = list.Skip(pagesize * (pagenum - 1)).Take(pagesize).OrderBy(x => x.Id);
             return list.ToList();
         }
+        /// <summary>
+        /// 查询列表 带条件
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public object GetList(string name)
+        {
+            var ls = GetListData();
+            if (!string.IsNullOrEmpty(name))
+            {
+                ls = ls.Where(x => x.Name.Trim().Contains(name.Trim()));
+            }
+            var list = from x in ls
+                       select new
+                       {
+                           x.Id,
+                           x.Name,
+                           x.ClientId,
+                           universityTest = _context.UniversityTest.FirstOrDefault(z => z.Id == x.UniversityTestId) != null ? _context.UniversityTest.FirstOrDefault(z => z.Id == x.UniversityTestId).Name : "",
+                           x.Professor,
+                           x.IsAudit,
+                           x.UniversityTestId
+                       };
+            list = list.OrderBy(x => x.Id);
+            return list.ToList();
+        }
     }
 }

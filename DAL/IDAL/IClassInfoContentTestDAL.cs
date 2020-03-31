@@ -78,6 +78,12 @@ namespace DAL.IDAL
         /// <param name="id"></param>
         /// <returns></returns>
         ClassInfoContentTest GetNext(int id);
+        /// <summary>
+        /// 查询该订单是否存在未审核的答案
+        /// </summary>
+        /// <param name="classInfoTestId"></param>
+        /// <returns></returns>
+        bool GetNoAudit(int classInfoTestId);
     }
 }
 

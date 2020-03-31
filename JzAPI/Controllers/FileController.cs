@@ -79,12 +79,11 @@ namespace JzAPI.Controllers
 
         private string CheckDirectory(int classinfoid)
         {
-            string url = AppConfig.Configuration["imgurl"];
+            string url = AppConfig.Configuration["uploadurl"];
             var filePath = Path.Combine(url, "ClassinfoImg");
             if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
             filePath = Path.Combine(filePath, classinfoid.ToString());
             if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
-
             return filePath;
         }
     }

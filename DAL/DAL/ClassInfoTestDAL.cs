@@ -116,7 +116,7 @@ namespace DAL.DAL
         /// </summary>
         /// <param name="no"></param>
         /// <returns></returns>
-        public List<ClassInfoTest> GetListByno(int no)
+        public List<ClassInfoTest> GetListByno(int no, int status)
         {
             var list = GetListData();
             if (no != 0)
@@ -124,9 +124,24 @@ namespace DAL.DAL
                 list = list.Where(x => x.Id == no);
 
             }
+            if (status != -1)
+            {
+                list = list.Where(x => x.Status == status);
+            }
             return list.ToList();
-
-
         }
+        /// <summary>
+        /// 审核
+        /// </summary>
+        /// <param name="classInfoTest"></param>
+        /// <returns></returns>
+        public int Audit(ClassInfoTest classInfoTest)
+        {
+            var cit = _context.ClassInfoTest.FirstOrDefault(x => x.Id == classInfoTest.Id);
+            cit.Status = (int)classInfoTestStatus.Audited;
+            return _context.SaveChanges();
+        }
+
+
     }
 }

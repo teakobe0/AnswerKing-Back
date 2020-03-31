@@ -44,7 +44,7 @@ namespace JzAPI.Controllers
             try
             {
                 r.Data = _clatdal.GetList(universityTestId, name).Take(10);
-               
+
             }
             catch (Exception ex)
             {
@@ -72,10 +72,11 @@ namespace JzAPI.Controllers
                 classTest.ClientId = ID;
                 if (!string.IsNullOrEmpty(classTest.Name))
                 {
+                   
                     if (classTest.Id == 0)
                     {
                         //查询添加的课程是否存在
-                        bool name = _clatdal.GetName(classTest.UniversityTestId, classTest.Name,0);
+                        bool name = _clatdal.GetName(classTest.UniversityTestId, classTest.Name, 0);
                         if (name == true)
                         {
                             r.Status = RmStatus.Error;
@@ -95,18 +96,15 @@ namespace JzAPI.Controllers
                 }
                 //生成订单
                 if (r.Msg == null)
-                {
-                    //该客户是否创建过该课程的题库集
-                    var classInfoTest = _citdal.GetClassInfoTest(ID, classTest.Id);
-                    if (classInfoTest==null)
-                    {
-                        cit = new ClassInfoTest();
-                        cit.ClassTestId = classTest.Id;
-                        cit.ClientId = classTest.ClientId;
-                        var clientName = _clientdal.GetClientById(ID).Name;
-                        cit.Name = clientName + "的题库集";
-                        classInfoTest = _citdal.Add(cit);
-                    }
+                 {
+                    cit = new ClassInfoTest();
+                    cit.ClassTestId = classTest.Id;
+                    cit.ClientId = classTest.ClientId;
+                    Random random = new Random();
+                    int num = random.Next(10000000, 99999999);
+                    cit.Name = "题库集" + num;
+                    var classInfoTest = _citdal.Add(cit);
+
                     r.Data = new { classtest, classInfoTest };
                 }
             }

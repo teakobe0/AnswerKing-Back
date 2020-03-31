@@ -64,6 +64,12 @@ namespace DAL.IDAL
         /// <param name="PageTotal"></param>
         /// <returns></returns>
         object GetListbyname(string name, int pagenum, int pagesize, out int PageTotal);
+        /// <summary>
+        /// 查询列表 带条件
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        object GetList(string name);
 
     }
 }

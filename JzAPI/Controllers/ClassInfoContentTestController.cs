@@ -110,6 +110,9 @@ namespace JzAPI.Controllers
                 {
                     info = new info();
                     info.ClassInfoContentTest = i;
+
+                    i.NameUrl= AppConfig.Configuration["imgurl"]+i.NameUrl;
+                    i.Url = AppConfig.Configuration["imgurl"] + i.Url;
                     info.universityname = _utdal.GetUniversityTest(i.UniversityTestId) == null ? null : _utdal.GetUniversityTest(i.UniversityTestId).Name;
                     info.classname = _ctdal.GeClassTest(i.ClassTestId) == null ? null : _ctdal.GeClassTest(i.ClassTestId).Name;
                     ls.Add(info);
@@ -155,29 +158,23 @@ namespace JzAPI.Controllers
                     if (clientid == ID)
                     {
                         r.Data = _cictdal.DelImg(id, imgurl);
-                        if ((int)r.Data == 0)
-                        {
-                            r.Status = RmStatus.Error;
-                            r.Msg = "删除失败";
-                        }
                     }
                     else
                     {
                         r.Status = RmStatus.Error;
-                        r.Msg = "删除失败";
+                        r.Msg = "你没有权限操作";
                     }
                 }
                 if (r.Msg == null)
                 {
                     //转换为绝对路径
-                    string path = AppConfig.Configuration["imgurl"] + imgurl;
+                    string path = AppConfig.Configuration["uploadurl"] + imgurl;
                     //删除本地
                     if (System.IO.File.Exists(path))
                     {
                         System.IO.File.Delete(path);
                     }
                 }
-
             }
             catch (Exception ex)
             {
