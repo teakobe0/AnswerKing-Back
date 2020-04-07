@@ -69,7 +69,7 @@ namespace DAL.IDAL
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        object GetList(string name);
+        object GetData();
 
     }
 }

@@ -53,7 +53,12 @@ namespace DAL.IDAL
         /// <param name="name"></param>
         /// <returns></returns>
         bool GetName(string name, int id);
-       
+        /// <summary>
+        /// 根据学校名称查询
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        UniversityTest GetUniversityTest(string name);
 
     }
 }

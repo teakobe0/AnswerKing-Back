@@ -45,10 +45,18 @@ namespace JzAPI.Controllers
                     if (universityTest.Id == 0)
                     {
                         universityTest.ClientId = ID;
+                        
                         //查询添加的学校是否存在
-                        bool name = _untdal.GetName(universityTest.Name,0);
-                        if (name == true)
+                        //bool name = _untdal.GetName(universityTest.Name,0);
+                        //if (name == true)
+                        //{
+                        //    r.Status = RmStatus.Error;
+                        //    r.Msg = "该学校名称已经存在";
+                        //}
+                        var university = _untdal.GetUniversityTest(universityTest.Name);
+                        if (university != null)
                         {
+                            r.Data = university;
                             r.Status = RmStatus.Error;
                             r.Msg = "该学校名称已经存在";
                         }

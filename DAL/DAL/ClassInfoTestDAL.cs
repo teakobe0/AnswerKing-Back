@@ -128,7 +128,7 @@ namespace DAL.DAL
             {
                 list = list.Where(x => x.Status == status);
             }
-            return list.ToList();
+            return list.OrderBy(x => x.Id).ToList();
         }
         /// <summary>
         /// 审核

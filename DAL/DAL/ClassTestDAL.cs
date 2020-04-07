@@ -170,13 +170,10 @@ namespace DAL.DAL
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public object GetList(string name)
+        public object GetData()
         {
             var ls = GetListData();
-            if (!string.IsNullOrEmpty(name))
-            {
-                ls = ls.Where(x => x.Name.Trim().Contains(name.Trim()));
-            }
+           
             var list = from x in ls
                        select new
                        {

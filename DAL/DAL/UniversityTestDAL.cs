@@ -54,7 +54,7 @@ namespace DAL.DAL
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public bool GetName(string name,int id)
+        public bool GetName(string name, int id)
         {
             if (id == 0)
             {
@@ -62,9 +62,19 @@ namespace DAL.DAL
             }
             else
             {
-                return _context.UniversityTest.Any(x =>x.Id!=id&& x.Name.Trim() == name.Trim());
+                return _context.UniversityTest.Any(x => x.Id != id && x.Name.Trim() == name.Trim());
             }
-            
+
+        }
+        /// <summary>
+        /// 根据学校名称查询
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public UniversityTest GetUniversityTest(string name)
+        {
+            return _context.UniversityTest.FirstOrDefault(x => x.Name.Trim() == name.Trim());
+
         }
         /// <summary>
         /// 新增
