@@ -238,6 +238,30 @@ namespace DAL.DAL
                 return false;
             }
         }
+        /// <summary>
+        /// 获取当前导入数据的最大
+        /// </summary>
+        /// <returns></returns>
+        public int GetImportMaxid()
+        {
+            var cic = _context.ClassInfoContentTest.Where(x => x.RefId != 0).OrderByDescending(x => x.RefId).FirstOrDefault();
+            return cic == null ? 0 : cic.RefId;
+        }
+        /// <summary>
+        /// 导入数据ls
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+        public int AddImportData(List<ClassInfoContentTest> ls)
+        {
+            int num = 0;
+            foreach (var item in ls)
+            {
+                _context.ClassInfoContentTest.Add(item);
+                num += _context.SaveChanges();
+            }
+            return num;
+        }
     }
 
 }

@@ -188,5 +188,29 @@ namespace DAL.DAL
             list = list.OrderBy(x => x.Id);
             return list.ToList();
         }
+        /// <summary>
+        /// 获取当前导入数据的最大id
+        /// </summary>
+        /// <returns></returns>
+        public int GetImportMaxid()
+        {
+            var c = _context.ClassTest.OrderByDescending(x => x.RefId).FirstOrDefault();
+            return c == null ? 0 : c.RefId;
+        }
+        /// <summary>
+        /// 导入数据ls
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+        public int AddImportData(List<ClassTest> ls)
+        {
+            int num = 0;
+            foreach (var item in ls)
+            {
+                _context.ClassTest.Add(item);
+                num += _context.SaveChanges();
+            }
+            return num;
+        }
     }
 }

@@ -59,6 +59,16 @@ namespace DAL.IDAL
         /// <param name="name"></param>
         /// <returns></returns>
         UniversityTest GetUniversityTest(string name);
-
+        /// <summary>
+        /// 获取当前导入数据的最大id
+        /// </summary>
+        /// <returns></returns>
+        int GetImportMaxid();
+        /// <summary>
+        /// 导入数据ls
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+        int AddImportData(List<UniversityTest> ls);
     }
 }

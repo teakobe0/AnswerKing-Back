@@ -53,6 +53,24 @@ namespace DAL.DAL
 
         }
         /// <summary>
+        /// 查询每个类型下的最后一次记录
+        /// </summary>
+        /// <returns></returns>
+        public List<ImportRecords> GetEndTest()
+        {
+            string[] type = new string[4] { "UniversityTest", "ClassTest", "ClassInfoTest", "ClassInfoContentTest" };
+            List<ImportRecords> ls = new List<ImportRecords>();
+            foreach (var item in type)
+            {
+                var model = _context.ImportRecords.Where(x => x.Table == item).OrderByDescending(x => x.Id).FirstOrDefault();
+                ls.Add(model);
+            }
+
+            return ls;
+
+
+        }
+        /// <summary>
         /// 查询列表全部数据
         /// </summary>
         /// <returns></returns>

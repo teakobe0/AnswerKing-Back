@@ -66,5 +66,16 @@ namespace DAL.IDAL
         /// <param name="classInfoTest"></param>
         /// <returns></returns>
         int Audit(ClassInfoTest classInfoTest);
+        /// <summary>
+        /// 获取当前导入数据的最大id
+        /// </summary>
+        /// <returns></returns>
+        int GetImportMaxid();
+        /// <summary>
+        /// 导入数据ls
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+        int AddImportData(List<ClassInfoTest> ls);
     }  
 }

@@ -1,5 +1,6 @@
 ﻿using DAL.IDAL;
 using DAL.Model;
+using DAL.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -88,6 +89,7 @@ namespace DAL.DAL
             _context.UniversityTest.Add(universityTest);
             _context.SaveChanges();
             return universityTest;
+            
         }
         /// <summary>
         /// 编辑学校
@@ -127,6 +129,30 @@ namespace DAL.DAL
                 list = list.Where(x => x.ClientId == clientId).ToList();
             }
             return list;
+        }
+        /// <summary>
+        /// 获取当前导入数据的最大id
+        /// </summary>
+        /// <returns></returns>
+        public int GetImportMaxid()
+        {
+            var c = _context.UniversityTest.OrderByDescending(x => x.RefId).FirstOrDefault();
+            return c == null ? 0 : c.RefId;
+        }
+        /// <summary>
+        /// 导入数据ls
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+        public int AddImportData(List<UniversityTest> ls)
+        {
+            int num = 0;
+            foreach (var item in ls)
+            {
+                _context.UniversityTest.Add(item);
+                num += _context.SaveChanges();
+            }
+            return num;
         }
     }
 }

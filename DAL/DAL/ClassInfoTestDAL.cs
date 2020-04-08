@@ -141,7 +141,29 @@ namespace DAL.DAL
             cit.Status = (int)classInfoTestStatus.Audited;
             return _context.SaveChanges();
         }
-
-
+        /// <summary>
+        /// 获取当前导入数据的最大id
+        /// </summary>
+        /// <returns></returns>
+        public int GetImportMaxid()
+        {
+            var c = _context.ClassInfoTest.OrderByDescending(x => x.RefId).FirstOrDefault();
+            return c == null ? 0 : c.RefId;
+        }
+        /// <summary>
+        /// 导入数据ls
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+        public int AddImportData(List<ClassInfoTest> ls)
+        {
+            int num = 0;
+            foreach (var item in ls)
+            {
+                _context.ClassInfoTest.Add(item);
+                num += _context.SaveChanges();
+            }
+            return num;
+        }
     }
 }

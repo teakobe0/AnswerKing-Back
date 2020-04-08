@@ -84,6 +84,17 @@ namespace DAL.IDAL
         /// <param name="classInfoTestId"></param>
         /// <returns></returns>
         bool GetNoAudit(int classInfoTestId);
+        /// <summary>
+        /// 获取当前导入数据的最大
+        /// </summary>
+        /// <returns></returns>
+        int GetImportMaxid();
+        /// <summary>
+        /// 导入数据ls
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+        int AddImportData(List<ClassInfoContentTest> ls);
     }
 }
 

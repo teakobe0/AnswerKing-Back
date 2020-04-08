@@ -29,5 +29,10 @@ namespace DAL.IDAL
         /// </summary>
         /// <returns></returns>
         List<ImportRecords> GetEnd();
+        /// <summary>
+        /// 查询每个类型下的最后一次记录
+        /// </summary>
+        /// <returns></returns>
+        List<ImportRecords> GetEndTest();
     }
 }

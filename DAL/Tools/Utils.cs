@@ -71,6 +71,37 @@ namespace DAL.Tools
             sw.Close();
         }
 
+        /// <summary>
+        /// 写操作日志文件
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="model"></param>
+        /// <param name="type"></param>
+        /// <param name="id"></param>
+        public static void WriteOperationLog(string name,string model,string type, int id)
+        {
+            DateTime time = DateTime.Now;
+            string path = Directory.GetCurrentDirectory() + @"\Log\Operation\";
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            string fileFullPath = path + time.ToString("yyyy-MM-dd") + ".txt";
+            StringBuilder str = new StringBuilder();
+            //str.Append(time.ToString()+"/t"+name+"----->"+model+"----->"+type+"----->"+"Id:"+id + "<br/>");
+            str.Append(time.ToString() + "&nbsp;&nbsp;&nbsp;&nbsp;" + "用户：" + "【"+name+"】 "+ "模块：" +"【"+ model+"】" + "操作：" + "【" + type + "】" + "数据：" + "【"+"Id=" + id + "】" + "<br/>");
+
+            StreamWriter sw;
+            if (!File.Exists(fileFullPath))
+            {
+                sw = File.CreateText(fileFullPath);
+            }
+            else
+            {
+                sw = File.AppendText(fileFullPath);
+            }
+            sw.WriteLine(str.ToString());
+            sw.Close();
+        }
         public static TOut TransReflection<TIn, TOut>(TIn tIn)
         {
             TOut tOut = Activator.CreateInstance<TOut>();
