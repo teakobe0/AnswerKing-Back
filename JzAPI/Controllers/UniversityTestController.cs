@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DAL.IDAL;
 using DAL.Model;
 using DAL.Model.Const;
+using JzAPI.tool;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
@@ -20,10 +21,12 @@ namespace JzAPI.Controllers
     public class UniversityTestController : BaseController
     {
         private IUniversityTestDAL _untdal;
+        private IUniversityDAL _undal;
 
-        public UniversityTestController(IUniversityTestDAL untdal)
+        public UniversityTestController(IUniversityTestDAL untdal, IUniversityDAL undal)
         {
             _untdal = untdal;
+            _undal = undal;
         }
         /// <summary>
         /// 新增学校
@@ -45,7 +48,7 @@ namespace JzAPI.Controllers
                     if (universityTest.Id == 0)
                     {
                         universityTest.ClientId = ID;
-                        
+                        //新旧表合并之后，需要改回来
                         //查询添加的学校是否存在
                         //bool name = _untdal.GetName(universityTest.Name,0);
                         //if (name == true)
@@ -72,7 +75,7 @@ namespace JzAPI.Controllers
                     r.Status = RmStatus.Error;
                     r.Msg = "学校名称不能为空";
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -134,10 +137,34 @@ namespace JzAPI.Controllers
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
+            //新旧表合并之后，需要改回来
+            //try
+            //{
+            //    r.Data = _untdal.GetList(name).Take(10);
+
+            //}
             try
             {
-                r.Data = _untdal.GetList(name).Take(10);
-                
+                var test = _untdal.GetList(name).Take(10);
+                //r.Data = _untdal.GetList(name);
+                var ls = _undal.GetList(name).Take(10);
+                List<University> list= new List<University>();
+                if (ls.Count() > 0)
+                {
+                    list = ls.Where(x => x.Name.Trim() == name.Trim()).ToList();
+                    if (list.Count() > 0)
+                    {
+                        r.Data = list;
+                    }
+                }
+                if (test.Count() == 0&& list.Count()==0)
+                {
+                    r.Data = ls;
+                }
+                if(list.Count() == 0 && test.Count() > 0)
+                {
+                    r.Data=test;
+                }
             }
             catch (Exception ex)
             {
@@ -148,7 +175,7 @@ namespace JzAPI.Controllers
         /// <summary>
         /// 根据学校id检索
         /// </summary>
-        /// <param name="classTest"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet]
         [Route("GetUniversityTest")]
@@ -158,6 +185,8 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
+                Mail.SendMail("1183240954@qq.com", 550);
+                
                 r.Data = _untdal.GetUniversityTest(id);
 
             }
@@ -202,5 +231,6 @@ namespace JzAPI.Controllers
             }
             return r;
         }
+
     }
 }

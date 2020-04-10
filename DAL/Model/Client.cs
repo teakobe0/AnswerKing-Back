@@ -16,5 +16,6 @@ namespace DAL.Model
         public string School { get; set; }//学校
         public bool IsDel { get; set; }//是否删除 0：未删除 1：已删除
         public int Inviterid { get; set; }//邀请人id
+        public bool IsValidate { get; set; }//是否验证 0：未验证 1：已验证
     }
 }

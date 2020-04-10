@@ -21,12 +21,16 @@ namespace JzAPI.Controllers
         private IClassInfoTestDAL _citdal;
         private IUniversityTestDAL _utdal;
         private IClientDAL _clientdal;
-        public ClassTestController(IClassTestDAL clatdal, IClassInfoTestDAL citdal, IUniversityTestDAL utdal, IClientDAL clientdal)
+        private IClassDAL _cladal;
+        private IUniversityDAL _udal;
+        public ClassTestController(IClassTestDAL clatdal, IClassInfoTestDAL citdal, IUniversityTestDAL utdal, IClientDAL clientdal, IClassDAL cladal, IUniversityDAL udal)
         {
             _clatdal = clatdal;
             _citdal = citdal;
             _utdal = utdal;
             _clientdal = clientdal;
+            _cladal = cladal;
+            _udal = udal;
         }
 
         /// <summary>
@@ -37,14 +41,50 @@ namespace JzAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("ClassTests")]
-        public ResultModel ClassTests(int universityTestId, string name)
+        public ResultModel ClassTests(int universityTestId, int universityId, string name)
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
+            //新旧表合并之后，需要改回来
+            //try
+            //{
+            //    r.Data = _clatdal.GetList(universityTestId, name).Take(10);
+
+            //}
+            //根据旧库学校id,查询当前课程
             try
             {
-                r.Data = _clatdal.GetList(universityTestId, name).Take(10);
-
+                List<ClassTest> ctls = new List<ClassTest>();
+                List<Class> cls = new List<Class>();
+                if (universityTestId != 0)
+                {
+                    ctls = _clatdal.GetList(universityTestId, name).Take(10).ToList();
+                }
+                if (universityId == 0)
+                {
+                    string universityname = _utdal.GetUniversityTest(universityTestId).Name;
+                    universityId = _udal.Getbyname(universityname);
+                }
+                if (universityId != 0)
+                {
+                    var ls = _cladal.GetList(universityId, name).Take(10);
+                    if (ls.Count() > 0)
+                    {
+                        cls = ls.Where(x => x.Name.Trim() == name.Trim()).ToList();
+                        if(cls.Count() > 0)
+                        {
+                            r.Data = cls;
+                        }
+                    }
+                }
+                if (ctls.Count() == 0 && cls.Count() == 0)
+                {
+                    r.Data = _cladal.GetList(universityId, name).Take(10);
+                }
+                if (cls.Count() == 0 && ctls.Count() > 0)
+                {
+                    r.Data = ctls;
+                }
             }
             catch (Exception ex)
             {
@@ -52,6 +92,7 @@ namespace JzAPI.Controllers
             }
             return r;
         }
+       
         /// <summary>
         /// 新增课程
         /// </summary>
@@ -72,7 +113,7 @@ namespace JzAPI.Controllers
                 classTest.ClientId = ID;
                 if (!string.IsNullOrEmpty(classTest.Name))
                 {
-                   
+
                     if (classTest.Id == 0)
                     {
                         //查询添加的课程是否存在
@@ -96,7 +137,7 @@ namespace JzAPI.Controllers
                 }
                 //生成订单
                 if (r.Msg == null)
-                 {
+                {
                     cit = new ClassInfoTest();
                     cit.ClassTestId = classTest.Id;
                     cit.ClientId = classTest.ClientId;

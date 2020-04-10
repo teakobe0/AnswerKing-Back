@@ -74,6 +74,36 @@ namespace JzAPI.tool
                 throw e;
             }
         }
+        /// <summary>
+        /// 发邮件验证邮箱
+        /// </summary>
+        /// <param name="sendTo"></param>
+        /// <param name="id"></param>
+        public static void SendMail(string sendTo, int id)
+        {
+            string path = AppConfig.Configuration["emailurl"];
+            IClientProfile profile = DefaultProfile.GetProfile("cn-hangzhou", "y477o7DhqDXNWdLm", "KQXXPABKIW8hVN5IdVAp7FtnqFTkiy");
+            IAcsClient client = new DefaultAcsClient(profile);
+            SingleSendMailRequest request = new SingleSendMailRequest();
+            try
+            {
+
+                request.AccountName = "info@coursewhale.com";
+                request.FromAlias = "CourseWhale";
+                request.AddressType = 1;
+                //request.TagName = "控制台创建的标签";
+                request.ReplyToAddress = true;
+                request.ToAddress = sendTo;
+                request.Subject = "CourseWhale--邮箱验证通知";
+                var Encrypt = DES.Encode(id.ToString() + "&" + DateTime.Now.ToString());
+                request.HtmlBody = "亲爱的用户:<br/><br/>您好!感谢您注册CourseWhale网站，邮箱验证成功后，您可以获得7天VIP会员，点击链接<a href=" + path + "?key=" + Encrypt + ">完成邮箱验证</a>。<br/><br/>CourseWhale账号中心<br/>" + DateTime.Now.ToString();
+                SingleSendMailResponse httpResponse = client.GetAcsResponse(request);
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
     }
 }
 

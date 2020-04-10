@@ -161,6 +161,30 @@ namespace DAL.DAL
             _context.SaveChanges();
             return client;
         }
+        /// <summary>
+        /// 修改用户为7天vip
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
+        public Client ChangeVip(int clientid, out string errmsg)
+        {
+            errmsg = "";
+            var client = _context.Client.FirstOrDefault(x => x.Id == clientid);
+            if(client.IsValidate==false)
+            {
+                client.Role = C_Role.vip;
+                client.IsValidate = true;
+                client.EffectiveDate = client.EffectiveDate == DateTime.MinValue ? DateTime.Now.AddDays(7) : client.EffectiveDate.AddDays(7);
+                _context.SaveChanges();
+               
+            }
+            else
+            {
+                errmsg = "该邮箱已经验证过，不能重复验证。";
+                client = null;
+            }
+            return client;
+        }
 
         /// <summary>
         /// 查询列表全部数据

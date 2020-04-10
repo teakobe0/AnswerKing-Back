@@ -105,5 +105,11 @@ namespace DAL.IDAL
         /// <param name="client"></param>
         /// <returns></returns>
         int SaveImg(int ID, string url);
+        /// <summary>
+        /// 修改用户为7天vip
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
+        Client ChangeVip(int clientid, out string errmsg);
     }
 }

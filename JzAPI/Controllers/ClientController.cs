@@ -85,12 +85,14 @@ namespace JzAPI.Controllers
                         param.configuration = _configuration;
 
                         r.Data = getToken(param);
+                        Mail.SendMail(client.Email, client.Id);
                     }
                     else
                     {
                         r.Data = 0;
                         r.Status = RmStatus.Error;
                     }
+
                 }
                 else
                 {
@@ -112,7 +114,7 @@ namespace JzAPI.Controllers
         [HttpPost]
         [Route("Login")]
         public ResultModel Login([FromBody] TokenRequest request)
-         {
+        {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             //登录错误返回msg
@@ -123,9 +125,9 @@ namespace JzAPI.Controllers
 
             if (client != null)
             {
-                if (client.Role=="vip"&& client.EffectiveDate < DateTime.Now)
+                if (client.Role == "vip" && client.EffectiveDate < DateTime.Now)
                 {
-                   client = _clidal.ChangeEffectiveDate(client.Id);
+                    client = _clidal.ChangeEffectiveDate(client.Id);
                 }
                 TokenParam param = new TokenParam();
                 param.Id = client.Id;
@@ -272,12 +274,9 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _clidal.GetClientById(ID);
-                if (r.Data == null)
-                {
-                    r.Status = RmStatus.Error;
-                    r.Msg = "查询失败";
-                }
+                var client = _clidal.GetClientById(ID);
+                client.Image = AppConfig.Configuration["imgurl"] + client.Image;
+                r.Data = client;
             }
             catch (Exception ex)
             {
@@ -395,11 +394,11 @@ namespace JzAPI.Controllers
                             formFile.CopyTo(stream);
                         }
                         string cropimg = "/clientImg/" + filename.Replace(".", "_small.");
-                        bool isCompress = IMGHelper.CompressImage(AppConfig.Configuration["imgurl"] + "/clientImg/" + filename, AppConfig.Configuration["imgurl"] + cropimg);
+                        bool isCompress = IMGHelper.CompressImage(AppConfig.Configuration["uploadurl"] + "/clientImg/" + filename, AppConfig.Configuration["uploadurl"] + cropimg);
                         if (isCompress)
                         {
                             _clidal.SaveImg(ID, cropimg);
-                            r.Data = cropimg;
+                            r.Data = AppConfig.Configuration["imgurl"] + cropimg;
                         }
                     }
                     catch (IOException e)
@@ -414,7 +413,7 @@ namespace JzAPI.Controllers
 
         private string CheckDirectory()
         {
-            string url = AppConfig.Configuration["imgurl"];
+            string url = AppConfig.Configuration["uploadurl"];
             var filePath = Path.Combine(url, "clientImg");
             if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
             return filePath;
@@ -454,7 +453,7 @@ namespace JzAPI.Controllers
                     ls.Add(ac);
                 }
                 //关注
-                var focusls = _focusdal.GetListByClientid(Clientid,true);
+                var focusls = _focusdal.GetListByClientid(Clientid, true);
                 foreach (var i in focusls)
                 {
                     ac = new actioninfo();
@@ -512,12 +511,75 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _clidal.GetClientById(id);
-                if (r.Data == null)
+                var client = _clidal.GetClientById(id);
+                if (client.Role != "bot")
                 {
-                    r.Status = RmStatus.Error;
-                    r.Msg = "查询失败";
+                    client.Image = AppConfig.Configuration["imgurl"] + client.Image;
                 }
+                r.Data = client;
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 完成验证
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("FinishValidate")]
+        public ResultModel FinishValidate(string key)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            var decrip = DES.Decode(key);
+            string[] array = decrip.Split("&");
+            int clientid = int.Parse(array[0]);
+            try
+            {
+                //更改用户为7天vip
+                string msg = "";
+                var client = _clidal.ChangeVip(clientid, out msg);
+                if (client != null)
+                {
+                    TokenParam param = new TokenParam();
+                    param.Id = client.Id;
+                    param.Username = client.Email;
+                    param.Role = client.Role;
+                    param.configuration = _configuration;
+
+                    r.Data = getToken(param);
+                }
+                else
+                {
+
+                    r.Status = RmStatus.Error;
+                    r.Msg = msg;
+                }
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 发邮件
+        /// </summary>
+        /// <returns></returns>
+        [Authorize(Roles = C_Role.all)]
+        [HttpPost]
+        [Route("SendEmail")]
+        public ResultModel SendEmail()
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                Mail.SendMail(Email, ID);
 
             }
             catch (Exception ex)

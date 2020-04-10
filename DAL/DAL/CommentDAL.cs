@@ -66,7 +66,7 @@ namespace DAL.DAL
                     cv = Utils.TransReflection<Comment, Comment_v>(item);
                     var model = _context.Client.FirstOrDefault(x => x.Id == item.ClientId);
                     cv.name = model.Name;
-                    cv.img = model.Image;
+                    cv.img = model.Image==null?null: AppConfig.Configuration["imgurl"] + model.Image;
                     ls.Add(cv);
                    
                     var son = list.Where(x => x.ParentId.Contains("," + item.Id) && x.ParentId.Substring(x.ParentId.LastIndexOf(",") + 1) == item.Id.ToString());
@@ -76,10 +76,10 @@ namespace DAL.DAL
                         cv = Utils.TransReflection<Comment, Comment_v>(ea);
                         var reply = _context.Client.FirstOrDefault(x => x.Id == ea.ClientId);
                         cv.replyname = reply.Name;
-                        cv.replyimg = reply.Image;
+                        cv.replyimg = reply.Image==null?null:AppConfig.Configuration["imgurl"]+reply.Image;
                         var breply = _context.Client.FirstOrDefault(x => x.Id == item.ClientId);
                         cv.name = breply.Name;
-                        cv.img = breply.Image;
+                        cv.img = breply.Image==null?null: AppConfig.Configuration["imgurl"]+ breply.Image;
                         ls.Add(cv);
                         var sonreply = list.Where(x => x.ParentId.Contains("," + ea.Id + ",") ||
                          (x.ParentId.Contains("," + ea.Id) && x.ParentId.Substring(x.ParentId.LastIndexOf(",") + 1) == ea.Id.ToString()));
@@ -89,11 +89,11 @@ namespace DAL.DAL
                             cv = Utils.TransReflection<Comment, Comment_v>(cc);
                             var re = _context.Client.FirstOrDefault(x => x.Id == cc.ClientId);
                             cv.replyname =re.Name;
-                            cv.replyimg = re.Image;
+                            cv.replyimg =re.Image==null?null: AppConfig.Configuration["imgurl"]+ re.Image;
                             int cid = _context.Comment.FirstOrDefault(x => x.Id == int.Parse(cc.ParentId.Substring(cc.ParentId.LastIndexOf(",") + 1))).ClientId;
                             var b = _context.Client.FirstOrDefault(x => x.Id == cid);
                             cv.name =b .Name;
-                            cv.img = b.Image;
+                            cv.img = b.Image==null?null:AppConfig.Configuration["imgurl"]+ b.Image;
                             ls.Add(cv);
                         }
                     }

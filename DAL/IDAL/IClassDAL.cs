@@ -101,5 +101,12 @@ namespace DAL.IDAL
         /// </summary>
         /// <returns></returns> 
         List<Class> GetClasses(int universityid);
+        /// <summary>
+        /// 根据条件检索
+        /// </summary>
+        /// <param name="universityId"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        List<Class> GetList(int universityId, string name);
     }
 }

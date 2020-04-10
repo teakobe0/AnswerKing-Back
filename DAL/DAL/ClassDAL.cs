@@ -276,5 +276,29 @@ namespace DAL.DAL
             }
             return _context.SaveChanges();
         }
+        /// <summary>
+        /// 根据条件检索
+        /// </summary>
+        /// <param name="universityId"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public List<Class> GetList(int universityId, string name)
+        {
+            var list = GetListData();
+            if (universityId != 0)
+            {
+                list = list.Where(x => x.UniversityId == universityId);
+                if (!string.IsNullOrEmpty(name))
+                {
+                    list = list.Where(x => x.Name.Trim().Contains(name.Trim()));
+                }
+            }
+            else
+            {
+                return null;
+            }
+            return list.ToList();
+
+        }
     }
 }
