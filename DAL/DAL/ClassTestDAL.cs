@@ -35,6 +35,7 @@ namespace DAL.DAL
         public ClassTest Add(ClassTest cla)
         {
             cla.CreateTime = DateTime.Now;
+            cla.UniversityTest = _context.UniversityTest.FirstOrDefault(x => x.Id == cla.UniversityTestId).Name;
             _context.ClassTest.Add(cla);
             _context.SaveChanges();
             return cla;
@@ -61,6 +62,15 @@ namespace DAL.DAL
                 ClassTest ct = _context.ClassTest.FirstOrDefault(x => x.Id == id);
                 ct.IsDel = true;
                 _context.ClassTest.Update(ct);
+                //删除这个课下面的题库集
+                var cit = _context.ClassInfoTest.Where(x => x.ClassTestId == id);
+                if (cit.Count() > 0)
+                {
+                    foreach (var i in cit)
+                    {
+                        i.IsDel = true;
+                    }
+                }
                 return _context.SaveChanges();
             }
             return 0;
@@ -132,61 +142,20 @@ namespace DAL.DAL
             }
             return list;
         }
-       /// <summary>
-       /// 根据课程名称检索
-       /// </summary>
-       /// <param name="name"></param>
-       /// <param name="status"></param>
-       /// <param name="pagenum"></param>
-       /// <param name="pagesize"></param>
-       /// <param name="PageTotal"></param>
-       /// <returns></returns>
-        public object GetListbyname(string name,  int pagenum, int pagesize, out int PageTotal)
+        /// <summary>
+        /// 根据课程名称检索
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public List<ClassTest> GetListbyname(string name)
         {
-            PageTotal = 0;
+           
             var ls = GetListData();
             if (!string.IsNullOrEmpty(name))
             {
                 ls = ls.Where(x => x.Name.Trim().Contains(name.Trim()));
             }
-            var list = from x in ls
-                       select new
-                       {
-                           x.Id,
-                           x.Name,
-                           x.ClientId,
-                           universityTest = _context.UniversityTest.FirstOrDefault(z => z.Id == x.UniversityTestId) != null ? _context.UniversityTest.FirstOrDefault(z => z.Id == x.UniversityTestId).Name : "",
-                           x.Professor,
-                           x.IsAudit,
-                           x.UniversityTestId
-                       };
-
-            PageTotal = list.Count();
-            list = list.Skip(pagesize * (pagenum - 1)).Take(pagesize).OrderBy(x => x.Id);
-            return list.ToList();
-        }
-        /// <summary>
-        /// 查询列表 带条件
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public object GetData()
-        {
-            var ls = GetListData();
-           
-            var list = from x in ls
-                       select new
-                       {
-                           x.Id,
-                           x.Name,
-                           x.ClientId,
-                           universityTest = _context.UniversityTest.FirstOrDefault(z => z.Id == x.UniversityTestId) != null ? _context.UniversityTest.FirstOrDefault(z => z.Id == x.UniversityTestId).Name : "",
-                           x.Professor,
-                           x.IsAudit,
-                           x.UniversityTestId
-                       };
-            list = list.OrderBy(x => x.Id);
-            return list.ToList();
+            return ls.ToList();
         }
         /// <summary>
         /// 获取当前导入数据的最大id

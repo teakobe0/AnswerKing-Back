@@ -92,6 +92,27 @@ namespace DAL.DAL
             
         }
         /// <summary>
+        /// 删除图片
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="img"></param>
+        /// <returns></returns>
+        public int DelImg(int id, string img)
+        {
+            var u = _context.UniversityTest.FirstOrDefault(x => x.Id == id);
+            if (u.Image != null && u.Image != "")
+            {
+
+                u.Image = u.Image.Replace(img, "");
+                return _context.SaveChanges();
+            }
+            else
+            {
+                return 0;
+            }
+
+        }
+        /// <summary>
         /// 编辑学校
         /// </summary>
         /// <param name="cla"></param>
@@ -113,6 +134,15 @@ namespace DAL.DAL
                 UniversityTest ut = _context.UniversityTest.FirstOrDefault(x => x.Id == id);
                 ut.IsDel = true;
                 _context.UniversityTest.Update(ut);
+                //删除这个学校下面的课
+                var clas = _context.ClassTest.Where(x => x.UniversityTestId == id);
+                if (clas.Count() > 0)
+                {
+                    foreach (var i in clas)
+                    {
+                        i.IsDel = true;
+                    }
+                }
                 return _context.SaveChanges();
             }
             return 0;

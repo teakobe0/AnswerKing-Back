@@ -55,14 +55,14 @@ namespace DAL.DAL
                 if (inviter != null)
                 {
                     inviter.Role = C_Role.vip;
-                    inviter.EffectiveDate = inviter.EffectiveDate==DateTime.MinValue? DateTime.Now.AddDays(7): inviter.EffectiveDate.AddDays(7);
+                    inviter.EffectiveDate = inviter.EffectiveDate == DateTime.MinValue ? DateTime.Now.AddDays(7) : inviter.EffectiveDate.AddDays(7);
                 }
             }
             else
             {
                 client.Role = C_Role.guest;
             }
-            client.Name = "ak_" +  DateTimeToUnixTimestamp(client.CreateTime);
+            client.Name = "ak_" + DateTimeToUnixTimestamp(client.CreateTime);
             _context.Client.Add(client);
             return _context.SaveChanges();
 
@@ -78,7 +78,7 @@ namespace DAL.DAL
         /// </summary>
         /// <param name="client"></param>
         /// <returns></returns>
-        public int SaveImg(int ID,string url)
+        public int SaveImg(int ID, string url)
         {
             var client = _context.Client.FirstOrDefault(x => x.Id == ID);
             client.Image = url;
@@ -101,7 +101,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public Client GetClientByEmail(string email)
         {
-            return _context.Client.FirstOrDefault(x => x.Email==email);
+            return _context.Client.FirstOrDefault(x => x.Email == email);
         }
         /// <summary>
         /// 查询真实客户列表 根据条件
@@ -141,10 +141,10 @@ namespace DAL.DAL
         /// </summary>
         /// <param name="clientid"></param>
         /// <returns></returns>
-        public int ChangeEffectiveDate(int clientid,DateTime date)
+        public int ChangeEffectiveDate(int clientid, DateTime date)
         {
             var client = _context.Client.FirstOrDefault(x => x.Id == clientid);
-            client.Role =C_Role.vip;
+            client.Role = C_Role.vip;
             client.EffectiveDate = date;
             return _context.SaveChanges();
         }
@@ -170,13 +170,13 @@ namespace DAL.DAL
         {
             errmsg = "";
             var client = _context.Client.FirstOrDefault(x => x.Id == clientid);
-            if(client.IsValidate==false)
+            if (client.IsValidate == false)
             {
                 client.Role = C_Role.vip;
                 client.IsValidate = true;
                 client.EffectiveDate = client.EffectiveDate == DateTime.MinValue ? DateTime.Now.AddDays(7) : client.EffectiveDate.AddDays(7);
                 _context.SaveChanges();
-               
+
             }
             else
             {
@@ -280,7 +280,34 @@ namespace DAL.DAL
             }
             return 0;
         }
-
+        /// <summary>
+        /// 积分兑换
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Client Exchange(int clientid, out string errmsg)
+        {
+            errmsg = "";
+            var client = _context.Client.FirstOrDefault(x => x.Id == clientid);
+            int integral = int.Parse(AppConfig.Configuration["Integral"].Split(":")[0]);
+            if (client.Integral < integral)
+            {
+                errmsg = "积分不足，不能兑换.";
+                return null;
+            }
+            client.Integral -= integral;
+            client.EffectiveDate = client.EffectiveDate == DateTime.MinValue ? DateTime.Now.AddMonths(1) : client.EffectiveDate.AddMonths(1);
+            client.Role = C_Role.vip;
+            //积分记录表
+            IntegralRecords ir = new IntegralRecords();
+            ir.ClientId = client.Id;
+            ir.Integral = integral;
+            ir.Source = "积分兑换";
+            ir.CreateTime = DateTime.Now;
+            _context.IntegralRecords.Add(ir);
+            _context.SaveChanges();
+            return client;
+        }
     }
 }
 

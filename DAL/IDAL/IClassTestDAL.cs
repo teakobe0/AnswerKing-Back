@@ -58,18 +58,8 @@ namespace DAL.IDAL
         /// 根据课程名称检索
         /// </summary>
         /// <param name="name"></param>
-        /// <param name="status"></param>
-        /// <param name="pagenum"></param>
-        /// <param name="pagesize"></param>
-        /// <param name="PageTotal"></param>
         /// <returns></returns>
-        object GetListbyname(string name, int pagenum, int pagesize, out int PageTotal);
-        /// <summary>
-        /// 查询列表 带条件
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        object GetData();
+        List<ClassTest> GetListbyname(string name);
         /// <summary>
         /// 获取当前导入数据的最大id
         /// </summary>

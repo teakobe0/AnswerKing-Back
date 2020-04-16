@@ -43,14 +43,17 @@ namespace DAL.Tools
             /// </summary>
             NoCreate = 0,
             /// <summary>
-            /// 待审核
+            /// 全新未审核
             /// </summary>
             NoAudit = 1,
             /// <summary>
             /// 已审核
             /// </summary>
-            Audited = 2
-
+            Audited = 2,
+            /// <summary>
+            /// 修改未审核
+            /// </summary>
+            Edit = 3
         }
     }
 }

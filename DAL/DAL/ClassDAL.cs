@@ -170,6 +170,15 @@ namespace DAL.DAL
                 Utils.WriteInfoLog("Class:Delete" + cla.ToJson());
                 cla.IsDel = true;
                 _context.Class.Update(cla);
+                //删除这个课下面的题库集
+                var ci = _context.ClassInfo.Where(x => x.ClassId == id);
+                if (ci.Count() > 0)
+                {
+                    foreach (var i in ci)
+                    {
+                        i.IsDel = true;
+                    }
+                }
                 return _context.SaveChanges();
             }
             return 0;

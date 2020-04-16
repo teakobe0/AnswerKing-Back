@@ -37,5 +37,6 @@ namespace DAL
         public DbSet<Question> Question { get; set; }
         public DbSet<Bidding> Bidding { get; set; }
         public DbSet<Answer> Answer { get; set; }
+        public DbSet<IntegralRecords> IntegralRecords { get; set; }
     }
 }

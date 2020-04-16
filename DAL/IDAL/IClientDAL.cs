@@ -111,5 +111,11 @@ namespace DAL.IDAL
         /// <param name="clientid"></param>
         /// <returns></returns>
         Client ChangeVip(int clientid, out string errmsg);
+        /// <summary>
+        /// 积分兑换
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Client Exchange(int clientid, out string errmsg);
     }
 }

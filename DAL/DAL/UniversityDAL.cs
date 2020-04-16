@@ -172,6 +172,15 @@ namespace DAL.DAL
                 Utils.WriteInfoLog("University:Delete" + university.ToJson());
                 university.IsDel = true;
                 _context.University.Update(university);
+                //删除这个学校下面的课
+                var clas = _context.Class.Where(x => x.UniversityId == id);
+                if (clas.Count() > 0)
+                {
+                    foreach(var i in clas)
+                    {
+                        i.IsDel = true;
+                    }
+                }
                 return _context.SaveChanges();
             }
             return 0;

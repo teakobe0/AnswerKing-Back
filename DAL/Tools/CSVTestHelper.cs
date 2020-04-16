@@ -77,8 +77,8 @@ namespace DAL.Tools
         }
         public static DataTable OpenCSV(CsvType CsvType)
         {
-            string fileName = System.IO.Path.GetFullPath("wwwroot/data/" + DateTime.Now.ToString("yyyy-MM-dd") + "\\" + CsvType.ToString() + ".csv");
-            //string file= "C:/Users/admin/Desktop/akht/AK/Admin/wwwroot/data\\" + DateTime.Now.ToString("yyyy-MM-dd") + "\\" + CsvType.ToString() + ".csv";
+            string fileName = System.IO.Path.GetFullPath("wwwroot/datatest/" + DateTime.Now.ToString("yyyy-MM-dd") + "\\" + CsvType.ToString() + ".csv");
+         
             DataTable dt = new DataTable();
             FileStream fs = new FileStream(fileName, System.IO.FileMode.Open, System.IO.FileAccess.Read);
             StreamReader sr = new StreamReader(fs, System.Text.Encoding.Default);

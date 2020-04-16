@@ -31,7 +31,8 @@ namespace JzAPI.Controllers
         private IClassInfoDAL _clindal;
         private IUseRecordsDAL _urdal;
         private IClassDAL _clasdal;
-        public ClientController(IClientDAL clidal, IConfiguration configuration, IHostingEnvironment environment, IFocusDAL focusdal, ICommentDAL comdal, IClassInfoDAL clindal, IUseRecordsDAL urdal, IClassDAL clasdal)
+        private IIntegralRecordsDAL _irdal;
+        public ClientController(IClientDAL clidal, IConfiguration configuration, IHostingEnvironment environment, IFocusDAL focusdal, ICommentDAL comdal, IClassInfoDAL clindal, IUseRecordsDAL urdal, IClassDAL clasdal, IIntegralRecordsDAL irdal)
         {
             _configuration = configuration;
             _clidal = clidal;
@@ -41,6 +42,7 @@ namespace JzAPI.Controllers
             _clindal = clindal;
             _urdal = urdal;
             _clasdal = clasdal;
+            _irdal = irdal;
         }
         /// <summary>
         /// 注册
@@ -570,9 +572,9 @@ namespace JzAPI.Controllers
         /// 发邮件
         /// </summary>
         /// <returns></returns>
-        [Authorize(Roles = C_Role.all)]
         [HttpPost]
         [Route("SendEmail")]
+        [Authorize(Roles = C_Role.all)]
         public ResultModel SendEmail()
         {
             ResultModel r = new ResultModel();
@@ -587,6 +589,82 @@ namespace JzAPI.Controllers
                 r.Status = RmStatus.Error;
             }
             return r;
+        }
+        /// <summary>
+        /// 根据客户id检索积分列表
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("IntegralList")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel IntegralList()
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                r.Data = _irdal.GetList(ID);
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 查询兑换比例
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("GetExchange")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel GetExchange()
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            string integral = AppConfig.Configuration["Integral"];
+            r.Data = integral;
+            return r;
+        }
+      
+        /// <summary>
+        /// 积分兑换
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("IntegralExchange")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel IntegralExchange()
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                string msg = "";
+                var client = _clidal.Exchange(ID,out msg);
+                if (client != null)
+                {
+                    TokenParam param = new TokenParam();
+                    param.Id = client.Id;
+                    param.Username = client.Email;
+                    param.Role = client.Role;
+                    param.configuration = _configuration;
+
+                    r.Data = getToken(param);
+                }
+                else
+                {
+
+                    r.Status = RmStatus.Error;
+                    r.Msg = msg;
+                }
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+
         }
     }
 }

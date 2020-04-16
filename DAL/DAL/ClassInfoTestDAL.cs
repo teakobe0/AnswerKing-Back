@@ -1,5 +1,6 @@
 ﻿using DAL.IDAL;
 using DAL.Model;
+using DAL.Model.Const;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -96,7 +97,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public ClassInfoTest GetClassInfoTest(int clientid, int classtestid)
         {
-            return _context.ClassInfoTest.FirstOrDefault(x => x.IsDel==false&&x.ClientId == clientid && x.ClassTestId == classtestid);
+            return _context.ClassInfoTest.FirstOrDefault(x => x.IsDel == false && x.ClientId == clientid && x.ClassTestId == classtestid);
         }
         /// <summary>
         /// 根据客户id检索课程资料
@@ -138,6 +139,19 @@ namespace DAL.DAL
         public int Audit(ClassInfoTest classInfoTest)
         {
             var cit = _context.ClassInfoTest.FirstOrDefault(x => x.Id == classInfoTest.Id);
+            if (cit.Status != (int)classInfoTestStatus.Edit)
+            {
+                //添加积分
+                var client = _context.Client.FirstOrDefault(x => x.Id == classInfoTest.ClientId);
+                client.Integral += Integral.addcontent;
+                //积分记录表
+                IntegralRecords ir = new IntegralRecords();
+                ir.ClientId = client.Id;
+                ir.Integral = Integral.addcontent;
+                ir.Source = "贡献资源";
+                ir.CreateTime = DateTime.Now;
+                _context.IntegralRecords.Add(ir);
+            }
             cit.Status = (int)classInfoTestStatus.Audited;
             return _context.SaveChanges();
         }

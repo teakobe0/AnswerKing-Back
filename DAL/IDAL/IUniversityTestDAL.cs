@@ -41,6 +41,13 @@ namespace DAL.IDAL
         /// <param name="id"></param>
         /// <returns></returns>
         int Del(int id);
+        /// <summary>
+        /// 删除图片
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="img"></param>
+        /// <returns></returns>
+        int DelImg(int id, string img);
        /// <summary>
        /// 根据学校名称检索
        /// </summary>

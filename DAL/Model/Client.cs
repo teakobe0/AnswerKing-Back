@@ -6,9 +6,9 @@ using System.Text;
 
 namespace DAL.Model
 {
-    public class Client:BaseUser
+    public class Client : BaseUser
     {
-        
+
         public string Sex { get; set; }//性别
         public DateTime Birthday { get; set; }//生日
         public DateTime EffectiveDate { get; set; }//有效期
@@ -17,5 +17,6 @@ namespace DAL.Model
         public bool IsDel { get; set; }//是否删除 0：未删除 1：已删除
         public int Inviterid { get; set; }//邀请人id
         public bool IsValidate { get; set; }//是否验证 0：未验证 1：已验证
+        public int Integral { get; set; } //积分
     }
 }

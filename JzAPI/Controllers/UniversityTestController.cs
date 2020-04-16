@@ -185,8 +185,7 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                Mail.SendMail("1183240954@qq.com", 550);
-                
+               
                 r.Data = _untdal.GetUniversityTest(id);
 
             }

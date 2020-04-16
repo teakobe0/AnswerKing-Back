@@ -11,19 +11,19 @@ namespace DAL.Sql
     {
         private SqlConnection conn;
         string path = AppConfig.Configuration["sql"];
-        public DataTable GetList(string table,int maxid)
+        public DataTable GetList(string table,int maxid,int type)
         {
             conn = new SqlConnection(path);
             conn.Open();
             string sql = "";
-            if (maxid != 0)
+           
+            if (type != 0)
             {
-                sql = " select * from " + table + " where id> " + maxid + "and ClassId!=-99 and CwtParentId!=0 order by id";
-
+                sql = " select * from " + table + " where id> " + maxid + "and ClassId!=-99 and CwtParentId!=0 and Url is not null and Url !=''and Status=0 order by id";
             }
             else
             {
-                sql = "select  * from " + table + " order by id";
+                sql = "select  * from " + table + " where id> " + maxid + " order by id";
 
             }
             SqlCommand command = new SqlCommand(sql, conn);

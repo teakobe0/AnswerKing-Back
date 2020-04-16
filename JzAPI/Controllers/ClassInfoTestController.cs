@@ -162,6 +162,7 @@ namespace JzAPI.Controllers
                     actioninfo.id = i.Id;
                     actioninfo.name = i.Name;
                     actioninfo.type = "学校";
+                    actioninfo.status = i.IsAudit==false?0:1;
                     actioninfo.CreateTime = i.CreateTime;
                     list.Add(actioninfo);
                 }
@@ -174,6 +175,7 @@ namespace JzAPI.Controllers
                     actioninfo.id = t.Id;
                     actioninfo.name = t.Name;
                     actioninfo.type = "课程";
+                    actioninfo.status = t.IsAudit == false ? 0 : 1;
                     actioninfo.CreateTime = t.CreateTime;
                     list.Add(actioninfo);
                 }
@@ -185,6 +187,7 @@ namespace JzAPI.Controllers
                     actioninfo.id = e.Id;
                     actioninfo.name = e.Name;
                     actioninfo.type = "题库集";
+                    actioninfo.status = e.Status;
                     actioninfo.CreateTime = e.CreateTime;
                     list.Add(actioninfo);
                 }
@@ -202,6 +205,8 @@ namespace JzAPI.Controllers
             public string name { get; set; }//项目名称
             public string type { get; set; }//类别 
             public DateTime CreateTime { get; set; }//创建时间
+            public int status { get; set; }//状态
+
         }
         /// <summary>
         /// 更改题库集状态
