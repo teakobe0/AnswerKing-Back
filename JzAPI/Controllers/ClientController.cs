@@ -537,11 +537,11 @@ namespace JzAPI.Controllers
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
-            var decrip = DES.Decode(key);
-            string[] array = decrip.Split("&");
-            int clientid = int.Parse(array[0]);
             try
             {
+                var decrip = DES.Decode(key);
+                string[] array = decrip.Split("&");
+                int clientid = int.Parse(array[0]);
                 //更改用户为7天vip
                 string msg = "";
                 var client = _clidal.ChangeVip(clientid, out msg);

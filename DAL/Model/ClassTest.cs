@@ -34,6 +34,7 @@ namespace DAL.Model
         public string Name { get; set; } //标题
         public int ClientId { get; set; }//客户id
         public int ClassTestId { get; set; }//课程id
+        public int Grade { get; set; } //得分
         public int Use { get; set; } //有用
         public int NoUse { get; set; }//没用
         public bool IsDel { get; set; }//是否删除 0：未删除 1：已删除
@@ -52,9 +53,9 @@ namespace DAL.Model
         public int ClassInfoTestId { get; set; }//课程资料id
         public int UniversityTestId { get; set; }//学校id
         public int ClientId { get; set; }//客户id
+        public int Grade { get; set; } //得分
         public bool IsAudit { get; set; }//是否审核 0：未审核，1：已审核
         public bool IsDel { get; set; }//是否删除 0：未删除 1：已删除
-      
     }
 }
 

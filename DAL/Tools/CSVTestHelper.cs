@@ -81,7 +81,7 @@ namespace DAL.Tools
          
             DataTable dt = new DataTable();
             FileStream fs = new FileStream(fileName, System.IO.FileMode.Open, System.IO.FileAccess.Read);
-            StreamReader sr = new StreamReader(fs, System.Text.Encoding.Default);
+            StreamReader sr = new StreamReader(fs, System.Text.Encoding.GetEncoding("GB2312"));
             //记录每次读取的一行记录
             string strLine = "";
             //记录每行记录中的各字段内容
