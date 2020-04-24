@@ -65,7 +65,7 @@ namespace DAL.IDAL
         /// <param name="pagesize"></param>
         /// <param name="PageTotal"></param>
         /// <returns></returns>
-        object GetListbycinid(int classinfotestid, int status, int pagenum, int pagesize, out int PageTotal);
+        List<ClassInfoContentTest> GetListbycinid(int classinfotestid, int status, int pagenum, int pagesize, out int PageTotal);
         /// <summary>
         /// 审核、取消审核
         /// </summary>

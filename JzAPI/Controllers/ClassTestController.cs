@@ -50,7 +50,7 @@ namespace JzAPI.Controllers
             {
                 List<cinfo> ls = new List<cinfo>();
                 cinfo c = null;
-                var query = _clatdal.GetList(name);
+                var query = _clatdal.GetList(name).Where(x=>x.IsAudit==true);
                 var model = query.Skip(pagesize * (pagenum - 1)).Take(pagesize).ToList();
                 foreach (var item in model)
                 {
@@ -92,7 +92,7 @@ namespace JzAPI.Controllers
             {
                 List<cinfo> ls = new List<cinfo>();
                 cinfo info = null;
-                var cla = _clatdal.GetList(universityid, alif, name);
+                var cla = _clatdal.GetList(universityid, alif, name).Where(x=>x.IsAudit==true);
                 foreach (var item in cla)
                 {
                     info = new cinfo();
@@ -122,7 +122,7 @@ namespace JzAPI.Controllers
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
-            //新旧表合并之后，需要改回来
+            //新旧表合并之后，需要改回来,需要的是已审核的数据
             //try
             //{
             //    r.Data = _clatdal.GetList(universityTestId, name).Take(10);

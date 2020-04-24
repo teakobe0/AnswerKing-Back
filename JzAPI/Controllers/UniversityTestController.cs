@@ -49,7 +49,7 @@ namespace JzAPI.Controllers
 
             try
             {
-                var queryList = _untdal.GetList(name);
+                var queryList = _untdal.GetList(name).Where(x=>x.IsAudit==true);
                 page.Data = queryList.Skip(pagesize * (pagenum - 1)).Take(pagesize).ToList();
                 page.PageTotal = queryList.Count();
                 r.Data = page;
@@ -169,7 +169,7 @@ namespace JzAPI.Controllers
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
-            //新旧表合并之后，需要改回来
+            //新旧表合并之后，需要改回来,展示的是已审核的数据
             //try
             //{
             //    r.Data = _untdal.GetList(name).Take(10);

@@ -37,7 +37,7 @@ namespace DAL.DAL
 
         private IQueryable<ClassInfoContentTest> GetListData()
         {
-            return _context.ClassInfoContentTest.Where(x => x.IsDel == false && x.IsAudit == true);
+            return _context.ClassInfoContentTest.Where(x => x.IsDel == false );
         }
         /// <summary>
         /// 新增
@@ -84,7 +84,7 @@ namespace DAL.DAL
         public List<ClassInfoContentTest> Types(int classInfoId, int weekName)
         {
 
-            var list = GetListData().Where(x => x.ClassInfoTestId == classInfoId && x.ClassWeek == weekName).OrderBy(x => x.Id);
+            var list = GetListData().Where(x =>x.IsAudit==true&& x.ClassInfoTestId == classInfoId && x.ClassWeek == weekName).OrderBy(x => x.Id);
             return list.ToList();
 
         }
@@ -189,7 +189,7 @@ namespace DAL.DAL
         /// <param name="pagesize"></param>
         /// <param name="PageTotal"></param>
         /// <returns></returns>
-        public object GetListbycinid(int classinfotestid, int status, int pagenum, int pagesize, out int PageTotal)
+        public List<ClassInfoContentTest> GetListbycinid(int classinfotestid, int status, int pagenum, int pagesize, out int PageTotal)
         {
             PageTotal = 0;
             var ls = GetListData();
