@@ -22,10 +22,29 @@ namespace DAL.DAL
             return GetListData().ToList();
 
         }
-
+        public ClassTest GetRandomClass()
+        {
+            return _context.ClassTest.Where(x => 1 == 1).OrderBy(x => Guid.NewGuid()).First();
+        }
         private IQueryable<ClassTest> GetListData()
         {
             return _context.ClassTest.Where(x => x.IsDel == false);
+        }
+        /// <summary>
+        /// 查询列表 根据条件
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public List<ClassTest> GetList(string name)
+        {
+            var list = GetListData().OrderBy(x => x.Name.Replace("\"", "").Trim()).ToList();
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                list = list.Where(x => x.Name.Contains(name.Trim())).ToList();
+            }
+            return list;
+
         }
         /// <summary>
         /// 新增课程
@@ -95,6 +114,33 @@ namespace DAL.DAL
             else
             {
                 return null;
+            }
+            return list.ToList();
+
+        }
+        /// <summary>
+        /// 查询列表 根据条件
+        /// </summary>
+        /// <param name="universityid"></param>
+        /// <param name="alif"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public List<ClassTest> GetList(int universityid, string alif, string name)
+        {
+            var list = GetListData();
+            if (universityid != 0)
+            {
+                list = list.Where(x => x.UniversityTestId == universityid);
+
+            }
+            if (!string.IsNullOrEmpty(alif))
+            {
+                list = list.Where(x => x.Name.Substring(0, 1).ToUpper() == alif);
+
+            }
+            if (!string.IsNullOrEmpty(name))
+            {
+                list = list.Where(x => x.Name.Trim().Contains(name.Trim()));
             }
             return list.ToList();
 
@@ -181,5 +227,21 @@ namespace DAL.DAL
             }
             return num;
         }
+        /// <summary>
+        /// 查询列表 根据条件
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public List<ClassTest> GetLs(int universityid)
+        {
+            var list = GetListData();
+            if (universityid != 0)
+            {
+                list = list.Where(x => x.UniversityTestId == universityid);
+                return list.ToList();
+            }
+            return null;
+        }
+
     }
 }

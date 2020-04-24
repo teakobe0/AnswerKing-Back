@@ -78,7 +78,7 @@ namespace DAL.Tools
         /// <param name="model"></param>
         /// <param name="type"></param>
         /// <param name="id"></param>
-        public static void WriteOperationLog(string name,string model,string type, int id)
+        public static void WriteOperationLog(string name,string model,string type, object id)
         {
             DateTime time = DateTime.Now;
             string path = Directory.GetCurrentDirectory() + @"\Log\Operation\";
@@ -88,6 +88,7 @@ namespace DAL.Tools
             string fileFullPath = path + time.ToString("yyyy-MM-dd") + ".txt";
             StringBuilder str = new StringBuilder();
             //str.Append(time.ToString()+"/t"+name+"----->"+model+"----->"+type+"----->"+"Id:"+id + "<br/>");
+           
             str.Append(time.ToString() + "&nbsp;&nbsp;&nbsp;&nbsp;" + "用户：" + "【"+name+"】 "+ "模块：" +"【"+ model+"】" + "操作：" + "【" + type + "】" + "数据：" + "【"+"Id=" + id + "】" + "<br/>");
 
             StreamWriter sw;

@@ -21,12 +21,16 @@ namespace JzAPI.Controllers
         private IClassInfoTestDAL _citdal;
         private IUniversityTestDAL _utdal;
         private IClassTestDAL _ctdal;
-        public ClassInfoTestController(IClassInfoTestDAL citdal, IUniversityTestDAL utdal, IClassTestDAL ctdal)
+        private IClientDAL _clientdal;
+        private IUseRecordsDAL _urdal;
+        public ClassInfoTestController(IClassInfoTestDAL citdal, IUniversityTestDAL utdal, IClassTestDAL ctdal, IClientDAL clientdal, IUseRecordsDAL urdal)
         {
 
             _citdal = citdal;
             _utdal = utdal;
             _ctdal = ctdal;
+            _clientdal = clientdal;
+            _urdal = urdal;
         }
 
         /// <summary>
@@ -239,5 +243,168 @@ namespace JzAPI.Controllers
             }
             return r;
         }
+        /// <summary>
+        /// 根据课程id检索课程资料
+        /// </summary>
+        /// <param name="classid"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("ClassInfos")]
+        public ResultModel ClassInfos(int classid)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                List<cinfo> ls = new List<cinfo>();
+                cinfo cinfo = null;
+                var cils = _citdal.GetLs(classid);
+                foreach (var item in cils)
+                {
+                    cinfo = new cinfo();
+                    cinfo.classinfo = item;
+                    var client = _clientdal.GetClientById(item.ClientId);
+                    if (client != null)
+                    {
+                        cinfo.clientname = client.Name;
+                        cinfo.clientimg = client.Image;
+                    }
+                    ls.Add(cinfo);
+                }
+                r.Data = ls;
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        public class cinfo
+        {
+            public ClassInfoTest classinfo { get; set; }
+            public string clientname { get; set; }
+            public string clientimg { get; set; }
+        }
+        /// <summary>
+        /// 更改课程资料有用/没用
+        /// </summary>
+        /// <param name="classInfoId"></param>
+        /// <param name="type">有用:Y,没用:N</param>
+        /// <param name="check">选中:1，取消:-1</param>
+        /// <returns></returns>
+        [HttpPut]
+        [Authorize(Roles = C_Role.all)]
+        [Route("ChangeClassInfo")]
+        public ResultModel ChangeClassInfo(int classInfoId, string type, int check)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+
+            try
+            {
+                r.Data =_citdal.Change(ID, classInfoId, type, check, null);
+
+
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+
+            }
+            return r;
+        }
+        /// <summary>
+        /// 根据课程资料id检索该课程资料有用、无用
+        /// </summary>
+        /// <param name="classInfoid"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Authorize(Roles = C_Role.all)]
+        [Route("UseRecords")]
+        public ResultModel UseRecords(int classInfoid)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+
+                r.Data = _urdal.GetUseRecords(ID, classInfoid);
+
+
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+
+            }
+            return r;
+        }
+
+        public class model
+        {
+            public string university_name { get; set; }
+            public int university_id { get; set; }
+            public int class_num { get; set; }
+
+            public int classinfo_num { get; set; }
+            public string class_name { get; set; }
+            public int class_id { get; set; }
+
+            public string client_name { get; set; }
+            public int client_id { get; set; }
+            public int client_num { get; set; }
+        }
+        /// <summary>
+        /// 首页查询题库，课程，贡献者
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("ClassInfo")]
+        public ResultModel ClassInfo()
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            List<model> ls = new List<model>();
+            try
+            {
+                var clas = _ctdal.GetList();
+                var num = new Random().Next(1, clas.Count() - 15);
+                var eachclas = clas.Where(x => x.Id > num).Take(15);
+                var classinfos = _citdal.GetList();
+                model m = null;
+                foreach (var item in eachclas)
+                {
+                    m = new model();
+                    m.university_id = item.UniversityTestId;
+                    m.university_name = item.UniversityTest;
+                    m.class_num = clas.Count();
+                    m.class_name = item.Name;
+                    m.class_id = item.Id;
+                    m.classinfo_num = classinfos.Count();
+                    var classinfo = classinfos.Where(x=>x.ClassTestId==item.Id);
+                    foreach (var i in classinfo)
+                    {
+                        var client = _clientdal.GetClientById(i.ClientId);
+                        if (client != null)
+                        {
+                            m.client_name = client.Name;
+                            m.client_id = client.Id;
+                            break;
+                        }
+                    }
+                    m.client_num =_citdal.GetClients();
+                    ls.Add(m);
+                }
+
+                r.Data = ls;
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+
+            }
+            return r;
+        }
+
     }
 }

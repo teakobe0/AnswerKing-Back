@@ -50,7 +50,7 @@ namespace DAL.DAL
         }
         private IQueryable<Notice> GetListData()
         {
-            return _context.Notice.Where(x => 1 == 1);
+            return _context.Notice.Where(x => x.IsDel == false);
         }
         /// <summary>
         /// 新增

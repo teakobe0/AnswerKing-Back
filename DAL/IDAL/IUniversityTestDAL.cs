@@ -77,5 +77,11 @@ namespace DAL.IDAL
         /// <param name="ls"></param>
         /// <returns></returns>
         int AddImportData(List<UniversityTest> ls);
+        /// <summary>
+        /// 根据国家和州/省份检索学校
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        List<UniversityTest> GetByCountry(string name, string state);
     }
 }

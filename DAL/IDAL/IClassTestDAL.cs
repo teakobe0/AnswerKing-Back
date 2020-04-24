@@ -71,5 +71,26 @@ namespace DAL.IDAL
         /// <param name="ls"></param>
         /// <returns></returns>
         int AddImportData(List<ClassTest> ls);
+        /// <summary>
+        /// 查询列表 根据条件
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        List<ClassTest> GetList(string name);
+        /// <summary>
+        /// 查询列表 根据条件
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        List<ClassTest> GetLs(int universityid);
+        /// <summary>
+        /// 查询列表 根据条件
+        /// </summary>
+        /// <param name="universityid"></param>
+        /// <param name="alif"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        List<ClassTest> GetList(int universityid, string alif, string name);
+        ClassTest GetRandomClass();
     }
 }

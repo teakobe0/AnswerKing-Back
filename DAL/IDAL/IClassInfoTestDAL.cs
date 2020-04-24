@@ -30,6 +30,12 @@ namespace DAL.IDAL
         /// <returns></returns>
         List<ClassInfoTest> GetList(int clientId);
         /// <summary>
+        /// 根据课程id检索
+        /// </summary>
+        /// <param name="classid"></param>
+        /// <returns></returns>
+        List<ClassInfoTest> GetLs(int classid);
+        /// <summary>
         /// 编辑
         /// </summary>
         /// <param name="cit"></param>
@@ -77,5 +83,23 @@ namespace DAL.IDAL
         /// <param name="ls"></param>
         /// <returns></returns>
         int AddImportData(List<ClassInfoTest> ls);
+        /// <summary>
+        /// 修改课程资料有用、没用
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="classInfoId"></param>
+        /// <param name="type"></param>
+        /// <param name="check"></param>
+        /// <returns></returns>
+        int Change(int clientId, int classInfoId, string type, int check, DateTime? time);
+        int GetClients();
+        ClassInfoTest GetRandomClassInfo();
+        ClassInfoTest GetRandom();
+        /// <summary>
+        /// 修改课程资料
+        /// </summary>
+        /// <param name="classInfo"></param>
+        /// <returns></returns>
+        int ChangeClassInfo(ClassInfoTest classInfoTest);
     }  
 }

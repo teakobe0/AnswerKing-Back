@@ -24,10 +24,20 @@ namespace DAL.DAL
             return GetListData().ToList();
 
         }
+        /// <summary>
+        /// 查询未识别的图片集
+        /// </summary>
+        /// <returns></returns>
+        public List<ClassInfoContentTest> ImgLs()
+        {
+            var list = _context.ClassInfoContentTest.Where(x => x.IsDel == false && !string.IsNullOrEmpty(x.Url) && string.IsNullOrEmpty(x.Contents));
+            return list.ToList();
+
+        }
 
         private IQueryable<ClassInfoContentTest> GetListData()
         {
-            return _context.ClassInfoContentTest.Where(x => x.IsDel == false);
+            return _context.ClassInfoContentTest.Where(x => x.IsDel == false && x.IsAudit == true);
         }
         /// <summary>
         /// 新增
@@ -37,7 +47,7 @@ namespace DAL.DAL
         public int Add(ClassInfoContentTest classInfoContentTest)
         {
             var cit = _context.ClassInfoTest.FirstOrDefault(x => x.Id == classInfoContentTest.ClassInfoTestId);
-            if (cit.Status ==(int) classInfoTestStatus.Audited)
+            if (cit.Status == (int)classInfoTestStatus.Audited)
             {
                 cit.Status = (int)classInfoTestStatus.NoAudit;
             }
@@ -63,6 +73,19 @@ namespace DAL.DAL
             {
                 return null;
             }
+
+        }
+        /// <summary>
+        /// 根据题库集id，周名称检索类型
+        /// </summary>
+        /// <param name="classInfoId"></param>
+        /// <param name="weekName"></param>
+        /// <returns></returns>
+        public List<ClassInfoContentTest> Types(int classInfoId, int weekName)
+        {
+
+            var list = GetListData().Where(x => x.ClassInfoTestId == classInfoId && x.ClassWeek == weekName).OrderBy(x => x.Id);
+            return list.ToList();
 
         }
         /// <summary>
@@ -217,9 +240,9 @@ namespace DAL.DAL
         /// <returns></returns>
         public ClassInfoContentTest GetNext(int id)
         {
-            var classInfoTestId= _context.ClassInfoContentTest.FirstOrDefault(x => x.Id == id).ClassInfoTestId;
-            
-            return _context.ClassInfoContentTest.FirstOrDefault(x => x.Id > id &&x.ClassInfoTestId== classInfoTestId && x.IsAudit == false&&x.IsDel==false );
+            var classInfoTestId = _context.ClassInfoContentTest.FirstOrDefault(x => x.Id == id).ClassInfoTestId;
+
+            return _context.ClassInfoContentTest.FirstOrDefault(x => x.Id > id && x.ClassInfoTestId == classInfoTestId && x.IsAudit == false && x.IsDel == false);
         }
         /// <summary>
         /// 查询该订单未审核的答案
@@ -261,6 +284,18 @@ namespace DAL.DAL
                 num += _context.SaveChanges();
             }
             return num;
+        }
+
+        /// <summary>
+        /// 更新
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+        public int Update(List<ClassInfoContentTest> ls)
+        {
+
+            _context.ClassInfoContentTest.UpdateRange(ls);
+            return _context.SaveChanges();
         }
     }
 

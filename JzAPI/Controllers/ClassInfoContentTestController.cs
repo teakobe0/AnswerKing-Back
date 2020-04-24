@@ -45,7 +45,7 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                if (!string.IsNullOrEmpty(classInfoContentTest.Url)|| !string.IsNullOrEmpty(classInfoContentTest.Contents))
+                if (!string.IsNullOrEmpty(classInfoContentTest.Url) || !string.IsNullOrEmpty(classInfoContentTest.Contents))
                 {
                     classInfoContentTest.ClientId = ID;
                     r.Data = _cictdal.Add(classInfoContentTest);
@@ -111,7 +111,7 @@ namespace JzAPI.Controllers
                     info = new info();
                     info.ClassInfoContentTest = i;
 
-                    i.NameUrl= AppConfig.Configuration["imgurl"]+i.NameUrl;
+                    i.NameUrl = AppConfig.Configuration["imgurl"] + i.NameUrl;
                     i.Url = AppConfig.Configuration["imgurl"] + i.Url;
                     info.universityname = _utdal.GetUniversityTest(i.UniversityTestId) == null ? null : _utdal.GetUniversityTest(i.UniversityTestId).Name;
                     info.classname = _ctdal.GeClassTest(i.ClassTestId) == null ? null : _ctdal.GeClassTest(i.ClassTestId).Name;
@@ -252,11 +252,11 @@ namespace JzAPI.Controllers
         public ResultModel Edit([FromBody] ClassInfoContentTest classInfoContentTest)
         {
             ResultModel r = new ResultModel();
-          
+
             r.Status = RmStatus.OK;
             try
             {
-                if (!string.IsNullOrEmpty(classInfoContentTest.Url)|| !string.IsNullOrEmpty(classInfoContentTest.Contents))
+                if (!string.IsNullOrEmpty(classInfoContentTest.Url) || !string.IsNullOrEmpty(classInfoContentTest.Contents))
                 {
                     if (classInfoContentTest.ClientId == ID)
                     {
@@ -277,6 +277,48 @@ namespace JzAPI.Controllers
             catch (Exception ex)
             {
                 r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+
+        /// <summary>
+        /// 根据每周课程id检索类型答案
+        /// </summary>
+        /// <param name="classweekid"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Types")]
+        public ResultModel Types(int weekname, int classinfoid)
+        {
+            ResultModel r = new ResultModel();
+
+            r.Status = RmStatus.OK;
+
+            try
+            {
+                var ls = _cictdal.Types(classinfoid, weekname);
+                var img = AppConfig.Configuration["imgurl"];
+             
+                foreach (var item in ls)
+                {
+                   
+                    if (!string.IsNullOrEmpty(item.Url))
+                    {
+                        item.Url = img + item.Url;
+                    }
+                    if (!string.IsNullOrEmpty(item.NameUrl))
+                    {
+                        item.NameUrl = img + item.NameUrl;
+                    }
+                   
+                }
+                r.Data =ls;
+
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+
             }
             return r;
         }

@@ -69,7 +69,7 @@ namespace DAL.DAL
 
         private IQueryable<Feedback> GetListData()
         {
-            return _context.Feedback.Where(x => 1 == 1);
+            return _context.Feedback.Where(x => x.IsDel == false);
         }
     }
 }

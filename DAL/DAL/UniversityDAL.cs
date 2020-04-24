@@ -44,17 +44,17 @@ namespace DAL.DAL
         {
             if (id == 0)
             {
-                return _context.University.Any(x => x.Name.Trim() == name);
+                return _context.University.Any(x => x.Name.Trim() == name.Trim() && x.IsDel == false);
             }
             else
             {
-                return _context.University.Any(x => x.Name.Trim() == name && x.Id != id);
+                return _context.University.Any(x => x.Name.Trim() == name.Trim() && x.Id != id && x.IsDel == false);
             }
         }
 
         public University GetUniversity(string name)
         {
-            return _context.University.FirstOrDefault(x => x.Name.Trim() == name);
+            return _context.University.FirstOrDefault(x => x.Name.Trim() == name.Trim() && x.IsDel == false);
         }
         /// <summary>
         /// 新增

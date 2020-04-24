@@ -32,7 +32,84 @@ namespace JzAPI.Controllers
             _cladal = cladal;
             _udal = udal;
         }
+        /// <summary>
+        /// 根据课程名称检索 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="pagenum"></param>
+        /// <param name="pagesize"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("ClassPage")]
+        public ResultModel ClassPage(string name, int pagenum = 1, int pagesize = 40)
+        {
+            ResultModel r = new ResultModel();
+            PageData page = new PageData();
+            r.Status = RmStatus.OK;
+            try
+            {
+                List<cinfo> ls = new List<cinfo>();
+                cinfo c = null;
+                var query = _clatdal.GetList(name);
+                var model = query.Skip(pagesize * (pagenum - 1)).Take(pagesize).ToList();
+                foreach (var item in model)
+                {
+                    c = new cinfo();
+                    c.cla = item;
+                    var classinfo = _citdal.GetLs(item.Id);
+                    c.order = classinfo.Count();
+                    ls.Add(c);
+                }
+                page.Data = ls;
+                page.PageTotal = query.Count();
+                r.Data = page;
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        public class cinfo
+        {
+            public ClassTest cla { get; set; }
+            public int order { get; set; }
+        }
+        /// <summary>
+        /// 根据学校id/课程首字母/课程名称检索课程
+        /// </summary>
+        /// <param name="universityid"></param>
+        /// <param name="alif"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Class")]
+        public ResultModel Class(int universityid, string alif, string name)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                List<cinfo> ls = new List<cinfo>();
+                cinfo info = null;
+                var cla = _clatdal.GetList(universityid, alif, name);
+                foreach (var item in cla)
+                {
+                    info = new cinfo();
+                    info.cla = item;
+                    var clas = _citdal.GetLs(item.Id);
+                    info.order = clas.Count();
+                    ls.Add(info);
+                }
+                r.Data = ls;
 
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
         /// <summary>
         /// 根据学校id/课程名称检索课程
         /// </summary>

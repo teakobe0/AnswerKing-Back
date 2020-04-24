@@ -212,7 +212,7 @@ namespace DAL.DAL
         }
         private IQueryable<Class> GetListData()
         {
-            return _context.Class.Where(x => 1 == 1);
+            return _context.Class.Where(x => x.IsDel == false);
         }
         /// <summary>
         /// 获取当前导入数据的最大id

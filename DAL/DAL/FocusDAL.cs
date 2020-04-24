@@ -80,7 +80,7 @@ namespace DAL.DAL
 
         private IQueryable<Focus> GetListData()
         {
-            return _context.Focus.Where(x => 1 == 1);
+            return _context.Focus.Where(x => x.IsDel == false);
         }
     }
 }

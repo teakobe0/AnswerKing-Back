@@ -59,11 +59,11 @@ namespace DAL.DAL
         {
             if (id == 0)
             {
-                return _context.UniversityTest.Any(x => x.Name.Trim() == name.Trim());
+                return _context.UniversityTest.Any(x => x.Name.Trim() == name.Trim() && x.IsDel == false);
             }
             else
             {
-                return _context.UniversityTest.Any(x => x.Id != id && x.Name.Trim() == name.Trim());
+                return _context.UniversityTest.Any(x => x.Id != id && x.Name.Trim() == name.Trim() && x.IsDel == false);
             }
 
         }
@@ -74,7 +74,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public UniversityTest GetUniversityTest(string name)
         {
-            return _context.UniversityTest.FirstOrDefault(x => x.Name.Trim() == name.Trim());
+            return _context.UniversityTest.FirstOrDefault(x => x.Name.Trim() == name.Trim() && x.IsDel == false);
 
         }
         /// <summary>
@@ -183,6 +183,22 @@ namespace DAL.DAL
                 num += _context.SaveChanges();
             }
             return num;
+        }
+        /// <summary>
+        /// 根据国家和州/省份检索学校
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public List<UniversityTest> GetByCountry(string name, string state)
+        {
+            var list = GetListData();
+            if (!string.IsNullOrEmpty(name))
+                list = list.Where(x => x.Country == name);
+            if (!string.IsNullOrEmpty(state))
+            {
+                list = list.Where(x => x.State == state);
+            }
+            return list.ToList();
         }
     }
 }

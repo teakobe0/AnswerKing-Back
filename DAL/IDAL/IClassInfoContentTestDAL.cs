@@ -95,6 +95,24 @@ namespace DAL.IDAL
         /// <param name="ls"></param>
         /// <returns></returns>
         int AddImportData(List<ClassInfoContentTest> ls);
+        /// <summary>
+        /// 根据题库集id，周名称检索类型
+        /// </summary>
+        /// <param name="classInfoId"></param>
+        /// <param name="weekName"></param>
+        /// <returns></returns>
+        List<ClassInfoContentTest> Types(int classInfoId, int weekName);
+        /// <summary>
+        /// 查询未识别的图片集
+        /// </summary>
+        /// <returns></returns>
+        List<ClassInfoContentTest> ImgLs();
+        /// <summary>
+        /// 更新
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+        int Update(List<ClassInfoContentTest> ls);
     }
 }
 

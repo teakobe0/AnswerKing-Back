@@ -22,11 +22,43 @@ namespace JzAPI.Controllers
     {
         private IUniversityTestDAL _untdal;
         private IUniversityDAL _undal;
+        private IClassTestDAL _clatdal;
+        private IAreaDAL _areadal;
 
-        public UniversityTestController(IUniversityTestDAL untdal, IUniversityDAL undal)
+        public UniversityTestController(IUniversityTestDAL untdal, IUniversityDAL undal, IClassTestDAL clatdal, IAreaDAL areadal)
         {
             _untdal = untdal;
             _undal = undal;
+            _clatdal = clatdal;
+            _areadal = areadal;
+        }
+        /// <summary>
+        /// 根据学校名称检索 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="pagenum"></param>
+        /// <param name="pagesize"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("UniversitysPage")]
+        public ResultModel UniversitysPage(string name, int pagenum = 1, int pagesize = 10)
+        {
+            ResultModel r = new ResultModel();
+            PageData page = new PageData();
+            r.Status = RmStatus.OK;
+
+            try
+            {
+                var queryList = _untdal.GetList(name);
+                page.Data = queryList.Skip(pagesize * (pagenum - 1)).Take(pagesize).ToList();
+                page.PageTotal = queryList.Count();
+                r.Data = page;
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
         }
         /// <summary>
         /// 新增学校
@@ -227,6 +259,91 @@ namespace JzAPI.Controllers
             catch (Exception ex)
             {
                 r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        public class uinfo
+        {
+            public UniversityTest university { get; set; }
+            public int number { get; set; }
+        }
+        /// <summary>
+        /// 根据国家 州/省份检索学校
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("GetUniversitys")]
+        public ResultModel GetUniversitys(string name, string state)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+
+                List<uinfo> ls = new List<uinfo>();
+                uinfo uinfo = null;
+                var university = _untdal.GetByCountry(name, state);
+
+                foreach (var item in university)
+                {
+                    uinfo = new uinfo();
+                    uinfo.university = item;
+                    var clas = _clatdal.GetLs(item.Id);
+                    uinfo.number = clas.Count();
+                    ls.Add(uinfo);
+                }
+                r.Data = ls;
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+
+            }
+            return r;
+        }
+        /// <summary>
+        /// 查询国家
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Countrys")]
+        public ResultModel Countrys()
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                r.Data = _areadal.GetCountryList();
+
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+
+            }
+            return r;
+        }
+        /// <summary>
+        /// 查询所有的州/省份
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("States")]
+        public ResultModel States(string name)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                r.Data = _areadal.GetList(name);
+
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+
             }
             return r;
         }

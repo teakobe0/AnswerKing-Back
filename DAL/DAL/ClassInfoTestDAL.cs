@@ -1,6 +1,7 @@
 ﻿using DAL.IDAL;
 using DAL.Model;
 using DAL.Model.Const;
+using DAL.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,7 +25,34 @@ namespace DAL.DAL
             return GetListData().ToList();
 
         }
-
+        public ClassInfoTest GetRandomClassInfo()
+        {
+            return _context.ClassInfoTest.Where(x => 1 == 1).OrderBy(x => Guid.NewGuid()).First();
+        }
+        public ClassInfoTest GetRandom()
+        {
+            var ClassInfo = _context.ClassInfoTest.Where(x => x.ClientId == 0);
+            if (ClassInfo.Count() > 0)
+            {
+                return _context.ClassInfoTest.Where(x => x.ClientId == 0).OrderBy(x => Guid.NewGuid()).First();
+            }
+            return null;
+        }
+        /// <summary>
+        /// 根据课程id检索
+        /// </summary>
+        /// <param name="classid"></param>
+        /// <returns></returns>
+        public List<ClassInfoTest> GetLs(int classid)
+        {
+            if (classid != 0)
+            {
+                var list = GetListData();
+                list = list.Where(x => x.ClassTestId == classid);
+                return list.ToList();
+            }
+            return null;
+        }
         private IQueryable<ClassInfoTest> GetListData()
         {
             return _context.ClassInfoTest.Where(x => x.IsDel == false);
@@ -40,6 +68,16 @@ namespace DAL.DAL
             _context.ClassInfoTest.Add(cit);
             _context.SaveChanges();
             return cit;
+        }
+        /// <summary>
+        /// 修改课程资料
+        /// </summary>
+        /// <param name="classInfo"></param>
+        /// <returns></returns>
+        public int ChangeClassInfo(ClassInfoTest classInfoTest)
+        {
+            _context.ClassInfoTest.Update(classInfoTest);
+            return _context.SaveChanges();
         }
         /// <summary>
         /// 根据题库集id检索
@@ -178,6 +216,74 @@ namespace DAL.DAL
                 num += _context.SaveChanges();
             }
             return num;
+        }
+        /// <summary>
+        /// 修改课程资料有用、没用
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="classInfoId"></param>
+        /// <param name="type"></param>
+        /// <param name="check"></param>
+        /// <returns></returns>
+        public int Change(int clientId, int classInfoId, string type, int check, DateTime? time)
+        {
+            var ci = _context.ClassInfoTest.FirstOrDefault(x => x.Id == classInfoId);
+            UseRecords urs = null;
+            if (check == 1)
+            {
+                var ur = _context.UseRecords.Where(x => x.ClassInfoId == classInfoId && x.ClientId == clientId).OrderByDescending(x => x.CreateTime).FirstOrDefault();
+                if (ur != null && ur.Check == 1)
+                {
+                    urs = new UseRecords();
+                    urs = Utils.TransReflection<UseRecords, UseRecords>(ur);
+                    urs.Id = 0;
+                    urs.Check = -1;
+                    urs.Type = ur.Type;
+                    urs.CreateTime = time == null ? DateTime.Now : (ur.CreateTime > time ? time.Value.AddDays(1) : ur.CreateTime.AddDays(1));
+                    _context.UseRecords.Add(urs);
+                    if (ur.Type == "Y")
+                    {
+                        ci.Use -= 1;
+                    }
+                    else
+                    {
+                        ci.NoUse -= 1;
+
+                    }
+                }
+            }
+            if (type == "Y")
+            {
+                ci.Use += check;
+            }
+            else
+            {
+                ci.NoUse += check;
+
+
+            }
+            if (ci.Use == -1)
+            {
+                ci.Use = 0;
+            }
+            if (ci.NoUse == -1)
+            {
+                ci.NoUse = 0;
+            }
+            urs = new UseRecords();
+            urs.ClassInfoId = classInfoId;
+            urs.ClientId = clientId;
+            urs.Check = check;
+            urs.Type = type;
+            urs.CreateTime = time != null ? time.Value : DateTime.Now;
+            _context.UseRecords.Add(urs);
+            return _context.SaveChanges();
+        }
+       
+        public int GetClients()
+        {
+            return GetListData().Where(x => x.ClientId != 0).GroupBy(x => x.ClientId).Count();
+
         }
     }
 }
