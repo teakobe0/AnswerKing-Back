@@ -23,6 +23,6 @@ namespace DAL.IDAL
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        int Cancel(int id);
+        //int Cancel(int id);
     }
 }

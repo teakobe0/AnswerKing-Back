@@ -36,7 +36,7 @@ namespace DAL.Tools
             Complete = 6
 
         }
-        public enum classInfoTestStatus
+        public enum classInfoStatus
         {
             /// <summary>
             /// 未创建

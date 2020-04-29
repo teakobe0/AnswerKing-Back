@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using DAL.IDAL;
 using DAL.Model;
 using DAL.Model.Const;
+using DAL.Tools;
+using JzAPI.tool;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
@@ -19,15 +21,16 @@ namespace JzAPI.Controllers
     [Route("api/University")]
     public class UniversityController : BaseController
     {
+
         private IUniversityDAL _undal;
+        private IClassDAL _cladal;
         private IAreaDAL _areadal;
-        private IClassDAL _classdal;
-        public UniversityController(IUniversityDAL undal, IAreaDAL areadal, IClassDAL classdal)
+
+        public UniversityController(IUniversityDAL undal, IClassDAL cladal, IAreaDAL areadal)
         {
             _undal = undal;
+            _cladal = cladal;
             _areadal = areadal;
-            _classdal = classdal;
-           
         }
         /// <summary>
         /// 根据学校名称检索 
@@ -58,7 +61,119 @@ namespace JzAPI.Controllers
             return r;
         }
         /// <summary>
-        /// 根据学校id检索学校
+        /// 新增学校
+        /// </summary>
+        /// <param name="university"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("Add")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Add([FromBody] University university)
+        {
+            ResultModel r = new ResultModel();
+            PageData page = new PageData();
+            r.Status = RmStatus.OK;
+            try
+            {
+                if (!string.IsNullOrEmpty(university.Name))
+                {
+                    if (university.Id == 0)
+                    {
+                        university.ClientId = ID;
+                        //查询添加的学校是否存在
+                        bool name = _undal.GetName(university.Name, 0);
+                        if (name == true)
+                        {
+                            r.Status = RmStatus.Error;
+                            r.Msg = "该学校名称已经存在";
+                        }
+                        else
+                        {
+                            r.Data = _undal.Add(university);
+                        }
+
+                    }
+                }
+                else
+                {
+                    r.Status = RmStatus.Error;
+                    r.Msg = "学校名称不能为空";
+                }
+
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 编辑学校
+        /// </summary>
+        /// <param name="university"></param>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("Edit")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Edit([FromBody] University university)
+        {
+            ResultModel r = new ResultModel();
+            PageData page = new PageData();
+            r.Status = RmStatus.OK;
+            try
+            {
+                if (!string.IsNullOrEmpty(university.Name))
+                {
+                    if (university.ClientId == ID)
+                    {
+                        bool name = _undal.GetName(university.Name, university.Id);
+                        if (name == true)
+                        {
+                            r.Status = RmStatus.Error;
+                            r.Msg = "该学校名称已经存在";
+                        }
+                        else
+                        {
+                            r.Data = _undal.Edit(university);
+                        }
+                    }
+                }
+                else
+                {
+                    r.Status = RmStatus.Error;
+                    r.Msg = "学校名称不能为空";
+                }
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 查询学校
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Universitys")]
+        public ResultModel Universitys(string name)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                r.Data = _undal.GetList(name).Take(10);
+
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 根据学校id检索
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -70,17 +185,51 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _undal.GetUniversity(id);
-                if (r.Data == null)
+                var university = _undal.GetUniversity(id);
+                if (!string.IsNullOrEmpty(university.Image))
+                {
+                    university.Image = AppConfig.Configuration["imgurl"] + university.Image;
+                }
+                r.Data = university;
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        [Route("Del")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Del(int id)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                var clientid = _undal.GetUniversity(id).ClientId;
+                if (clientid == ID)
+                {
+                    r.Data = _undal.Del(id);
+                }
+                else
+                {
+                    r.Data = 0;
+                }
+                if ((int)r.Data == 0)
                 {
                     r.Status = RmStatus.Error;
-                    r.Msg = "查询失败";
+                    r.Msg = "删除失败。";
                 }
             }
             catch (Exception ex)
             {
                 r.Status = RmStatus.Error;
-
             }
             return r;
         }
@@ -110,8 +259,9 @@ namespace JzAPI.Controllers
                 foreach (var item in university)
                 {
                     uinfo = new uinfo();
+                   
                     uinfo.university = item;
-                    var clas = _classdal.GetList(item.Id);
+                    var clas = _cladal.GetLs(item.Id);
                     uinfo.number = clas.Count();
                     ls.Add(uinfo);
                 }
@@ -137,7 +287,7 @@ namespace JzAPI.Controllers
             try
             {
                 r.Data = _areadal.GetCountryList();
-              
+
             }
             catch (Exception ex)
             {
@@ -160,7 +310,7 @@ namespace JzAPI.Controllers
             try
             {
                 r.Data = _areadal.GetList(name);
-              
+
             }
             catch (Exception ex)
             {
@@ -169,6 +319,6 @@ namespace JzAPI.Controllers
             }
             return r;
         }
-       
+
     }
 }

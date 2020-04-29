@@ -58,7 +58,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public List<ImportRecords> GetEndTest()
         {
-            string[] type = new string[4] { "UniversityTest", "ClassTest", "ClassInfoTest", "ClassInfoContentTest" };
+            string[] type = new string[4] { "University", "Class", "ClassInfo", "ClassInfoContent" };
             List<ImportRecords> ls = new List<ImportRecords>();
             foreach (var item in type)
             {

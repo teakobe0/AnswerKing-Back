@@ -1,26 +1,49 @@
 ﻿using DAL.IDAL;
 using DAL.Model;
+using DAL.Model.Const;
 using DAL.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static DAL.Tools.EnumAll;
 
 namespace DAL.DAL
 {
     public class ClassInfoDAL : BaseDAL, IClassInfoDAL
     {
-
         public ClassInfoDAL(DataContext context)
         {
             _context = context;
+        }
+        /// <summary>
+        /// 查询列表
+        /// </summary>
+        /// <returns></returns> 
+        public List<ClassInfo> GetList()
+        {
+            return GetListData().ToList();
+
+        }
+        public ClassInfo GetRandomClassInfo()
+        {
+            return _context.ClassInfo.Where(x => 1 == 1).OrderBy(x => Guid.NewGuid()).First();
+        }
+        public ClassInfo GetRandom()
+        {
+            var ClassInfo = _context.ClassInfo.Where(x => x.ClientId == 0);
+            if (ClassInfo.Count() > 0)
+            {
+                return _context.ClassInfo.Where(x => x.ClientId == 0).OrderBy(x => Guid.NewGuid()).First();
+            }
+            return null;
         }
         /// <summary>
         /// 根据课程id检索
         /// </summary>
         /// <param name="classid"></param>
         /// <returns></returns>
-        public List<ClassInfo> GetList(int classid)
+        public List<ClassInfo> GetLs(int classid)
         {
             if (classid != 0)
             {
@@ -30,9 +53,34 @@ namespace DAL.DAL
             }
             return null;
         }
-
+        private IQueryable<ClassInfo> GetListData()
+        {
+            return _context.ClassInfo.Where(x => x.IsDel == false);
+        }
         /// <summary>
-        /// 根据课程资料id检索
+        /// 新增订单(题库集）
+        /// </summary>
+        /// <param name="cit"></param>
+        /// <returns></returns>
+        public ClassInfo Add(ClassInfo cit)
+        {
+            cit.CreateTime = DateTime.Now;
+            _context.ClassInfo.Add(cit);
+            _context.SaveChanges();
+            return cit;
+        }
+        /// <summary>
+        /// 修改课程资料
+        /// </summary>
+        /// <param name="classInfo"></param>
+        /// <returns></returns>
+        public int ChangeClassInfo(ClassInfo classInfo)
+        {
+            _context.ClassInfo.Update(classInfo);
+            return _context.SaveChanges();
+        }
+        /// <summary>
+        /// 根据题库集id检索
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -41,53 +89,26 @@ namespace DAL.DAL
         {
             return _context.ClassInfo.FirstOrDefault(x => x.Id == id);
         }
-
-        public ClassInfo GetRandomClassInfo()
-        {
-            return _context.ClassInfo.Where(x => 1 == 1).OrderBy(x => Guid.NewGuid()).First();
-        }
-        public ClassInfo GetRandom()
-        {
-            var ClassInfo = _context.ClassInfo.Where(x => x.ClientId == 0);
-            if (ClassInfo.Count()>0)
-            {
-               return  _context.ClassInfo.Where(x => x.ClientId == 0).OrderBy(x => Guid.NewGuid()).First();
-            }
-            return null;
-        }
         /// <summary>
-        /// 根据课程资料单号查询
+        /// 编辑
         /// </summary>
-        /// <param name="no"></param>
+        /// <param name="cit"></param>
         /// <returns></returns>
-        public List<ClassInfo> GetListByno(int no)
+        public int Edit(ClassInfo cit)
         {
-            var list = GetListData();
-            if (no != 0)
-            {
-                list = list.Where(x => x.Id == no);
-
-            }
-            return list.ToList();
-
-
+            _context.ClassInfo.Update(cit);
+            return _context.SaveChanges();
         }
-        public int GetClients()
-        {
-            return GetListData().Where(x=>x.ClientId!=0).GroupBy(x=>x.ClientId).Count();
 
-        }
         /// <summary>
-        /// 新增
+        /// 更改题库集状态
         /// </summary>
-        /// <param name="classInfo"></param>
+        /// <param name="cit"></param>
         /// <returns></returns>
-        public int Add(ClassInfo classInfo)
+        public int Change(int id)
         {
-            //var maxclassinfo = _context.ClassInfo.OrderByDescending(x => x.Id).FirstOrDefault();
-             //classInfo.Id = maxclassinfo == null || maxclassinfo.Id < InitID ? InitID : maxclassinfo.Id + 1;
-            classInfo.CreateTime = DateTime.Now;
-            _context.ClassInfo.Add(classInfo);
+            var cit = _context.ClassInfo.FirstOrDefault(x => x.Id == id);
+            cit.Status = (int)classInfoStatus.NoAudit;
             return _context.SaveChanges();
         }
         /// <summary>
@@ -99,12 +120,111 @@ namespace DAL.DAL
         {
             if (id != 0)
             {
-                ClassInfo classInfo = _context.ClassInfo.FirstOrDefault(x => x.Id == id);
-                classInfo.IsDel = true;
-                _context.ClassInfo.Update(classInfo);
+                ClassInfo ci = _context.ClassInfo.FirstOrDefault(x => x.Id == id);
+                ci.IsDel = true;
+                _context.ClassInfo.Update(ci);
+                ///删除该题库集下面的答案
+                var cit = _context.ClassInfoContent.Where(x => x.ClassInfoId == id);
+                foreach(var item in cit)
+                {
+                    item.IsDel = true;
+                }
                 return _context.SaveChanges();
             }
             return 0;
+        }
+        /// <summary>
+        /// 查询该客户是否创建过该课程的订单
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <param name="classtestid"></param>
+        /// <returns></returns>
+        public ClassInfo GetClassInfo(int clientid, int classtestid)
+        {
+            return _context.ClassInfo.FirstOrDefault(x => x.IsDel == false && x.ClientId == clientid && x.ClassId == classtestid);
+        }
+        /// <summary>
+        /// 根据客户id检索课程资料
+        /// </summary>
+        /// <returns></returns>
+        public List<ClassInfo> GetList(int clientId)
+        {
+            var list = GetListData().ToList();
+            if (clientId != 0)
+            {
+                list = list.Where(x => x.ClientId == clientId).ToList();
+            }
+            return list;
+        }
+        /// <summary>
+        /// 根据课程资料单号查询
+        /// </summary>
+        /// <param name="no"></param>
+        /// <returns></returns>
+        public List<ClassInfo> GetListByno(int no, int status)
+        {
+            var list = GetListData();
+            if (no != 0)
+            {
+                list = list.Where(x => x.Id == no);
+
+            }
+            if (status != -1)
+            {
+                list = list.Where(x => x.Status == status);
+            }
+            return list.OrderBy(x => x.Id).ToList();
+        }
+        /// <summary>
+        /// 审核
+        /// </summary>
+        /// <param name="ClassInfo"></param>
+        /// <returns></returns>
+        public int Audit(ClassInfo classInfo)
+        {
+            var cit = _context.ClassInfo.FirstOrDefault(x => x.Id == classInfo.Id);
+            if (cit.Status != (int)classInfoStatus.Edit)
+            {
+                //添加积分
+                var client = _context.Client.FirstOrDefault(x => x.Id == classInfo.ClientId);
+                if (client != null)
+                {
+                    client.Integral += Integral.addcontent;
+                    //积分记录表
+                    IntegralRecords ir = new IntegralRecords();
+                    ir.ClientId = client.Id;
+                    ir.Integral = Integral.addcontent;
+                    ir.Source = "贡献资源";
+                    ir.CreateTime = DateTime.Now;
+                    _context.IntegralRecords.Add(ir);
+                }
+            }
+            cit.Status = (int)classInfoStatus.Audited;
+            return _context.SaveChanges();
+        }
+        /// <summary>
+        /// 获取当前导入数据的最大id
+        /// </summary>
+        /// <returns></returns>
+        public int GetImportMaxid()
+        {
+            var c = _context.ClassInfo.OrderByDescending(x => x.RefId).FirstOrDefault();
+            return c == null ? 0 : c.RefId;
+        }
+        /// <summary>
+        /// 导入数据ls
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+        public int AddImportData(List<ClassInfo> ls)
+        {
+            int num = 0;
+            foreach (var item in ls)
+            {
+                _context.ClassInfo.Add(item);
+                num += _context.SaveChanges();
+            }
+            return num;
         }
         /// <summary>
         /// 修改课程资料有用、没用
@@ -114,7 +234,7 @@ namespace DAL.DAL
         /// <param name="type"></param>
         /// <param name="check"></param>
         /// <returns></returns>
-        public int Change(int clientId, int classInfoId, string type, int check,DateTime? time)
+        public int Change(int clientId, int classInfoId, string type, int check, DateTime? time)
         {
             var ci = _context.ClassInfo.FirstOrDefault(x => x.Id == classInfoId);
             UseRecords urs = null;
@@ -128,16 +248,16 @@ namespace DAL.DAL
                     urs.Id = 0;
                     urs.Check = -1;
                     urs.Type = ur.Type;
-                    urs.CreateTime =time==null?DateTime.Now:(ur.CreateTime > time ?  time.Value.AddDays(1) : ur.CreateTime.AddDays(1));
+                    urs.CreateTime = time == null ? DateTime.Now : (ur.CreateTime > time ? time.Value.AddDays(1) : ur.CreateTime.AddDays(1));
                     _context.UseRecords.Add(urs);
                     if (ur.Type == "Y")
                     {
-                        ci.Use-= 1;
+                        ci.Use -= 1;
                     }
                     else
                     {
                         ci.NoUse -= 1;
-                        
+
                     }
                 }
             }
@@ -148,7 +268,7 @@ namespace DAL.DAL
             else
             {
                 ci.NoUse += check;
-               
+
 
             }
             if (ci.Use == -1)
@@ -168,73 +288,11 @@ namespace DAL.DAL
             _context.UseRecords.Add(urs);
             return _context.SaveChanges();
         }
-        /// <summary>
-        /// 修改课程资料
-        /// </summary>
-        /// <param name="classInfo"></param>
-        /// <returns></returns>
-        public int ChangeClassInfo(ClassInfo classInfo)
+       
+        public int GetClients()
         {
-            _context.ClassInfo.Update(classInfo);
-            return _context.SaveChanges();
-        }
-        /// <summary>
-        /// 更新分数
-        /// </summary>
-        /// <param name="classInfo"></param>
-        /// <returns></returns>
-        public int UpdateGrade(int id,int grade)
-        {
-            var ci = _context.ClassInfo.FirstOrDefault(x => x.Id == id);
-            ci.TotalGrade = grade;
-            return _context.SaveChanges();
-        }
-        /// <summary>
-        /// 查询列表全部数据
-        /// </summary>
-        /// <returns></returns>
-        public List<ClassInfo> GetList()
-        {
-            return GetListData().OrderByDescending(x => x.Id).ToList();
-        }
+            return GetListData().Where(x => x.ClientId != 0).GroupBy(x => x.ClientId).Count();
 
-        private IQueryable<ClassInfo> GetListData()
-        {
-            return _context.ClassInfo.Where(x => x.IsDel ==false);
-        }
-        /// <summary>
-        /// 获取导入数据最大的
-        /// </summary>
-        /// <returns></returns>
-        public int GetImportMaxid()
-        {
-            var ci = _context.ClassInfo.Where(x => x.RefId != 0).OrderByDescending(x => x.RefId).FirstOrDefault();
-            return ci == null ? 0 : ci.RefId;
-
-        }
-        /// <summary>
-        /// 导入数据ls
-        /// </summary>
-        /// <param name="ls"></param>
-        /// <returns></returns>
-        public int AddImportData(List<ClassInfo> ls)
-        {
-            int num = 0;
-            foreach (var item in ls)
-            {
-                _context.ClassInfo.Add(item);
-                num += _context.SaveChanges();
-            }
-            return num;
-        }
-        /// <summary>
-        /// 查询全部导入的数据
-        /// </summary>
-        /// <returns></returns>
-        public List<ClassInfo> GetImportList()
-        {
-            var list = _context.ClassInfo.Where(x => x.RefId != 0);
-            return list.ToList();
         }
     }
 }

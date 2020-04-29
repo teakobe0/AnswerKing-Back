@@ -6,6 +6,7 @@ using DAL.DAL;
 using DAL.IDAL;
 using DAL.Model;
 using DAL.Model.Const;
+using DAL.Tools;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
@@ -18,36 +19,44 @@ namespace JzAPI.Controllers
     [Route("api/ClassInfoContent")]
     public class ClassInfoContentController : BaseController
     {
-        private IClassInfoContentDAL _clicdal;
-        private IUniversityDAL _undal;
-        private IClassDAL _classdal;
-        private IClassWeekTypeDAL _cwtdal;
-        public ClassInfoContentController(IClassInfoContentDAL clicdal, IUniversityDAL undal, IClassDAL classdal, IClassWeekTypeDAL cwtdal)
+        private IClassInfoContentDAL _cicdal;
+        private IUniversityDAL _udal;
+        private IClassDAL _cdal;
+        private IClassInfoDAL _cidal;
+        public ClassInfoContentController(IClassInfoContentDAL cicdal, IUniversityDAL udal, IClassDAL cdal, IClassInfoDAL cidal)
         {
-            _clicdal = clicdal;
-            _undal = undal;
-            _classdal = classdal;
-            _cwtdal = cwtdal;
-
+            _cicdal = cicdal;
+            _udal = udal;
+            _cdal = cdal;
+            _cidal = cidal;
         }
         /// <summary>
-        /// 根据内容检索答案  分页
+        /// 新增答案
         /// </summary>
-        /// <param name="searchText"></param>
+        /// <param name="classInfoContent"></param>
         /// <returns></returns>
-        [HttpGet]
-        [Route("ContentsPage")]
-        public ResultModel ContentsPage(string searchText, int pagenum = 1, int pagesize = 10)
+        [HttpPost]
+        [Route("Add")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Add([FromBody] ClassInfoContent classInfoContent)
         {
             ResultModel r = new ResultModel();
             PageData page = new PageData();
             r.Status = RmStatus.OK;
             try
             {
-                var queryList = _clicdal.GetList(searchText);
-                page.Data = queryList.Skip(pagesize * (pagenum - 1)).Take(pagesize).ToList();
-                page.PageTotal = queryList.Count();
-                r.Data = page;
+                if (!string.IsNullOrEmpty(classInfoContent.Url) || !string.IsNullOrEmpty(classInfoContent.Contents))
+                {
+                    classInfoContent.ClientId = ID;
+                    string id = "";
+                    r.Data = _cicdal.Add(classInfoContent,out id);
+                }
+                else
+                {
+                    r.Status = RmStatus.Error;
+                    r.Msg = "答案图片/内容不能为空";
+                }
+
             }
             catch (Exception ex)
             {
@@ -56,26 +65,175 @@ namespace JzAPI.Controllers
             return r;
         }
         /// <summary>
-        /// 根据答案id查询答案详情
+        /// 根据订单id检索所有周
         /// </summary>
-        /// <param name="contentid"></param>
+        /// <param name="classInfoId"></param>
         /// <returns></returns>
         [HttpGet]
-        //[Authorize(Roles = C_Role.admin_vip)]
-        [Route("ContentDetail")]
-        public ResultModel ContentDetail(int contentid)
+        [Route("Week")]
+        public ResultModel Week(int classInfoId)
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _clicdal.GetClassInfoContent(contentid);
+                r.Data = _cicdal.GetWeek(classInfoId);
                 if (r.Data == null)
                 {
                     r.Status = RmStatus.Error;
-                    r.Msg = "查询失败";
                 }
 
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 根据客户id,订单id检索答案
+        /// </summary>
+        /// <param name="classInfoId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("ClassInfoContents")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel ClassInfoContents(int classInfoId)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            List<info> ls = new List<info>();
+            info info = null;
+            try
+            {
+                var cict = _cicdal.GetLs(ID, classInfoId);
+                foreach (var i in cict)
+                {
+                    info = new info();
+                    info.ClassInfoContent = i;
+
+                    i.NameUrl = AppConfig.Configuration["imgurl"] + i.NameUrl;
+                    i.Url = AppConfig.Configuration["imgurl"] + i.Url;
+                    info.universityname = _udal.GetUniversity(i.UniversityId) == null ? null : _udal.GetUniversity(i.UniversityId).Name;
+                    info.classname = _cdal.GetClass(i.ClassId) == null ? null : _cdal.GetClass(i.ClassId).Name;
+                    ls.Add(info);
+                }
+                r.Data = ls;
+                if (r.Data == null)
+                {
+                    r.Status = RmStatus.Error;
+                }
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        public class info
+        {
+            public ClassInfoContent ClassInfoContent{ get; set; }
+            public string universityname { get; set; }
+            public string classname { get; set; }
+        }
+
+        /// <summary>
+        /// 删除图片
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        [Route("RemoveImg")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel RemoveImg(int id, string imgurl)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                if (id != 0)
+                {
+                    //删除数据库图片
+                    var clientid = _cicdal.GeClassInfoContent(id).ClientId;
+                    if (clientid == ID)
+                    {
+                        r.Data = _cicdal.DelImg(id, imgurl);
+                    }
+                    else
+                    {
+                        r.Status = RmStatus.Error;
+                        r.Msg = "你没有权限操作";
+                    }
+                }
+                if (r.Msg == null)
+                {
+                    //转换为绝对路径
+                    string path = AppConfig.Configuration["uploadurl"] + imgurl;
+                    //删除本地
+                    if (System.IO.File.Exists(path))
+                    {
+                        System.IO.File.Delete(path);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 根据答案id检索
+        /// </summary>
+        /// <param name="classTest"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("GetClassInfoContent")]
+        public ResultModel GetClassInfoContent(int id)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                var ClassInfoContent = _cicdal.GeClassInfoContent(id);
+                var universtiyname = _udal.GetUniversity(ClassInfoContent.UniversityId) == null ? null : _udal.GetUniversity(ClassInfoContent.UniversityId).Name;
+                var classname = _cdal.GetClass(ClassInfoContent.ClassId) == null ? null : _cdal.GetClass(ClassInfoContent.ClassId).Name;
+                r.Data = new { ClassInfoContent, universtiyname, classname };
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 删除答案
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        [Route("Del")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Del(int id)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                var clientid = _cicdal.GeClassInfoContent(id).ClientId;
+                if (clientid == ID)
+                {
+                    r.Data = _cicdal.Del(id);
+                }
+                else
+                {
+                    r.Data = 0;
+                }
+                if ((int)r.Data == 0)
+                {
+                    r.Status = RmStatus.Error;
+                    r.Msg = "删除失败。";
+                }
             }
             catch (Exception ex)
             {
@@ -89,80 +247,32 @@ namespace JzAPI.Controllers
         /// <param name="classInfoContent"></param>
         /// <returns></returns>
         [HttpPut]
-        [Authorize(Roles = C_Role.admin)]
         [Route("Edit")]
+        [Authorize(Roles = C_Role.all)]
         public ResultModel Edit([FromBody] ClassInfoContent classInfoContent)
         {
             ResultModel r = new ResultModel();
-            r.Status = RmStatus.OK;
-            try
-            {
-                r.Data = _clicdal.ChangeInfo(classInfoContent.Id, classInfoContent);
-            }
-            catch (Exception ex)
-            {
-                r.Status = RmStatus.Error;
-            }
-            return r;
-        }
-        /// <summary>
-        /// 根据每周课程id检索答案
-        /// </summary>
-        /// <param name="classweekid"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("Contents")]
-        public ResultModel Contents(int classweekid)
-        {
-            ResultModel r = new ResultModel();
-            r.Status = RmStatus.OK;
-            try
-            {
-                r.Data = _clicdal.GetList(classweekid);
 
-            }
-            catch (Exception ex)
-            {
-                r.Status = RmStatus.Error;
-            }
-            return r;
-        }
-        public class uinfo
-        {
-            public University university { get; set; }
-            public int number { get; set; }
-        }
-        /// <summary>
-        /// 根据学校名称、课程名称、答案检索
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("Search")]
-        public ResultModel Search(string name)
-        {
-            ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             try
             {
-                List<uinfo> ls = new List<uinfo>();
-                uinfo uinfo = null;
-                //var content = _clicdal.GetList(name);
-                var classes = _classdal.GetList(name).Take(10);
-
-                var university = _undal.GetList(name).Take(10);
-                foreach (var item in university)
+                if (!string.IsNullOrEmpty(classInfoContent.Url) || !string.IsNullOrEmpty(classInfoContent.Contents))
                 {
-                    uinfo = new uinfo();
-                    uinfo.university = item;
-                    var clas = _classdal.GetList(item.Id);
-                    uinfo.number = clas.Count();
-                    ls.Add(uinfo);
+                    if (classInfoContent.ClientId == ID)
+                    {
+                        r.Data = _cicdal.Edit(classInfoContent);
+                    }
+                    else
+                    {
+                        r.Status = RmStatus.Error;
+                        r.Msg = "你没有权限操作";
+                    }
                 }
-            
-                //r.Data = new { content, classes, ls };
-                r.Data = new { classes,ls };
-
+                else
+                {
+                    r.Status = RmStatus.Error;
+                    r.Msg = "答案图片/内容不能为空";
+                }
             }
             catch (Exception ex)
             {
@@ -170,14 +280,15 @@ namespace JzAPI.Controllers
             }
             return r;
         }
+
         /// <summary>
-        /// 根据每周课程id检索类型
+        /// 根据每周课程id检索类型答案
         /// </summary>
         /// <param name="classweekid"></param>
         /// <returns></returns>
         [HttpGet]
-        [Route("ClassWeekTypes")]
-        public ResultModel ClassWeekTypes(int classweekid)
+        [Route("Types")]
+        public ResultModel Types(int weekname, int classinfoid)
         {
             ResultModel r = new ResultModel();
 
@@ -185,36 +296,29 @@ namespace JzAPI.Controllers
 
             try
             {
-                r.Data = _cwtdal.ClassWeekTypes(classweekid);
+                var ls = _cicdal.Types(classinfoid, weekname);
+                var img = AppConfig.Configuration["imgurl"];
+             
+                foreach (var item in ls)
+                {
+                   
+                    if (!string.IsNullOrEmpty(item.Url))
+                    {
+                        item.Url = img + item.Url;
+                    }
+                    if (!string.IsNullOrEmpty(item.NameUrl))
+                    {
+                        item.NameUrl = img + item.NameUrl;
+                    }
+                   
+                }
+                r.Data =ls;
 
             }
             catch (Exception ex)
             {
                 r.Status = RmStatus.Error;
 
-            }
-            return r;
-        }
-        /// <summary>
-        /// 根据类型id获取答案
-        /// </summary>
-        /// <param name="classweektypeid"></param>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("Contentls")]
-        public ResultModel Contentls(int classweektypeid, int id)
-        {
-            ResultModel r = new ResultModel();
-            r.Status = RmStatus.OK;
-            try
-            {
-                r.Data = _clicdal.GetByTypeid(classweektypeid, id);
-
-            }
-            catch (Exception ex)
-            {
-                r.Status = RmStatus.Error;
             }
             return r;
         }

@@ -17,20 +17,231 @@ namespace JzAPI.Controllers
     [Route("api/ClassInfo")]
     public class ClassInfoController : BaseController
     {
-        private IClassInfoDAL _clindal;
-        private IUseRecordsDAL _urdal;
-        private IClassWeekDAL _clwdal;
-        private IUniversityDAL _undal;
-        private IClassDAL _clasdal;
+
+        private IClassInfoDAL _cidal;
+        private IUniversityDAL _udal;
+        private IClassDAL _cdal;
         private IClientDAL _clientdal;
-        public ClassInfoController(IClassInfoDAL clindal, IClassWeekDAL clwdal, IUseRecordsDAL urdal, IUniversityDAL undal, IClassDAL clasdal, IClientDAL clientdal, IFocusDAL focusdal, ICommentDAL comdal)
+        private IUseRecordsDAL _urdal;
+        public ClassInfoController(IClassInfoDAL cidal, IUniversityDAL udal, IClassDAL cdal, IClientDAL clientdal, IUseRecordsDAL urdal)
         {
-            _clindal = clindal;
-            _urdal = urdal;
-            _clwdal = clwdal;
-            _undal = undal;
-            _clasdal = clasdal;
+
+            _cidal = cidal;
+            _udal = udal;
+            _cdal = cdal;
             _clientdal = clientdal;
+            _urdal = urdal;
+        }
+
+        /// <summary>
+        /// 编辑订单(题库集）名称
+        /// </summary>
+        /// <param name="classInfo"></param>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("Edit")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Edit([FromBody] ClassInfo classInfo)
+        {
+            ResultModel r = new ResultModel();
+            PageData page = new PageData();
+            r.Status = RmStatus.OK;
+            try
+            {
+                if (!string.IsNullOrEmpty(classInfo.Name))
+                {
+                    if (classInfo.ClientId == ID)
+                    {
+                        r.Data = _cidal.Edit(classInfo);
+                    }
+                    else
+                    {
+                        r.Status = RmStatus.Error;
+                        r.Msg = "你没有权限操作";
+                    }
+                }
+                else
+                {
+                    r.Status = RmStatus.Error;
+                    r.Msg = "题库集名称不能为空";
+                }
+
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+
+        public class info
+        {
+            public ClassInfo cict { get; set; }
+            public string university { get; set; }
+            public string clas { get; set; }
+
+        }
+        /// <summary>
+        /// 根据题库集id检索
+        /// </summary>
+        /// <param name="classTest"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("GetClassInfo")]
+        public ResultModel GetClassInfo(int id)
+        {
+            ResultModel r = new ResultModel();
+            PageData page = new PageData();
+            r.Status = RmStatus.OK;
+            try
+            {
+                info info = new info();
+                info.cict = _cidal.GetClassInfo(id);
+                var cla = _cdal.GetClass(info.cict.ClassId);
+                info.clas = cla.Name;
+                info.university = _udal.GetUniversity(cla.UniversityId).Name;
+                r.Data = info;
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 删除题库集
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        [Route("Del")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Del(int id)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                var clientid = _cidal.GetClassInfo(id).ClientId;
+                if (clientid == ID)
+                {
+                    r.Data = _cidal.Del(id);
+                }
+                else
+                {
+                    r.Data = 0;
+                }
+                if ((int)r.Data == 0)
+                {
+                    r.Status = RmStatus.Error;
+                    r.Msg = "删除失败。";
+                }
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 根据客户id检索学校、课程、订单
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Action")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Action()
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            List<actioninfo> list = new List<actioninfo>();
+            actioninfo actioninfo = null;
+            try
+            {
+                //学校
+                var university = _udal.GetList(ID);
+                foreach (var i in university)
+                {
+                    actioninfo = new actioninfo();
+                    actioninfo.id = i.Id;
+                    actioninfo.name = i.Name;
+                    actioninfo.type = "学校";
+                    actioninfo.status = i.IsAudit==false?0:1;
+                    actioninfo.CreateTime = i.CreateTime;
+                    list.Add(actioninfo);
+                }
+
+                //课程
+                var clas = _cdal.GetList(ID);
+                foreach (var t in clas)
+                {
+                    actioninfo = new actioninfo();
+                    actioninfo.id = t.Id;
+                    actioninfo.name = t.Name;
+                    actioninfo.type = "课程";
+                    actioninfo.status = t.IsAudit == false ? 0 : 1;
+                    actioninfo.CreateTime = t.CreateTime;
+                    list.Add(actioninfo);
+                }
+                //课程资料(题库集）
+                var classInfo = _cidal.GetList(ID);
+                foreach (var e in classInfo)
+                {
+                    actioninfo = new actioninfo();
+                    actioninfo.id = e.Id;
+                    actioninfo.name = e.Name;
+                    actioninfo.type = "题库集";
+                    actioninfo.status = e.Status;
+                    actioninfo.CreateTime = e.CreateTime;
+                    list.Add(actioninfo);
+                }
+                r.Data = list.OrderByDescending(x => x.CreateTime);
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        public class actioninfo
+        {
+            public int id { get; set; }//id
+            public string name { get; set; }//项目名称
+            public string type { get; set; }//类别 
+            public DateTime CreateTime { get; set; }//创建时间
+            public int status { get; set; }//状态
+
+        }
+        /// <summary>
+        /// 更改题库集状态
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("Change")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Change(int id)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                var clientid = _cidal.GetClassInfo(id).ClientId;
+                if (clientid == ID)
+                {
+                    r.Data = _cidal.Change(id);
+                }
+                else
+                {
+                    r.Status = RmStatus.Error;
+                    r.Msg = "你没有权限操作";
+                }
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
         }
         /// <summary>
         /// 根据课程id检索课程资料
@@ -47,7 +258,7 @@ namespace JzAPI.Controllers
             {
                 List<cinfo> ls = new List<cinfo>();
                 cinfo cinfo = null;
-                var cils = _clindal.GetList(classid);
+                var cils = _cidal.GetLs(classid);
                 foreach (var item in cils)
                 {
                     cinfo = new cinfo();
@@ -57,11 +268,6 @@ namespace JzAPI.Controllers
                     {
                         cinfo.clientname = client.Name;
                         cinfo.clientimg = client.Image;
-                    }
-                    var cwls = _clwdal.GetListByClassinfoid(item.Id);
-                    if (cwls.Count() > 0)
-                    {
-                        item.TotalGrade = cwls.Sum(x => x.Grade) / cwls.Count();
                     }
                     ls.Add(cinfo);
                 }
@@ -93,10 +299,10 @@ namespace JzAPI.Controllers
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
-         
+
             try
             {
-                r.Data = _clindal.Change(ID, classInfoId, type, check,null);
+                r.Data =_cidal.Change(ID, classInfoId, type, check, null);
 
 
             }
@@ -161,10 +367,10 @@ namespace JzAPI.Controllers
             List<model> ls = new List<model>();
             try
             {
-                var clas = _clasdal.GetList();
+                var clas = _cdal.GetList();
                 var num = new Random().Next(1, clas.Count() - 15);
                 var eachclas = clas.Where(x => x.Id > num).Take(15);
-                var classinfos = _clindal.GetList();
+                var classinfos = _cidal.GetList();
                 model m = null;
                 foreach (var item in eachclas)
                 {
@@ -175,7 +381,7 @@ namespace JzAPI.Controllers
                     m.class_name = item.Name;
                     m.class_id = item.Id;
                     m.classinfo_num = classinfos.Count();
-                    var classinfo = _clindal.GetList(item.Id);
+                    var classinfo = classinfos.Where(x=>x.ClassId==item.Id);
                     foreach (var i in classinfo)
                     {
                         var client = _clientdal.GetClientById(i.ClientId);
@@ -186,7 +392,7 @@ namespace JzAPI.Controllers
                             break;
                         }
                     }
-                    m.client_num = _clindal.GetClients();
+                    m.client_num =_cidal.GetClients();
                     ls.Add(m);
                 }
 
@@ -200,6 +406,5 @@ namespace JzAPI.Controllers
             return r;
         }
 
-       
     }
 }

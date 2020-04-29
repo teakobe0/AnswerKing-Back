@@ -37,10 +37,10 @@ namespace JzAPI.Controllers
         [HttpPost]
         [Route("UploadImg")]
         [Authorize(Roles = C_Role.all)]
-        public async Task<IActionResult> UploadImg(IFormCollection collection, int classInfoTestId)
+        public async Task<IActionResult> UploadImg(IFormCollection collection, int classInfoId)
         {
             
-            if (classInfoTestId==0)
+            if (classInfoId==0)
             {
                 return BadRequest("题库集单号不能为空");
             }
@@ -49,7 +49,7 @@ namespace JzAPI.Controllers
                 var files = collection.Files;
                 long size = files.Sum(f => f.Length);
                 var filePath = "";
-                filePath = CheckDirectory(classInfoTestId);
+                filePath = CheckDirectory(classInfoId);
                 string file = "";
                 foreach (var formFile in files)
                 {
@@ -65,7 +65,7 @@ namespace JzAPI.Controllers
                             {
                                 await formFile.CopyToAsync(stream);
                             }
-                            file = "/ClassinfoImg/" + classInfoTestId + "/" + filename;
+                            file = "/ClassinfoImg/" + classInfoId + "/" + filename;
                         }
                         catch (IOException e)
                         {

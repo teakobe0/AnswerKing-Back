@@ -15,28 +15,43 @@ namespace DAL.DAL
             _context = context;
         }
         /// <summary>
-        /// 查询列表 根据条件
+        /// 查询列表全部数据
+        /// </summary>
+        /// <returns></returns>
+        public List<University> GetList()
+        {
+            return GetListData().ToList();
+        }
+
+        private IQueryable<University> GetListData()
+        {
+            return _context.University.Where(x => x.IsDel == false);
+        }
+        /// <summary>
+        /// 查询列表
         /// </summary>
         /// <returns></returns>
         public List<University> GetList(string name)
         {
             var list = GetListData();
             if (!string.IsNullOrEmpty(name))
-                list = list.Where(x => x.Name.Contains(name));
-
-            return list.OrderBy(x => x.Id).ToList();
+            {
+                list = list.Where(x => x.Name.Trim().Contains(name.Trim()));
+            }
+            return list.ToList();
 
         }
         /// <summary>
-        /// 查询列表 根据条件
+        /// 根据学校id查询
         /// </summary>
+        /// <param name="id"></param>
         /// <returns></returns>
         public University GetUniversity(int id)
         {
             return _context.University.FirstOrDefault(x => x.Id == id);
         }
         /// <summary>
-        /// 检验学校名称是否存在
+        /// 查询学校名称是否存在
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
@@ -48,217 +63,33 @@ namespace DAL.DAL
             }
             else
             {
-                return _context.University.Any(x => x.Name.Trim() == name.Trim() && x.Id != id && x.IsDel == false);
+                return _context.University.Any(x => x.Id != id && x.Name.Trim() == name.Trim() && x.IsDel == false);
             }
-        }
 
+        }
+        /// <summary>
+        /// 根据学校名称查询
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public University GetUniversity(string name)
         {
             return _context.University.FirstOrDefault(x => x.Name.Trim() == name.Trim() && x.IsDel == false);
+
         }
         /// <summary>
         /// 新增
         /// </summary>
         /// <param name="university"></param>
         /// <returns></returns>
-        public int Add(University university)
+        public University Add(University university)
         {
-            //var unty = _context.University.OrderByDescending(x => x.Id).FirstOrDefault();
-            //university.Id = (unty == null || unty.Id < InitID) ? InitID : unty.Id + 1;
+
             university.CreateTime = DateTime.Now;
             _context.University.Add(university);
-            return _context.SaveChanges();
-        }
-        /// <summary>
-        /// 根据学校名称检索学校id
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public int Getbyname(string name)
-        {
-            var universityid = _context.University.FirstOrDefault(x => x.Name == name) == null ? 0 : _context.University.FirstOrDefault(x => x.Name == name).Id;
-            return universityid;
-        }
-        /// <summary>
-        /// 根据国家和州/省份检索学校
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public List<University> GetByCountry(string name, string state)
-        {
-            var list = GetListData();
-            if (!string.IsNullOrEmpty(name))
-                list = list.Where(x => x.Country == name);
-            if (!string.IsNullOrEmpty(state))
-            {
-                list = list.Where(x => x.State == state);
-            }
-            return list.ToList();
-        }
-
-        /// <summary>
-        /// 修改学校信息
-        /// </summary>
-        /// <param name="ID"></param>
-        /// <param name="university"></param>        
-        /// <returns></returns>
-        public int ChangeInfo(int ID, University university)
-        {
-            var data = _context.University.FirstOrDefault(x => x.Id == ID);
-            data.Image = university.Image;
-            data.Intro = university.Intro;
-            return _context.SaveChanges();
-        }
-        /// <summary>
-        /// 修改学校信息
-        /// </summary>
-        /// <param name="university"></param>
-        /// <returns></returns>
-        public int ChangeInfo(University university)
-        {
-            try
-            {
-                var model = _context.University.FirstOrDefault(x => x.Id == university.Id);
-                if (model.Name != university.Name)
-                {
-                    model.Name = university.Name;
-                    var clist = _context.Class.Where(x => x.UniversityId == university.Id);
-                    if (clist.Count() > 0)
-                    {
-                        foreach (var item in clist)
-                        {
-                            item.University = university.Name;
-                        }
-                    }
-                }
-                model.Country = university.Country;
-                model.City = university.City;
-                model.State = university.State;
-                model.Address = university.Address;
-                model.Intro = university.Intro;
-                model.Image = university.Image;
-                model.Website = university.Website;
-                _context.SaveChanges();
-                return 1;
-            }
-            catch (Exception ex)
-            {
-                return 0;
-            }
-
-
-        }
-        /// <summary>
-        /// 隐藏学校
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public int Hide(int id)
-        {
-            var data = _context.University.FirstOrDefault(x => x.Id == id);
-            data.IsHide = -1;
-            return _context.SaveChanges();
-        }
-        /// <summary>
-        /// 删除
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public int Del(int id)
-        {
-            if (id != 0)
-            {
-                var university = _context.University.FirstOrDefault(x => x.Id == id);
-                Utils.WriteInfoLog("University:Delete" + university.ToJson());
-                university.IsDel = true;
-                _context.University.Update(university);
-                //删除这个学校下面的课
-                var clas = _context.Class.Where(x => x.UniversityId == id);
-                if (clas.Count() > 0)
-                {
-                    foreach(var i in clas)
-                    {
-                        i.IsDel = true;
-                    }
-                }
-                return _context.SaveChanges();
-            }
-            return 0;
-        }
-        /// <summary>
-        /// 查询列表全部数据
-        /// </summary>
-        /// <returns></returns>
-        public List<University> GetList()
-        {
-            return GetListData().ToList();
-        }
-
-        private IQueryable<University> GetListData()
-        {
-            return _context.University.Where(x => x.IsHide == 0&&x.IsDel==false);
-        }
-
-        /// <summary>
-        /// 合并
-        /// </summary>
-        /// <param name="cbrows"></param>
-        /// <param name="targetid"></param>
-        /// <returns></returns>
-        public int Combine(List<University> cbrows, int targetid,int LoginId)
-        {
-            var target = _context.University.FirstOrDefault(x => x.Id == targetid);
-
-            foreach (var item in cbrows)
-            {
-                if (item.Id != targetid)
-                {
-                    //_context.University.Remove(item);
-                   UniversityCombine combine = new UniversityCombine();
-                    combine.OriginalId = item.Id;
-                    combine.TargetId = targetid;
-                    combine.CreateTime = DateTime.Now;
-                    combine.CreateBy = LoginId.ToString();
-                    _context.UniversityCombine.Add(combine);
-                    Utils.WriteInfoLog("University:CombineDel" + item.ToJson()+ ",targetid:" + targetid);
-                    item.IsDel = true;
-                    _context.University.Update(item);
-                    var classes = _context.Class.Where(x => x.UniversityId == item.Id);
-                    foreach (var cs in classes)
-                    {
-                        cs.UniversityId = target.Id;
-                        cs.University = target.Name;
-                        cs.OriginUniversityId = item.Id;
-
-                    }
-                    var cinfos = _context.ClassInfoContent.Where(x => x.UniversityId == item.Id);
-                    foreach (var i in cinfos)
-                    {
-                        i.UniversityId = target.Id;
-                        i.OriginUniversityId = item.Id;
-                    }
-                }
-            }
-            return _context.SaveChanges();
-        }
-        /// <summary>
-        /// 导入
-        /// </summary>
-        /// <param name="ls"></param>
-        /// <returns></returns>
-        public int Import(List<University> ls)
-        {
-            _context.University.AddRange(ls);
-            return _context.SaveChanges();
-        }
-        /// <summary>
-        /// 查询当前导入数据的最大
-        /// </summary>
-        /// <returns></returns>
-        public int GetMaxId()
-        {
-            var max = _context.University.OrderByDescending(x => x.Id).FirstOrDefault();
-            return max == null ? 0 : max.Id;
+            _context.SaveChanges();
+            return university;
+            
         }
         /// <summary>
         /// 删除图片
@@ -280,6 +111,120 @@ namespace DAL.DAL
                 return 0;
             }
 
+        }
+        /// <summary>
+        /// 编辑学校
+        /// </summary>
+        /// <param name="cla"></param>
+        /// <returns></returns>
+        public int Edit(University university)
+        {
+            try
+            {
+                var model = _context.University.FirstOrDefault(x => x.Id == university.Id);
+                if (model.Name != university.Name)
+                {
+                    model.Name = university.Name;
+                    var clist = _context.Class.Where(x => x.UniversityId == university.Id);
+                    if (clist.Count() > 0)
+                    {
+                        foreach (var item in clist)
+                        {
+                            item.University = university.Name;
+                        }
+                    }
+                }
+                model.Country = university.Country;
+                model.City = university.City;
+                model.State = university.State;
+                model.Intro = university.Intro;
+                model.Image = university.Image;
+                _context.SaveChanges();
+                return 1;
+            }
+            catch (Exception ex)
+            {
+                return 0;
+            }
+
+        }
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public int Del(int id)
+        {
+            if (id != 0)
+            {
+                University ut = _context.University.FirstOrDefault(x => x.Id == id);
+                ut.IsDel = true;
+                _context.University.Update(ut);
+                //删除这个学校下面的课
+                var clas = _context.Class.Where(x => x.UniversityId == id);
+                if (clas.Count() > 0)
+                {
+                    foreach (var i in clas)
+                    {
+                        i.IsDel = true;
+                    }
+                }
+                return _context.SaveChanges();
+            }
+            return 0;
+        }
+        /// <summary>
+        /// 根据客户id检索学校
+        /// </summary>
+        /// <returns></returns>
+        public List<University> GetList(int clientId)
+        {
+            var list = GetListData().ToList();
+            if (clientId != 0)
+            {
+                list = list.Where(x => x.ClientId == clientId).ToList();
+            }
+            return list;
+        }
+        /// <summary>
+        /// 获取当前导入数据的最大id
+        /// </summary>
+        /// <returns></returns>
+        public int GetImportMaxid()
+        {
+            var c = _context.University.OrderByDescending(x => x.RefId).FirstOrDefault();
+            return c == null ? 0 : c.RefId;
+        }
+        /// <summary>
+        /// 导入数据ls
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+        public int AddImportData(List<University> ls)
+        {
+            int num = 0;
+            foreach (var item in ls)
+            {
+                _context.University.Add(item);
+                num += _context.SaveChanges();
+            }
+            return num;
+        }
+        /// <summary>
+        /// 根据国家和州/省份检索学校
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public List<University> GetByCountry(string name, string state)
+        {
+            var list = GetListData();
+            if (!string.IsNullOrEmpty(name))
+                list = list.Where(x => x.Country == name);
+            if (!string.IsNullOrEmpty(state))
+            {
+                list = list.Where(x => x.State == state);
+            }
+            return list.ToList();
         }
     }
 }

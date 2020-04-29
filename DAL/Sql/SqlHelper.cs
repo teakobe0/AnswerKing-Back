@@ -23,7 +23,7 @@ namespace DAL.Sql
             }
             else
             {
-                sql = "select  * from " + table + " where id> " + maxid + " order by id";
+                sql = "select  * from " + table + " where id> " + maxid + "and IsDel=0 order by id";
 
             }
             SqlCommand command = new SqlCommand(sql, conn);

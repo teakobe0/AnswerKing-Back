@@ -4,14 +4,16 @@ using DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DAL.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20200426042916_sb")]
+    partial class sb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -97,40 +99,6 @@ namespace DAL.Migrations
                     b.ToTable("Bidding");
                 });
 
-            modelBuilder.Entity("DAL.Model.Class", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("ClientId");
-
-                    b.Property<string>("CreateBy")
-                        .HasMaxLength(50);
-
-                    b.Property<DateTime>("CreateTime");
-
-                    b.Property<bool>("IsAudit");
-
-                    b.Property<bool>("IsDel");
-
-                    b.Property<string>("Memo");
-
-                    b.Property<string>("Name");
-
-                    b.Property<string>("Professor");
-
-                    b.Property<int>("RefId");
-
-                    b.Property<string>("University");
-
-                    b.Property<int>("UniversityId");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Class");
-                });
-
             modelBuilder.Entity("DAL.Model.ClassCombine", b =>
                 {
                     b.Property<int>("Id")
@@ -155,49 +123,15 @@ namespace DAL.Migrations
                     b.ToTable("ClassCombine");
                 });
 
-            modelBuilder.Entity("DAL.Model.ClassInfo", b =>
+            modelBuilder.Entity("DAL.Model.ClassInfoContentTest", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("ClassId");
+                    b.Property<int>("ClassInfoTestId");
 
-                    b.Property<int>("ClientId");
-
-                    b.Property<string>("CreateBy")
-                        .HasMaxLength(50);
-
-                    b.Property<DateTime>("CreateTime");
-
-                    b.Property<int>("Grade");
-
-                    b.Property<bool>("IsDel");
-
-                    b.Property<string>("Name");
-
-                    b.Property<int>("NoUse");
-
-                    b.Property<int>("RefId");
-
-                    b.Property<int>("Status");
-
-                    b.Property<int>("Use");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ClassInfo");
-                });
-
-            modelBuilder.Entity("DAL.Model.ClassInfoContent", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("ClassId");
-
-                    b.Property<int>("ClassInfoId");
+                    b.Property<int>("ClassTestId");
 
                     b.Property<int>("ClassWeek");
 
@@ -224,13 +158,81 @@ namespace DAL.Migrations
 
                     b.Property<int>("RefId");
 
-                    b.Property<int>("UniversityId");
+                    b.Property<int>("UniversityTestId");
 
                     b.Property<string>("Url");
 
                     b.HasKey("Id");
 
-                    b.ToTable("ClassInfoContent");
+                    b.ToTable("ClassInfoContentTest");
+                });
+
+            modelBuilder.Entity("DAL.Model.ClassInfoTest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("ClassTestId");
+
+                    b.Property<int>("ClientId");
+
+                    b.Property<string>("CreateBy")
+                        .HasMaxLength(50);
+
+                    b.Property<DateTime>("CreateTime");
+
+                    b.Property<int>("Grade");
+
+                    b.Property<bool>("IsDel");
+
+                    b.Property<string>("Name");
+
+                    b.Property<int>("NoUse");
+
+                    b.Property<int>("RefId");
+
+                    b.Property<int>("Status");
+
+                    b.Property<int>("Use");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ClassInfoTest");
+                });
+
+            modelBuilder.Entity("DAL.Model.ClassTest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("ClientId");
+
+                    b.Property<string>("CreateBy")
+                        .HasMaxLength(50);
+
+                    b.Property<DateTime>("CreateTime");
+
+                    b.Property<bool>("IsAudit");
+
+                    b.Property<bool>("IsDel");
+
+                    b.Property<string>("Memo");
+
+                    b.Property<string>("Name");
+
+                    b.Property<string>("Professor");
+
+                    b.Property<int>("RefId");
+
+                    b.Property<string>("UniversityTest");
+
+                    b.Property<int>("UniversityTestId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ClassTest");
                 });
 
             modelBuilder.Entity("DAL.Model.ClassWeek", b =>
@@ -578,7 +580,31 @@ namespace DAL.Migrations
                     b.ToTable("Question");
                 });
 
-            modelBuilder.Entity("DAL.Model.University", b =>
+            modelBuilder.Entity("DAL.Model.UniversityCombine", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CreateBy")
+                        .HasMaxLength(50);
+
+                    b.Property<DateTime>("CreateTime");
+
+                    b.Property<bool>("IsDel");
+
+                    b.Property<int>("OriginalId");
+
+                    b.Property<int>("RefId");
+
+                    b.Property<int>("TargetId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UniversityCombine");
+                });
+
+            modelBuilder.Entity("DAL.Model.UniversityTest", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -611,31 +637,7 @@ namespace DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("University");
-                });
-
-            modelBuilder.Entity("DAL.Model.UniversityCombine", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("CreateBy")
-                        .HasMaxLength(50);
-
-                    b.Property<DateTime>("CreateTime");
-
-                    b.Property<bool>("IsDel");
-
-                    b.Property<int>("OriginalId");
-
-                    b.Property<int>("RefId");
-
-                    b.Property<int>("TargetId");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UniversityCombine");
+                    b.ToTable("UniversityTest");
                 });
 
             modelBuilder.Entity("DAL.Model.User", b =>

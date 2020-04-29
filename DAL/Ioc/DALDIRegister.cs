@@ -14,12 +14,8 @@ namespace DAL.Ioc
         {
             services.AddTransient(typeof(IClientDAL), typeof(ClientDAL));
             services.AddTransient(typeof(IUserDAL), typeof(UserDAL));
-            services.AddTransient(typeof(IClassInfoContentDAL), typeof(ClassInfoContentDAL));
-            services.AddTransient(typeof(IClassDAL), typeof(ClassDAL));
-            services.AddTransient(typeof(IClassInfoDAL), typeof(ClassInfoDAL));
             services.AddTransient(typeof(IClassWeekDAL), typeof(ClassWeekDAL));
             services.AddTransient(typeof(IClassWeekTypeDAL), typeof(ClassWeekTypeDAL));
-            services.AddTransient(typeof(IUniversityDAL), typeof(UniversityDAL));
             services.AddTransient(typeof(IHomeDAL), typeof(HomeDAL));
             services.AddTransient(typeof(IAreaDAL), typeof(AreaDAL));
             services.AddTransient(typeof(IImportRecordsDAL), typeof(ImportRecordsDAL));
@@ -31,10 +27,10 @@ namespace DAL.Ioc
             services.AddTransient(typeof(IFeedbackDAL), typeof(FeedbackDAL));
             services.AddTransient(typeof(IUniversityCombineDAL), typeof(UniversityCombineDAL));
             services.AddTransient(typeof(IClassCombineDAL), typeof(ClassCombineDAL));
-            services.AddTransient(typeof(IClassTestDAL), typeof(ClassTestDAL));
-            services.AddTransient(typeof(IUniversityTestDAL), typeof(UniversityTestDAL));
-            services.AddTransient(typeof(IClassInfoTestDAL), typeof(ClassInfoTestDAL));
-            services.AddTransient(typeof(IClassInfoContentTestDAL), typeof(ClassInfoContentTestDAL));
+            services.AddTransient(typeof(IClassDAL), typeof(ClassDAL));
+            services.AddTransient(typeof(IUniversityDAL), typeof(UniversityDAL));
+            services.AddTransient(typeof(IClassInfoDAL), typeof(ClassInfoDAL));
+            services.AddTransient(typeof(IClassInfoContentDAL), typeof(ClassInfoContentDAL));
             services.AddTransient(typeof(IQuestionDAL), typeof(QuestionDAL));
             services.AddTransient(typeof(IAnswerDAL), typeof(AnswerDAL));
             services.AddTransient(typeof(IBiddingDAL), typeof(BiddingDAL));

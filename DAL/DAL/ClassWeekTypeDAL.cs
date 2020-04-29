@@ -101,33 +101,33 @@ namespace DAL.DAL
         /// <param name="pagesize"></param>
         /// <param name="PageTotal"></param>
         /// <returns></returns>
-        public object GetList(int classinfoid, int pagenum, int pagesize, out int PageTotal)
-        {
-            PageTotal = 0;
-            var ls = GetListData().Where(x => x.ClassWeekTypeId != 0);
-            var list = from x in ls
-                       join cw in _context.ClassWeek on x.ClassWeekId equals cw.Id
-                       join ci in _context.ClassInfo on cw.ClassInfoId equals ci.Id
+        //public object GetList(int classinfoid, int pagenum, int pagesize, out int PageTotal)
+        //{
+        //    PageTotal = 0;
+        //    var ls = GetListData().Where(x => x.ClassWeekTypeId != 0);
+        //    var list = from x in ls
+        //               join cw in _context.ClassWeek on x.ClassWeekId equals cw.Id
+        //               join ci in _context.ClassInfo on cw.ClassInfoId equals ci.Id
 
-                       select new
-                       {
-                           x.ClassWeekTypeId,
-                           ClassWeek = _context.ClassWeek.FirstOrDefault(z => z.Id == x.ClassWeekId) != null ? _context.ClassWeek.FirstOrDefault(z => z.Id == x.ClassWeekId).No.ToString() : "",
-                           x.ContentType,
-                           x.ClassWeekId,
-                           x.Grade,
-                           x.Id,
-                           ClassInfo = cw.ClassInfoId
+        //               select new
+        //               {
+        //                   x.ClassWeekTypeId,
+        //                   ClassWeek = _context.ClassWeek.FirstOrDefault(z => z.Id == x.ClassWeekId) != null ? _context.ClassWeek.FirstOrDefault(z => z.Id == x.ClassWeekId).No.ToString() : "",
+        //                   x.ContentType,
+        //                   x.ClassWeekId,
+        //                   x.Grade,
+        //                   x.Id,
+        //                   ClassInfo = cw.ClassInfoId
 
-                       };
-            if (classinfoid != 0)
-            {
-                list = list.Where(x => x.ClassInfo == classinfoid);
-            }
-            PageTotal = list.Count();
-            list = list.Skip(pagesize * (pagenum - 1)).Take(pagesize).OrderBy(x => x.Id);
-            return list.ToList();
-        }
+        //               };
+        //    if (classinfoid != 0)
+        //    {
+        //        list = list.Where(x => x.ClassInfo == classinfoid);
+        //    }
+        //    PageTotal = list.Count();
+        //    list = list.Skip(pagesize * (pagenum - 1)).Take(pagesize).OrderBy(x => x.Id);
+        //    return list.ToList();
+        //}
       
         /// <summary>
         /// 根据每周课程id检索课程类型
@@ -151,102 +151,102 @@ namespace DAL.DAL
         /// </summary>
         /// <param name="classWeekType"></param>
         /// <returns></returns>
-        public int ChangeInfo(ClassWeekType classWeekType)
-        {
-            int num = 0;
-            if (classWeekType.ClassWeekTypeId == -1)
-            {
-                _context.ClassWeekType.Update(classWeekType);
-                _context.SaveChanges();
-                num = num + 1;
-            }
-            else
-            {
-                var model = _context.ClassWeekType.FirstOrDefault(x => x.Id == classWeekType.Id);
-                //更新该子集
-                model.Grade = classWeekType.Grade;
-                _context.ClassWeekType.Update(model);
-                _context.SaveChanges();
-                num = num + 1;
-                if (classWeekType.ClassWeekTypeId > 0)
-                {
-                    if (classWeekType.ContentType != model.ContentType)
-                    {
-                        model.ContentType = classWeekType.ContentType;
-                        if (classWeekType.RefId != 0)
-                        {
-                            var cwt = _context.ClassWeekType.FirstOrDefault(x => x.ClassWeekTypeId == 0 && x.ClassWeekId == classWeekType.ClassWeekId && x.ContentType == classWeekType.ContentType);
-                            if (cwt != null)
-                            {
-                                model.ClassWeekTypeId = cwt.RefId;
-                            }
-                            //更新对应答案里面的父级id
-                            if (classWeekType.ClassWeekTypeId != -1)
-                            {
-                                var cic = _context.ClassInfoContent.FirstOrDefault(x => x.ClassWeekTypeId == classWeekType.Id);
-                                if (cic != null)
-                                {
-                                    cic.CwtParentId = cwt.RefId;
-                                    _context.ClassInfoContent.Update(cic);
-                                }
-                            }
-                        }
-                        _context.ClassWeekType.Update(model);
-                        _context.SaveChanges();
-                        num = num + 1;
-                        //更新未修改之前的父级得分
-                        var bcwt = _context.ClassWeekType.FirstOrDefault(x => x.RefId == classWeekType.ClassWeekTypeId && x.ClassWeekTypeId == 0&&x.ContentType== classWeekType.ContentType);
-                        var bls = _context.ClassWeekType.Where(x => x.ClassWeekTypeId == bcwt.RefId && x.Grade > 0 && x.ClassWeekTypeId != 0 && x.ContentType == bcwt.ContentType);
-                        if (bls.Count() > 0)
-                        {
-                            int number = bls.Count();
-                            int grade = bls.Sum(x => x.Grade);
-                            bcwt.Grade = grade / number;
-                        }
-                        else
-                        {
-                            bcwt.Grade = 0;
-                        }
-                        _context.ClassWeekType.Update(bcwt);
-                        _context.SaveChanges();
-                        num = num + 1;
-                    }
-                    //更新类型对应的父级得分
-                    var cwtp = _context.ClassWeekType.FirstOrDefault(x => x.RefId == model.ClassWeekTypeId && x.ClassWeekTypeId == 0&&x.ContentType==model.ContentType);
-                    var pls = _context.ClassWeekType.Where(x => x.ClassWeekTypeId == cwtp.RefId && x.Grade > 0 && x.ClassWeekTypeId != 0 && x.ContentType == cwtp.ContentType);
-                    if (pls.Count() > 0)
-                    {
-                        int number = pls.Count();
-                        int grade = pls.Sum(x => x.Grade);
-                        cwtp.Grade = grade / number;
-                    }
-                    else
-                    {
-                        cwtp.Grade = 0;
-                    }
-                    _context.ClassWeekType.Update(cwtp);
-                    _context.SaveChanges();
-                    num = num + 1;
-                }
-            }
-            //更新对应周的总分
-            var cw = _context.ClassWeek.FirstOrDefault(x => x.Id == classWeekType.ClassWeekId);
-            var ls = _context.ClassWeekType.Where(x => x.ClassWeekId == cw.Id && (x.ClassWeekTypeId == 0 || x.ClassWeekTypeId == -1) && x.Grade > 0);
-            if (ls.Count() > 0)
-            {
-                int number = ls.Count();
-                int sgrade = ls.Sum(x => x.Grade);
-                cw.Grade = sgrade / number;
-            }
-            else
-            {
-                cw.Grade = 0;
-            }
-            _context.ClassWeek.Update(cw);
-            _context.SaveChanges();
-            num = num + 1;
-            return num;
-        }
+        //public int ChangeInfo(ClassWeekType classWeekType)
+        //{
+        //    int num = 0;
+        //    if (classWeekType.ClassWeekTypeId == -1)
+        //    {
+        //        _context.ClassWeekType.Update(classWeekType);
+        //        _context.SaveChanges();
+        //        num = num + 1;
+        //    }
+        //    else
+        //    {
+        //        var model = _context.ClassWeekType.FirstOrDefault(x => x.Id == classWeekType.Id);
+        //        //更新该子集
+        //        model.Grade = classWeekType.Grade;
+        //        _context.ClassWeekType.Update(model);
+        //        _context.SaveChanges();
+        //        num = num + 1;
+        //        if (classWeekType.ClassWeekTypeId > 0)
+        //        {
+        //            if (classWeekType.ContentType != model.ContentType)
+        //            {
+        //                model.ContentType = classWeekType.ContentType;
+        //                if (classWeekType.RefId != 0)
+        //                {
+        //                    var cwt = _context.ClassWeekType.FirstOrDefault(x => x.ClassWeekTypeId == 0 && x.ClassWeekId == classWeekType.ClassWeekId && x.ContentType == classWeekType.ContentType);
+        //                    if (cwt != null)
+        //                    {
+        //                        model.ClassWeekTypeId = cwt.RefId;
+        //                    }
+        //                    //更新对应答案里面的父级id
+        //                    if (classWeekType.ClassWeekTypeId != -1)
+        //                    {
+        //                        var cic = _context.ClassInfoContent.FirstOrDefault(x => x.ClassWeekTypeId == classWeekType.Id);
+        //                        if (cic != null)
+        //                        {
+        //                            cic.CwtParentId = cwt.RefId;
+        //                            _context.ClassInfoContent.Update(cic);
+        //                        }
+        //                    }
+        //                }
+        //                _context.ClassWeekType.Update(model);
+        //                _context.SaveChanges();
+        //                num = num + 1;
+        //                //更新未修改之前的父级得分
+        //                var bcwt = _context.ClassWeekType.FirstOrDefault(x => x.RefId == classWeekType.ClassWeekTypeId && x.ClassWeekTypeId == 0&&x.ContentType== classWeekType.ContentType);
+        //                var bls = _context.ClassWeekType.Where(x => x.ClassWeekTypeId == bcwt.RefId && x.Grade > 0 && x.ClassWeekTypeId != 0 && x.ContentType == bcwt.ContentType);
+        //                if (bls.Count() > 0)
+        //                {
+        //                    int number = bls.Count();
+        //                    int grade = bls.Sum(x => x.Grade);
+        //                    bcwt.Grade = grade / number;
+        //                }
+        //                else
+        //                {
+        //                    bcwt.Grade = 0;
+        //                }
+        //                _context.ClassWeekType.Update(bcwt);
+        //                _context.SaveChanges();
+        //                num = num + 1;
+        //            }
+        //            //更新类型对应的父级得分
+        //            var cwtp = _context.ClassWeekType.FirstOrDefault(x => x.RefId == model.ClassWeekTypeId && x.ClassWeekTypeId == 0&&x.ContentType==model.ContentType);
+        //            var pls = _context.ClassWeekType.Where(x => x.ClassWeekTypeId == cwtp.RefId && x.Grade > 0 && x.ClassWeekTypeId != 0 && x.ContentType == cwtp.ContentType);
+        //            if (pls.Count() > 0)
+        //            {
+        //                int number = pls.Count();
+        //                int grade = pls.Sum(x => x.Grade);
+        //                cwtp.Grade = grade / number;
+        //            }
+        //            else
+        //            {
+        //                cwtp.Grade = 0;
+        //            }
+        //            _context.ClassWeekType.Update(cwtp);
+        //            _context.SaveChanges();
+        //            num = num + 1;
+        //        }
+        //    }
+        //    //更新对应周的总分
+        //    var cw = _context.ClassWeek.FirstOrDefault(x => x.Id == classWeekType.ClassWeekId);
+        //    var ls = _context.ClassWeekType.Where(x => x.ClassWeekId == cw.Id && (x.ClassWeekTypeId == 0 || x.ClassWeekTypeId == -1) && x.Grade > 0);
+        //    if (ls.Count() > 0)
+        //    {
+        //        int number = ls.Count();
+        //        int sgrade = ls.Sum(x => x.Grade);
+        //        cw.Grade = sgrade / number;
+        //    }
+        //    else
+        //    {
+        //        cw.Grade = 0;
+        //    }
+        //    _context.ClassWeek.Update(cw);
+        //    _context.SaveChanges();
+        //    num = num + 1;
+        //    return num;
+        //}
         /// <summary>
         /// 删除
         /// </summary>

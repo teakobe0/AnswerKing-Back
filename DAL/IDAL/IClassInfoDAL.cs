@@ -6,33 +6,41 @@ using System.Text;
 namespace DAL.IDAL
 {
     public interface IClassInfoDAL
-    {
-        /// <summary>
-        /// 查询列表 带条件
-        /// </summary>
-        /// <param name="classid"></param>
-        /// <returns></returns>
-        List<ClassInfo> GetList(int classid);
-        /// <summary>
-        /// 查询列表
-        /// </summary>
-        /// <returns></returns>
+    {  /// <summary>
+       /// 查询列表
+       /// </summary>
+       /// <returns></returns> 
         List<ClassInfo> GetList();
+        /// <summary>
+        /// 新增课程
+        /// </summary>
+        /// <param name="cit"></param>
+        /// <returns></returns>
+        ClassInfo Add(ClassInfo cit);
         /// <summary>
         /// 根据课程资料id检索
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        ClassInfo GetClassInfo(int id);
-        ClassInfo GetRandomClassInfo();
-        ClassInfo GetRandom();
-        int GetClients();
-        /// <summary>
-        /// 新增
-        /// </summary>
-        /// <param name="classInfo"></param>
         /// <returns></returns>
-        int Add(ClassInfo classInfo);
+        ClassInfo GetClassInfo(int id);
+        /// <summary>
+        /// 根据客户id检索课程资料
+        /// </summary>
+        /// <returns></returns>
+        List<ClassInfo> GetList(int clientId);
+        /// <summary>
+        /// 根据课程id检索
+        /// </summary>
+        /// <param name="classid"></param>
+        /// <returns></returns>
+        List<ClassInfo> GetLs(int classid);
+        /// <summary>
+        /// 编辑
+        /// </summary>
+        /// <param name="cit"></param>
+        /// <returns></returns>
+        int Edit(ClassInfo cit);
         /// <summary>
         /// 删除
         /// </summary>
@@ -40,28 +48,32 @@ namespace DAL.IDAL
         /// <returns></returns>
         int Del(int id);
         /// <summary>
-        /// 修改课程资料(接口)
+        /// 查询该客户是否创建过该课程的订单
         /// </summary>
-        /// <param name="clientId"></param>
-        /// <param name="classInfoId"></param>
-        /// <param name="type"></param>
-        /// <param name="check"></param>
+        /// <param name="clientid"></param>
+        /// <param name="classtestid"></param>
         /// <returns></returns>
-        int Change(int clientId,int classInfoId, string type, int check, DateTime? time);
-        /// <summary>
-        /// 修改课程资料
-        /// </summary>
-        /// <param name="classInfo"></param>
-        /// <returns></returns>
-        int ChangeClassInfo(ClassInfo classInfo);
+        ClassInfo GetClassInfo(int clientid, int classtestid);
         /// <summary>
         /// 根据课程资料单号查询
         /// </summary>
         /// <param name="no"></param>
         /// <returns></returns>
-        List<ClassInfo> GetListByno(int no);
+         List<ClassInfo> GetListByno(int no, int status);
         /// <summary>
-        /// 获取导入数据最大的
+        /// 更改题库集状态
+        /// </summary>
+        /// <param name="cit"></param>
+        /// <returns></returns>
+        int Change(int id);
+        /// <summary>
+        /// 审核
+        /// </summary>
+        /// <param name="classInfo"></param>
+        /// <returns></returns>
+        int Audit(ClassInfo classInfo);
+        /// <summary>
+        /// 获取当前导入数据的最大id
         /// </summary>
         /// <returns></returns>
         int GetImportMaxid();
@@ -72,16 +84,22 @@ namespace DAL.IDAL
         /// <returns></returns>
         int AddImportData(List<ClassInfo> ls);
         /// <summary>
-        /// 查询全部导入的数据
+        /// 修改课程资料有用、没用
         /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="classInfoId"></param>
+        /// <param name="type"></param>
+        /// <param name="check"></param>
         /// <returns></returns>
-        List<ClassInfo> GetImportList();
+        int Change(int clientId, int classInfoId, string type, int check, DateTime? time);
+        int GetClients();
+        ClassInfo GetRandomClassInfo();
+        ClassInfo GetRandom();
         /// <summary>
-        /// 更新分数
+        /// 修改课程资料
         /// </summary>
         /// <param name="classInfo"></param>
         /// <returns></returns>
-        int UpdateGrade(int id, int grade);
-
-    }
+        int ChangeClassInfo(ClassInfo classInfo);
+    }  
 }

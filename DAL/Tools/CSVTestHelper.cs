@@ -15,11 +15,11 @@ namespace DAL.Tools
 
         public enum CsvType
         {
-            universitytest = 1,
-            classtest = 2,
-            classinfotest = 3,
+            university = 1,
+            classes = 2,
+            classinfo = 3,
            
-            classinfocontenttest = 4
+            classinfocontent = 4
         }
         public static void SaveCSV(DataTable dt, CsvType CsvType, string filePath)
         {
