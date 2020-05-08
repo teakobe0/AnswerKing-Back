@@ -67,6 +67,7 @@ namespace DAL.DAL
                 cic.ClientId = classInfoContent.ClientId;
                 cic.Url = item;
                 cic.CreateTime = DateTime.Now;
+                cic.Contents = classInfoContent.Contents;
                 cic.ClassId = _context.ClassInfo.FirstOrDefault(x => x.Id == cic.ClassInfoId).ClassId;
                 cic.UniversityId = _context.Class.FirstOrDefault(x => x.Id == cic.ClassId).UniversityId;
                 _context.ClassInfoContent.Add(cic);
