@@ -104,21 +104,30 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             List<info> ls = new List<info>();
             info info = null;
+            ClassInfoContent classInfoContent = null;
             try
             {
-                var cict = _cicdal.GetLs(ID, classInfoId);
-                foreach (var i in cict)
-                {
-                    info = new info();
-                    info.ClassInfoContent = i;
+                var cict = _cicdal.GetLs(ID, classInfoId) ;
+                var maxweek = cict.OrderByDescending(x => x.ClassWeek).FirstOrDefault().ClassWeek;
 
-                    i.NameUrl = AppConfig.Configuration["imgurl"] + i.NameUrl;
-                    i.Url = AppConfig.Configuration["imgurl"] + i.Url;
-                    info.universityname = _udal.GetUniversity(i.UniversityId) == null ? null : _udal.GetUniversity(i.UniversityId).Name;
-                    info.classname = _cdal.GetClass(i.ClassId) == null ? null : _cdal.GetClass(i.ClassId).Name;
+                for(int i = 1; i <= maxweek; i++)
+                {
+                    var weekls = cict.Where(x => x.ClassWeek == i);
+                    info = new info();
+                    info.week = i;
+                    List<ClassInfoContent> list = new List<ClassInfoContent>();
+                    foreach (var t in weekls)
+                    {
+                        classInfoContent = new ClassInfoContent();
+                        t.Url = !string.IsNullOrEmpty(t.Url) ? AppConfig.Configuration["imgurl"] + t.Url : t.Url;
+                        t.NameUrl = !string.IsNullOrEmpty(t.NameUrl) ? AppConfig.Configuration["imgurl"] + t.NameUrl : t.NameUrl;
+                        classInfoContent = t;
+                        list.Add(classInfoContent);
+                        info.list = list;
+                    }
                     ls.Add(info);
                 }
-                r.Data = ls;
+                r.Data = ls.OrderByDescending(x=>x.week);
                 if (r.Data == null)
                 {
                     r.Status = RmStatus.Error;
@@ -130,11 +139,12 @@ namespace JzAPI.Controllers
             }
             return r;
         }
+
         public class info
         {
-            public ClassInfoContent ClassInfoContent{ get; set; }
-            public string universityname { get; set; }
-            public string classname { get; set; }
+           
+            public int week { get; set; }
+            public List<ClassInfoContent> list { get; set; }
         }
 
         /// <summary>
