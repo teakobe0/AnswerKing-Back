@@ -66,8 +66,8 @@ namespace DAL.DAL
                 cic.IsAudit = classInfoContent.IsAudit;
                 cic.ClientId = classInfoContent.ClientId;
                 cic.Url = item;
-                cic.CreateTime = DateTime.Now;
                 cic.Contents = classInfoContent.Contents;
+                cic.CreateTime = DateTime.Now;
                 cic.ClassId = _context.ClassInfo.FirstOrDefault(x => x.Id == cic.ClassInfoId).ClassId;
                 cic.UniversityId = _context.Class.FirstOrDefault(x => x.Id == cic.ClassId).UniversityId;
                 _context.ClassInfoContent.Add(cic);
@@ -195,7 +195,7 @@ namespace DAL.DAL
             var cit = _context.ClassInfo.FirstOrDefault(x => x.Id == cict.ClassInfoId);
             if (cit.Status == (int)classInfoStatus.Audited)
             {
-                cit.Status = (int)classInfoStatus.NoAudit;
+                cit.Status = (int)classInfoStatus.Edit;
             }
             cict.IsAudit = false;
             _context.ClassInfoContent.Update(cict);
@@ -250,6 +250,8 @@ namespace DAL.DAL
                 cict.IsAudit = true;
                 cict.Url = classInfoContent.Url;
                 cict.Contents = classInfoContent.Contents;
+                cict.Name = classInfoContent.Name;
+                cict.NameUrl = classInfoContent.NameUrl;
                 Utils.WriteInfoLog("ClassInfoContent:Audit" + cict.ToJson());
             }
             return _context.SaveChanges();

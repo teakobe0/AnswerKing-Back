@@ -31,12 +31,23 @@ namespace DAL.DAL
         /// 查询列表
         /// </summary>
         /// <returns></returns>
-        public List<University> GetList(string name)
+        public List<University> GetList(string name, int status)
         {
             var list = GetListData();
             if (!string.IsNullOrEmpty(name))
             {
                 list = list.Where(x => x.Name.Trim().Contains(name.Trim()));
+            }
+            if (status != -1)
+            {
+                if (status == 1)
+                {
+                    list = list.Where(x => x.IsAudit == true);
+                }
+                else
+                {
+                    list = list.Where(x => x.IsAudit == false);
+                }
             }
             return list.ToList();
 
@@ -89,7 +100,7 @@ namespace DAL.DAL
             _context.University.Add(university);
             _context.SaveChanges();
             return university;
-            
+
         }
         /// <summary>
         /// 删除图片
@@ -126,19 +137,19 @@ namespace DAL.DAL
                 {
                     model.Name = university.Name;
                     var clist = _context.Class.Where(x => x.UniversityId == university.Id);
-                    if (clist.Count() > 0)
+                    foreach (var item in clist)
                     {
-                        foreach (var item in clist)
-                        {
-                            item.University = university.Name;
-                        }
+                        item.University = university.Name;
                     }
+                    _context.Class.UpdateRange(clist);
                 }
                 model.Country = university.Country;
                 model.City = university.City;
                 model.State = university.State;
                 model.Intro = university.Intro;
                 model.Image = university.Image;
+                model.IsAudit = false;
+                _context.University.Update(model);
                 _context.SaveChanges();
                 return 1;
             }
@@ -225,6 +236,27 @@ namespace DAL.DAL
                 list = list.Where(x => x.State == state);
             }
             return list.ToList();
+        }
+        /// <summary>
+        /// 审核
+        /// </summary>
+        /// <param name="university"></param>
+        /// <returns></returns>
+        public int Audit(University university)
+        {
+            university.IsAudit = true;
+            _context.University.Update(university);
+            return _context.SaveChanges();
+        }
+        /// <summary>
+        /// 检索下一个未审核学校
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public University GetNext(int id)
+        {
+
+            return _context.University.FirstOrDefault(x => x.Id > id && x.IsAudit == false && x.IsDel == false);
         }
     }
 }

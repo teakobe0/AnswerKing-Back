@@ -54,7 +54,7 @@ namespace DAL.DAL
         public Class Add(Class cla)
         {
             cla.CreateTime = DateTime.Now;
-            cla.University= _context.University.FirstOrDefault(x => x.Id == cla.UniversityId).Name;
+            cla.University = _context.University.FirstOrDefault(x => x.Id == cla.UniversityId).Name;
             _context.Class.Add(cla);
             _context.SaveChanges();
             return cla;
@@ -67,8 +67,16 @@ namespace DAL.DAL
         public int Edit(Class cla)
         {
             cla.University = _context.University.FirstOrDefault(x => x.Id == cla.UniversityId).Name;
+            cla.IsAudit = false;
             _context.Class.Update(cla);
-           return _context.SaveChanges();
+            //查询该课答案
+            var cls = _context.ClassInfoContent.Where(x => x.ClassId == cla.Id && x.UniversityId != cla.UniversityId);
+            foreach (var i in cls)
+            {
+                i.UniversityId = cla.UniversityId;
+            }
+            _context.ClassInfoContent.UpdateRange(cls);
+            return _context.SaveChanges();
         }
         /// <summary>
         /// 删除
@@ -84,13 +92,11 @@ namespace DAL.DAL
                 _context.Class.Update(ct);
                 //删除这个课下面的题库集
                 var cit = _context.ClassInfo.Where(x => x.ClassId == id);
-                if (cit.Count() > 0)
+                foreach (var i in cit)
                 {
-                    foreach (var i in cit)
-                    {
-                        i.IsDel = true;
-                    }
+                    i.IsDel = true;
                 }
+                _context.ClassInfo.UpdateRange(cit);
                 return _context.SaveChanges();
             }
             return 0;
@@ -153,18 +159,18 @@ namespace DAL.DAL
         /// <param name="name"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public bool GetName(int universityId,string name,int id)
+        public bool GetName(int universityId, string name, int id)
         {
             if (id == 0)
             {
-             return _context.Class.Any(x=>x.UniversityId == universityId && x.Name.Trim() == name.Trim());
+                return _context.Class.Any(x => x.UniversityId == universityId && x.Name.Trim() == name.Trim());
             }
             else
             {
-                return _context.Class.Any(x =>x.Id!=id&& x.UniversityId == universityId && x.Name.Trim() == name.Trim());
+                return _context.Class.Any(x => x.Id != id && x.UniversityId == universityId && x.Name.Trim() == name.Trim());
             }
 
-            
+
         }
         /// <summary>
         /// 根据课程id查询
@@ -194,13 +200,24 @@ namespace DAL.DAL
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public List<Class> GetListbyname(string name)
+        public List<Class> GetListbyname(string name, int status)
         {
-           
+
             var ls = GetListData();
             if (!string.IsNullOrEmpty(name))
             {
                 ls = ls.Where(x => x.Name.Trim().Contains(name.Trim()));
+            }
+            if (status != -1)
+            {
+                if (status == 1)
+                {
+                    ls = ls.Where(x => x.IsAudit == true);
+                }
+                else
+                {
+                    ls = ls.Where(x => x.IsAudit == false);
+                }
             }
             return ls.ToList();
         }
@@ -243,6 +260,34 @@ namespace DAL.DAL
             }
             return null;
         }
+        /// <summary>
+        /// 审核
+        /// </summary>
+        /// <param name="clas"></param>
+        /// <returns></returns>
+        public int Audit(Class clas)
+        {
+            clas.University = _context.University.FirstOrDefault(x => x.Id == clas.UniversityId).Name;
+            clas.IsAudit = true;
+            _context.Class.Update(clas);
+            //查询该课答案
+            var cls = _context.ClassInfoContent.Where(x => x.ClassId == clas.Id && x.UniversityId != clas.UniversityId);
+            foreach (var i in cls)
+            {
+                i.UniversityId = clas.UniversityId;
+            }
+            _context.ClassInfoContent.UpdateRange(cls);
+            return _context.SaveChanges();
+        }
+        /// <summary>
+        /// 检索下一个未审核学校
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Class GetNext(int id)
+        {
 
+            return _context.Class.FirstOrDefault(x => x.Id > id && x.IsAudit == false && x.IsDel == false);
+        }
     }
 }

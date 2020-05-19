@@ -76,6 +76,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public int ChangeClassInfo(ClassInfo classInfo)
         {
+            classInfo.Status = (int)classInfoStatus.Edit;
             _context.ClassInfo.Update(classInfo);
             return _context.SaveChanges();
         }
@@ -96,6 +97,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public int Edit(ClassInfo cit)
         {
+            cit.Status = (int)classInfoStatus.Edit;
             _context.ClassInfo.Update(cit);
             return _context.SaveChanges();
         }

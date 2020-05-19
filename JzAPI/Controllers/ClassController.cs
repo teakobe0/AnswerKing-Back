@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static DAL.Tools.EnumAll;
 
 namespace JzAPI.Controllers
 {
@@ -48,7 +49,7 @@ namespace JzAPI.Controllers
             {
                 List<cinfo> ls = new List<cinfo>();
                 cinfo c = null;
-                var query = _cladal.GetList(name);
+                var query = _cladal.GetList(name).Where(x=>x.IsAudit==true);
                 var model = query.Skip(pagesize * (pagenum - 1)).Take(pagesize).ToList();
                 foreach (var item in model)
                 {
@@ -122,7 +123,7 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _cladal.GetList(universityId, name).Take(10);
+                r.Data = _cladal.GetList(universityId, name).Where(x=>x.IsAudit==true).Take(10);
 
             }
            
@@ -165,6 +166,11 @@ namespace JzAPI.Controllers
                         }
                         else
                         {
+                            //针对李龙添加的课程状态为已审核
+                            if (clas.ClientId == 553)
+                            {
+                                Clas.IsAudit = true;
+                            }
                             Clas = _cladal.Add(clas);
                             clas.Id = Clas.Id;
                         }
@@ -181,6 +187,11 @@ namespace JzAPI.Controllers
                     cit = new ClassInfo();
                     cit.ClassId = clas.Id;
                     cit.ClientId = clas.ClientId;
+                    //针对李龙添加的题库集状态为已审核
+                    if (cit.ClientId == 553)
+                    {
+                        cit.Status = (int)classInfoStatus.Audited;
+                    }
                     Random random = new Random();
                     int num = random.Next(10000000, 99999999);
                     cit.Name = "题库集" + num;

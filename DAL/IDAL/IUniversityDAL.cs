@@ -53,7 +53,7 @@ namespace DAL.IDAL
        /// </summary>
        /// <param name="name"></param>
        /// <returns></returns>
-        List<University> GetList(string name);
+        List<University> GetList(string name,int status);
         /// <summary>
         /// 查询学校名称是否存在
         /// </summary>
@@ -83,5 +83,17 @@ namespace DAL.IDAL
         /// <param name="name"></param>
         /// <returns></returns>
         List<University> GetByCountry(string name, string state);
+        /// <summary>
+        /// 审核
+        /// </summary>
+        /// <param name="university"></param>
+        /// <returns></returns>
+        int Audit(University university);
+        /// <summary>
+        /// 检索下一个未审核学校
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+         University GetNext(int id);
     }
 }

@@ -49,7 +49,7 @@ namespace JzAPI.Controllers
 
             try
             {
-                var queryList = _undal.GetList(name);
+                var queryList = _undal.GetList(name,-1).Where(x=>x.IsAudit==true);
                 page.Data = queryList.Skip(pagesize * (pagenum - 1)).Take(pagesize).ToList();
                 page.PageTotal = queryList.Count();
                 r.Data = page;
@@ -88,7 +88,12 @@ namespace JzAPI.Controllers
                             r.Msg = "该学校名称已经存在";
                         }
                         else
-                        {
+                        {  
+                            //针对李龙添加的学校状态为已审核
+                            if (university.ClientId == 553)
+                            {
+                                university.IsAudit = true;
+                            }
                             r.Data = _undal.Add(university);
                         }
 
@@ -163,7 +168,7 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _undal.GetList(name).Take(10);
+                r.Data = _undal.GetList(name,-1).Where(x=>x.IsAudit==true).Take(10);
 
             }
             catch (Exception ex)
@@ -254,7 +259,7 @@ namespace JzAPI.Controllers
 
                 List<uinfo> ls = new List<uinfo>();
                 uinfo uinfo = null;
-                var university = _undal.GetByCountry(name, state);
+                var university = _undal.GetByCountry(name, state).Where(x=>x.IsAudit==true);
 
                 foreach (var item in university)
                 {

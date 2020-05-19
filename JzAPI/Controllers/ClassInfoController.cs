@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static DAL.Tools.EnumAll;
 
 namespace JzAPI.Controllers
 {
@@ -258,7 +259,7 @@ namespace JzAPI.Controllers
             {
                 List<cinfo> ls = new List<cinfo>();
                 cinfo cinfo = null;
-                var cils = _cidal.GetLs(classid);
+                var cils = _cidal.GetLs(classid).Where(x=>x.Status==(int)classInfoStatus.Audited);
                 foreach (var item in cils)
                 {
                     cinfo = new cinfo();
@@ -367,10 +368,10 @@ namespace JzAPI.Controllers
             List<model> ls = new List<model>();
             try
             {
-                var clas = _cdal.GetList();
+                var clas = _cdal.GetList().Where(x=>x.IsAudit==true);
                 var num = new Random().Next(1, clas.Count() - 15);
                 var eachclas = clas.Where(x => x.Id > num).Take(15);
-                var classinfos = _cidal.GetList();
+                var classinfos = _cidal.GetList().Where(x=>x.Status==(int)classInfoStatus.Audited);
                 model m = null;
                 foreach (var item in eachclas)
                 {

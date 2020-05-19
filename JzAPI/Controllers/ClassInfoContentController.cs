@@ -48,6 +48,11 @@ namespace JzAPI.Controllers
                 if (!string.IsNullOrEmpty(classInfoContent.Url) || !string.IsNullOrEmpty(classInfoContent.Contents))
                 {
                     classInfoContent.ClientId = ID;
+                    //针对李龙添加的答案状态为已审核
+                    if (classInfoContent.ClientId == 553)
+                    {
+                        classInfoContent.IsAudit = true;
+                    }
                     string id = "";
                     r.Data = _cicdal.Add(classInfoContent,out id);
                 }
@@ -303,10 +308,9 @@ namespace JzAPI.Controllers
             ResultModel r = new ResultModel();
 
             r.Status = RmStatus.OK;
-
             try
             {
-                var ls = _cicdal.Types(classinfoid, weekname);
+                var ls = _cicdal.Types(classinfoid, weekname).Where(x=>x.IsAudit==true);
                 var img = AppConfig.Configuration["imgurl"];
              
                 foreach (var item in ls)

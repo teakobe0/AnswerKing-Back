@@ -59,7 +59,7 @@ namespace DAL.IDAL
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        List<Class> GetListbyname(string name);
+        List<Class> GetListbyname(string name,int status);
         /// <summary>
         /// 获取当前导入数据的最大id
         /// </summary>
@@ -92,5 +92,17 @@ namespace DAL.IDAL
         /// <returns></returns>
         List<Class> GetList(int universityid, string alif, string name);
         Class GetRandomClass();
+        /// <summary>
+        /// 审核
+        /// </summary>
+        /// <param name="clas"></param>
+        /// <returns></returns>
+        int Audit(Class clas);
+        /// <summary>
+        /// 检索下一个未审核学校
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Class GetNext(int id);
     }
 }
