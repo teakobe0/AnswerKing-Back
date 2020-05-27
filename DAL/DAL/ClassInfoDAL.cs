@@ -110,7 +110,10 @@ namespace DAL.DAL
         public int Change(int id)
         {
             var cit = _context.ClassInfo.FirstOrDefault(x => x.Id == id);
-            cit.Status = (int)classInfoStatus.NoAudit;
+            if (cit.Status == (int)classInfoStatus.NoCreate)
+            {
+                cit.Status = (int)classInfoStatus.NoAudit;
+            }
             return _context.SaveChanges();
         }
         /// <summary>

@@ -47,10 +47,14 @@ namespace DAL.DAL
         public int Add(ClassInfoContent classInfoContent, out string id)
         {
             id = "";
-            var cit = _context.ClassInfo.FirstOrDefault(x => x.Id == classInfoContent.ClassInfoId);
-            if (cit.Status == (int)classInfoStatus.Audited)
+            if (classInfoContent.ClientId != 553)
             {
-                cit.Status = (int)classInfoStatus.Edit;
+                var cit = _context.ClassInfo.FirstOrDefault(x => x.Id == classInfoContent.ClassInfoId);
+
+                if (cit.Status == (int)classInfoStatus.Audited)
+                {
+                    cit.Status = (int)classInfoStatus.Edit;
+                }
             }
             int num = 0;
             string[] urls = classInfoContent.Url.Split("|");
