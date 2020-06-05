@@ -37,10 +37,6 @@ namespace DAL.DAL
         {
             answer.CreateTime = DateTime.Now;
             _context.Answer.Add(answer);
-            //变更问题状态为已回答
-            var question = _context.Question.FirstOrDefault(x => x.Id ==answer.QuestionId);
-            question.Status =(int)questionStatus.Answer ;
-            _context.Update(question);
             return _context.SaveChanges();
              
         }
@@ -51,6 +47,8 @@ namespace DAL.DAL
         /// <returns></returns>
         public int Edit(Answer answer)
         {
+            //CreateTime:更新时间
+            answer.CreateTime = DateTime.Now;
             _context.Answer.Update(answer);
             return _context.SaveChanges();
         }

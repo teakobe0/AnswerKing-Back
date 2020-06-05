@@ -63,6 +63,27 @@ namespace DAL.IDAL
         /// 查询列表
         /// </summary>
         /// <returns></returns> 
-        object GetLs(int number, int pagenum, int pagesize, out int PageTotal);
+        object GetLs(int number, int status, int pagenum, int pagesize, out int PageTotal);
+        /// <summary>
+        /// 更新
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        int Update(int id, int clientid);
+        /// <summary>
+        /// 修改状态
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        int ChangeStatus(int id);
+        /// <summary>
+        ///  审核
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="userid"></param>
+        /// <param name="qintegral"></param>
+        /// <param name="aintegral"></param>
+        /// <returns></returns>
+        int Audit(int id, int userid,int qintegral,int aintegral);
     }
 }

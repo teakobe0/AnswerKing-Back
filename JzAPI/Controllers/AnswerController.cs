@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DAL.IDAL;
 using DAL.Model;
 using DAL.Model.Const;
+using DAL.Tools;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -37,20 +38,21 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                if (answer.Id == 0)
+                if (!string.IsNullOrEmpty(answer.Content))
                 {
-                    answer.CreateBy = ID.ToString();
-                    r.Data = _ansdal.Add(answer);
-                }
-                else
-                {
-                    if (!string.IsNullOrEmpty(answer.Content))
+                    string url = AppConfig.Configuration["imgurl"];
+                    answer.Content = answer.Content.Replace(url, "");
+                    if (answer.Id == 0)
+                    {
+                        answer.CreateBy = ID.ToString();
+                        r.Data = _ansdal.Add(answer);
+                    }
+                    else
                     {
                         if (int.Parse(answer.CreateBy) == ID)
                         {
-
+                           
                             r.Data = _ansdal.Edit(answer);
-
                         }
                         else
                         {
@@ -58,11 +60,11 @@ namespace JzAPI.Controllers
                             r.Msg = "你没有权限操作";
                         }
                     }
-                    else
-                    {
-                        r.Status = RmStatus.Error;
-                        r.Msg = "答案不能为空";
-                    }
+                }
+                else
+                {
+                    r.Status = RmStatus.Error;
+                    r.Msg = "答案不能为空";
                 }
             }
             catch (Exception ex)
@@ -128,6 +130,62 @@ namespace JzAPI.Controllers
                     ls.Add(ainfo);
                 }
                 r.Data = ls;
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 确认提交
+        /// </summary>
+        /// <param name="answer"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("Submit")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Submit([FromBody] Answer answer)
+        {
+
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                if (!string.IsNullOrEmpty(answer.Content))
+                {
+                    string url = AppConfig.Configuration["imgurl"];
+                    answer.Content = answer.Content.Replace(url, "");
+                    if (answer.Id == 0)
+                    {
+                        answer.CreateBy = ID.ToString();
+                        r.Data = _ansdal.Add(answer);
+                    }
+                    else
+                    {
+                        if (int.Parse(answer.CreateBy) == ID)
+                        {
+
+                            r.Data = _ansdal.Edit(answer);
+                        }
+                        else
+                        {
+                            r.Status = RmStatus.Error;
+                            r.Msg = "你没有权限操作";
+                        }
+                    }
+                    if (r.Status == RmStatus.OK)
+                    {
+                        //变更问题的状态为已回答
+                        _quedal.ChangeStatus(answer.QuestionId);
+                    }
+                }
+                else
+                {
+                    r.Status = RmStatus.Error;
+                    r.Msg = "答案不能为空";
+                }
+
             }
             catch (Exception ex)
             {

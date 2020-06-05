@@ -42,7 +42,14 @@ namespace DAL.DAL
             {
                 nv = new Notice_v();
                 nv = Utils.TransReflection<Notice, Notice_v>(item);
-                nv.Sendname = _context.Client.FirstOrDefault(x => x.Id == item.SendId).Name;
+                if (item.SendId == 0 && item.CreateBy != "0")
+                {
+                    nv.Sendname = "系统客服";
+                }
+                else
+                {
+                    nv.Sendname = _context.Client.FirstOrDefault(x => x.Id == item.SendId).Name;
+                }
                 ls.Add(nv);
             }
             return ls;
@@ -80,6 +87,18 @@ namespace DAL.DAL
             notice.IsRead = 1;
             return _context.SaveChanges();
 
+        }
+        /// <summary>
+        /// 新增
+        /// </summary>
+        /// <param name="notice"></param>
+        /// <returns></returns>
+        public int Add(Notice notice)
+        {
+
+            notice.CreateTime = DateTime.Now;
+            _context.Notice.Add(notice);
+            return _context.SaveChanges();
         }
     }
 }

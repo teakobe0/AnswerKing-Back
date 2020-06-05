@@ -19,21 +19,29 @@ namespace DAL.Tools
             /// </summary>
             Bidding = 2,
             /// <summary>
+            /// 已选竞拍者
+            /// </summary>
+            Choose = 3,
+            /// <summary>
             /// 已回答
             /// </summary>
-            Answer = 3,
+            Answer = 4,
             /// <summary>
             /// 提交修改
             /// </summary>
-            Edit = 4,
+            Edit = 5,
             /// <summary>
             /// 申请客服
             /// </summary>
-            ForService = 5,
+            ForService = 6,
             /// <summary>
             /// 已完成
             /// </summary>
-            Complete = 6
+            Complete = 7,
+            /// <summary>
+            /// 已关闭
+            /// </summary>
+            Close = 8
 
         }
         public enum classInfoStatus

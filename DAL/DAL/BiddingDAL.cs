@@ -42,7 +42,7 @@ namespace DAL.DAL
             que.Status = (int)questionStatus.Bidding;
             _context.Update(que);
             return _context.SaveChanges();
-           
+
         }
         /// <summary>
         /// 根据问题和客户id检索
@@ -52,16 +52,8 @@ namespace DAL.DAL
         /// <returns></returns>
         public Bidding GetBidding(int questionId, int clientId)
         {
-            
-            var bidding= _context.Bidding.FirstOrDefault(x => x.QuestionId == questionId && x.CreateBy == clientId.ToString());
-            if (bidding != null)
-            {
-                //修改问题表里面answerer
-                var que = _context.Question.FirstOrDefault(x => x.Id == questionId);
-                que.Answerer =int.Parse(bidding.CreateBy);
-                _context.SaveChanges();
-               
-            }
+            var bidding = _context.Bidding.FirstOrDefault(x => x.QuestionId == questionId && x.CreateBy == clientId.ToString());
+
             return bidding;
         }
         /// <summary>
@@ -78,5 +70,37 @@ namespace DAL.DAL
             }
             return null;
         }
+        /// <summary>
+        /// 根据客户id
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
+        public List<Bidding> GetListByCid(int clientid)
+        {
+            if (clientid != 0)
+            {
+                var list = GetList().Where(x => x.CreateBy == clientid.ToString());
+                return list.ToList();
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public int Del(int id)
+        {
+            if (id != 0)
+            {
+                var bid = _context.Bidding.FirstOrDefault(x => x.Id == id);
+                bid.IsDel = true;
+                return _context.SaveChanges();
+            }
+            return 0;
+        }
+
+
     }
 }

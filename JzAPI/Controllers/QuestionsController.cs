@@ -4,9 +4,11 @@ using System.Linq;
 using DAL.IDAL;
 using DAL.Model;
 using DAL.Model.Const;
+using DAL.Tools;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using static DAL.Tools.EnumAll;
 
 namespace JzAPI.Controllers
 {
@@ -44,9 +46,16 @@ namespace JzAPI.Controllers
 
                 if (question.Id != 0)
                 {
-                    //修改question状态为已删除
-                    _quedal.Del(question.Id);
-                    question.Id = 0;
+                    if (question.Status == (int)questionStatus.Answer)
+                    {
+                        r.Msg = "该问题已经有人回答，不能关闭该问题。";
+                    }
+                    else
+                    {
+                        //修改question状态为已删除
+                        _quedal.Del(question.Id);
+                        question.Id = 0;
+                    }
                 }
                 if (!string.IsNullOrEmpty(question.Title) && !string.IsNullOrEmpty(question.Content))
                 {
@@ -83,20 +92,22 @@ namespace JzAPI.Controllers
             try
             {
                 var ls = _quedal.GetList();
-                if (string.IsNullOrEmpty(type))
-                {
-                    ls = ls.OrderByDescending(x => x.CreateTime).ToList();
-                }
                 if (type == "time")
                 {
-                    ls = ls.OrderByDescending(x => x.EndTime).ToList();
-
+                    ls = ls.Where(x => x.Answerer == 0&& x.Status != (int)questionStatus.Close).OrderByDescending(x => x.EndTime).ToList();
+                }
+                else if (type == "finish")
+                {
+                    ls = ls.Where(x => x.Status == (int)questionStatus.Complete).OrderByDescending(x => x.Id).ToList();
+                }
+                else if (type == "currency")
+                {
+                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.Currency).ToList();
                 }
                 else
                 {
-                    ls = ls.OrderByDescending(x => x.Currency).ToList();
+                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.CreateTime).ToList();
                 }
-
                 page.Data = ls.Skip(pagesize * (pagenum - 1)).Take(pagesize);
                 page.PageTotal = ls.Count();
                 r.Data = page;
@@ -107,30 +118,7 @@ namespace JzAPI.Controllers
             }
             return r;
         }
-        /// <summary>
-        /// 回应(竞拍)问题
-        /// </summary>
-        /// <param name="bidding"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("AddBidding")]
-        [Authorize(Roles = C_Role.all)]
-        public ResultModel AddBidding([FromBody] Bidding bidding)
-        {
 
-            ResultModel r = new ResultModel();
-            r.Status = RmStatus.OK;
-            try
-            {
-                bidding.CreateBy = ID.ToString();
-                r.Data = _biddal.Add(bidding);
-            }
-            catch (Exception ex)
-            {
-                r.Status = RmStatus.Error;
-            }
-            return r;
-        }
         /// <summary>
         /// 选择竞拍者
         /// </summary>
@@ -154,21 +142,21 @@ namespace JzAPI.Controllers
                     if (questionid != 0 && clienid != 0)
                     {
                         var bidding = _biddal.GetBidding(questionid, clienid);
+                        //修改问题表里面answerer
+                        _quedal.Update(questionid, int.Parse(bidding.CreateBy));
                         r.Data = bidding.EndTime;
+
                     }
                     else
                     {
                         r.Status = RmStatus.Error;
                     }
-
                 }
                 else
                 {
                     r.Status = RmStatus.Error;
                     r.Msg = "密码错误";
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -193,11 +181,22 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _quedal.Evaluate(questionid, content, grade);
-                if ((int)r.Data == 0)
+                var que = _quedal.GetQuestion(questionid);
+                if (que.Status == (int)questionStatus.Answer)
+                {
+                    r.Data = _quedal.Evaluate(questionid, content, grade);
+
+                    if ((int)r.Data == 0)
+                    {
+                        r.Status = RmStatus.Error;
+                    }
+                }
+                else
                 {
                     r.Status = RmStatus.Error;
+                    r.Msg = "未回答的问题不能评价。";
                 }
+               
             }
             catch (Exception ex)
             {
@@ -220,10 +219,19 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _quedal.ForService(questionid, reason);
-                if ((int)r.Data == 0)
+                var que = _quedal.GetQuestion(questionid);
+                if (que.Status!= (int)questionStatus.Complete)
+                {
+                    r.Data = _quedal.ForService(questionid, reason);
+                    if ((int)r.Data == 0)
+                    {
+                        r.Status = RmStatus.Error;
+                    }
+                }
+                else
                 {
                     r.Status = RmStatus.Error;
+                    r.Msg = "已完成的问题不能的申请客服。";
                 }
             }
             catch (Exception ex)
@@ -247,10 +255,22 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _quedal.Edit(questionid);
-                if ((int)r.Data == 0)
+                var que = _quedal.GetQuestion(questionid);
+                var bidd = _biddal.GetBidding(que.Id, que.Answerer);
+
+                if (que.Status == (int)questionStatus.Answer)
+                {
+                    r.Data = _quedal.Edit(questionid);
+                    if ((int)r.Data == 0)
+                    {
+                        r.Status = RmStatus.Error;
+                    }
+                }
+                else
                 {
                     r.Status = RmStatus.Error;
+                    r.Msg = "只有已回答的问题才能提交修改。";
+
                 }
             }
             catch (Exception ex)
@@ -258,6 +278,13 @@ namespace JzAPI.Controllers
                 r.Status = RmStatus.Error;
             }
             return r;
+        }
+
+        public class binfo
+        {
+            public Bidding bidding { get; set; }
+            public string name { get; set; }
+            public string image { get; set; }
         }
         /// <summary>
         /// 问题详情
@@ -273,16 +300,39 @@ namespace JzAPI.Controllers
             try
             {
                 Answer answer = null;
-                List<Bidding> bls = null;
+                List<binfo> bls = new List<binfo>();
+                binfo binfo = null;
                 var que = _quedal.GetQuestion(questionid);
-                //已选择竞拍者
+                //已选竞拍者
+                string url = AppConfig.Configuration["imgurl"];
                 if (que.Answerer != 0)
                 {
                     answer = _ansdal.Answer(questionid);
+
+                    if (answer != null&& answer.Content.Contains("<img src=\""))
+                    {
+                        answer.Content = answer.Content.Replace("<img src=\"", "<img src=\"" + url);
+                    }
+                    var bidding = _biddal.GetBidding(questionid, que.Answerer);
+                    que.EndTime = bidding.EndTime;
+                    que.Currency = bidding.Currency;
+                    
                 }
                 else
                 {
-                    bls = _biddal.GetList(questionid);
+                    var biddings = _biddal.GetList(questionid);
+                    if (biddings.Count() > 0)
+                    {
+                        foreach (var item in biddings)
+                        {
+                            binfo = new binfo();
+                            binfo.bidding = item;
+                            var client = _clientdal.GetClientById(int.Parse(item.CreateBy));
+                            binfo.name = client.Name;
+                            binfo.image = !string.IsNullOrEmpty(client.Image) ? AppConfig.Configuration["imgurl"] + client.Image : client.Image;
+                            bls.Add(binfo);
+                        }
+                    }
                 }
 
                 r.Data = new { que, bls, answer };
@@ -293,6 +343,7 @@ namespace JzAPI.Controllers
             }
             return r;
         }
+
         public class qinfo
         {
             public Question que { get; set; }
@@ -315,7 +366,7 @@ namespace JzAPI.Controllers
                 List<qinfo> ls = new List<qinfo>();
                 qinfo qinfo = null;
                 var question = _quedal.GetList(ID);
-                foreach(var item in question)
+                foreach (var item in question)
                 {
                     qinfo = new qinfo();
                     qinfo.que = item;
@@ -331,7 +382,7 @@ namespace JzAPI.Controllers
             }
             return r;
         }
-        
+
 
     }
 }

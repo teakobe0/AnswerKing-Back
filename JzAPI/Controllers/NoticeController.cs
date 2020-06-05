@@ -59,7 +59,28 @@ namespace JzAPI.Controllers
             try
             {
                 r.Data = _notdal.ChangeStatus(id);
-
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 新增通知
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("Add")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Add([FromBody]Notice notice)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                notice.SendId = ID;
+                r.Data = _notdal.Add(notice);
 
             }
             catch (Exception ex)
@@ -68,6 +89,5 @@ namespace JzAPI.Controllers
             }
             return r;
         }
-
     }
 }

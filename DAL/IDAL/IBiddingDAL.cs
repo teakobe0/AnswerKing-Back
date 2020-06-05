@@ -32,6 +32,18 @@ namespace DAL.IDAL
         /// <param name="questionid"></param>
         /// <returns></returns>
         List<Bidding> GetList(int questionid);
+        /// <summary>
+        /// 删除
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        int Del(int id);
+        /// <summary>
+        /// 根据客户id检索
+        /// </summary>
+        /// <param name="clientid"></param>
+        /// <returns></returns>
+        List<Bidding> GetListByCid(int clientid);
     }
 }
 

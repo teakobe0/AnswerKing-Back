@@ -39,8 +39,8 @@ namespace JzAPI.Controllers
         [Authorize(Roles = C_Role.all)]
         public async Task<IActionResult> UploadImg(IFormCollection collection, int classInfoId)
         {
-            
-            if (classInfoId==0)
+
+            if (classInfoId == 0)
             {
                 return BadRequest("题库集单号不能为空");
             }
@@ -65,6 +65,7 @@ namespace JzAPI.Controllers
                             {
                                 await formFile.CopyToAsync(stream);
                             }
+
                             file = "/ClassinfoImg/" + classInfoId + "/" + filename;
                         }
                         catch (IOException e)
@@ -76,7 +77,55 @@ namespace JzAPI.Controllers
                 return Ok(new { count = files.Count, size, file });
             }
         }
+        /// <summary>
+        /// 上传问答页面答案图片
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <param name="questionId"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("Upload")]
+        [Authorize(Roles = C_Role.all)]
+        public async Task<IActionResult> Upload(IFormCollection collection, int questionId)
+        {
 
+            if (questionId == 0)
+            {
+                return BadRequest("问题单号不能为空");
+            }
+            else
+            {
+                var files = collection.Files;
+                long size = files.Sum(f => f.Length);
+                var filePath = "";
+                filePath = Check(questionId);
+                string file = "";
+                foreach (var formFile in files)
+                {
+                    if (formFile.Length > 0)
+                    {
+                        string suffix = formFile.FileName.Substring(formFile.FileName.LastIndexOf("."));
+                        var number = Guid.NewGuid().ToString();
+                        string filename = number + suffix;
+                        string pathImg = Path.Combine(filePath, filename);
+                        try
+                        {
+                            using (var stream = new FileStream(pathImg, FileMode.CreateNew))
+                            {
+                                await formFile.CopyToAsync(stream);
+                            }
+                            string url = AppConfig.Configuration["imgurl"];
+                            file = url + "/QuestionImg/" + questionId + "/" + filename;
+                        }
+                        catch (IOException e)
+                        {
+                            return BadRequest("该文件已存在！请重命名后重新上传");
+                        }
+                    }
+                }
+                return Ok(new { count = files.Count, size, file });
+            }
+        }
         private string CheckDirectory(int classinfoid)
         {
             string url = AppConfig.Configuration["uploadurl"];
@@ -86,6 +135,16 @@ namespace JzAPI.Controllers
             if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
             return filePath;
         }
+
+        private string Check(int questionid)
+        {
+            string url = AppConfig.Configuration["uploadurl"];
+            var filePath = Path.Combine(url, "QuestionImg");
+            if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
+            filePath = Path.Combine(filePath, questionid.ToString());
+            if (!Directory.Exists(filePath)) Directory.CreateDirectory(filePath);
+            return filePath;
+        }
     }
-    
+
 }

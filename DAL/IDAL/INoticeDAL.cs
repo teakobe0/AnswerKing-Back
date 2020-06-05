@@ -31,6 +31,11 @@ namespace DAL.IDAL
         /// <param name="id"></param>
         /// <returns></returns>
         int ChangeStatus(int id);
-
+        /// <summary>
+        /// 新增
+        /// </summary>
+        /// <param name="notice"></param>
+        /// <returns></returns>
+        int Add(Notice notice);
     }
 }

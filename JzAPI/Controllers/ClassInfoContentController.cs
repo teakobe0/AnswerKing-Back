@@ -41,7 +41,6 @@ namespace JzAPI.Controllers
         public ResultModel Add([FromBody] ClassInfoContent classInfoContent)
         {
             ResultModel r = new ResultModel();
-            PageData page = new PageData();
             r.Status = RmStatus.OK;
             try
             {
