@@ -85,5 +85,10 @@ namespace DAL.IDAL
         /// <param name="aintegral"></param>
         /// <returns></returns>
         int Audit(int id, int userid,int qintegral,int aintegral);
+        /// <summary>
+        /// 修改未处理订单状态
+        /// </summary>
+        /// <returns></returns>
+        int ChangeStatus();
     }
 }

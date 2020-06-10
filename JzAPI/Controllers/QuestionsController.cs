@@ -44,30 +44,41 @@ namespace JzAPI.Controllers
             try
             {
 
-                if (question.Id != 0)
+                //查询客户积分
+                var client = _clientdal.GetClientById(ID);
+                if (client.Integral >= question.Currency)
                 {
-                    if (question.Status == (int)questionStatus.Answer)
+                    if (question.Id != 0)
                     {
-                        r.Msg = "该问题已经有人回答，不能关闭该问题。";
+                        if (question.Status == (int)questionStatus.Answer)
+                        {
+                            r.Msg = "该问题已经有人回答，不能关闭该问题。";
+                        }
+                        else
+                        {
+                            //修改question状态为已删除，退回发布问题的积分
+                            _quedal.Del(question.Id);
+                            question.Id = 0;
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(question.Title) && !string.IsNullOrEmpty(question.Content))
+                    {
+
+                        question.CreateBy = ID.ToString();
+                        r.Data = _quedal.Add(question);
                     }
                     else
                     {
-                        //修改question状态为已删除
-                        _quedal.Del(question.Id);
-                        question.Id = 0;
+                        r.Status = RmStatus.Error;
+                        r.Msg = "问题的标题和内容不能为空";
                     }
-                }
-                if (!string.IsNullOrEmpty(question.Title) && !string.IsNullOrEmpty(question.Content))
-                {
-
-                    question.CreateBy = ID.ToString();
-                    r.Data = _quedal.Add(question);
                 }
                 else
                 {
                     r.Status = RmStatus.Error;
-                    r.Msg = "问题的标题和内容不能为空";
+                    r.Msg = "你的积分不足，不能发布问题";
                 }
+               
             }
             catch (Exception ex)
             {
