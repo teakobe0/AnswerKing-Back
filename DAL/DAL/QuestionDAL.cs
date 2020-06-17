@@ -22,6 +22,19 @@ namespace DAL.DAL
             return GetListData().ToList();
 
         }
+        /// <summary>
+        /// 根据客户id检索
+        /// </summary>
+        /// <returns></returns>
+        public List<Question> GetList(int clientId)
+        {
+            var list = GetListData().ToList();
+            if (clientId != 0)
+            {
+                list = list.Where(x => x.CreateBy == clientId.ToString()).ToList();
+            }
+            return list;
+        }
 
         private IQueryable<Question> GetListData()
         {
@@ -176,17 +189,7 @@ namespace DAL.DAL
         {
             return _context.Question.FirstOrDefault(x => x.Id == id);
         }
-        /// <summary>
-        /// 根据客户id检索问题
-        /// </summary>
-        /// <param name="clientid"></param>
-        /// <returns></returns>
-        public List<Question> GetList(int clientid)
-        {
-            var list = GetListData().Where(x => x.CreateBy == clientid.ToString());
-            return list.ToList();
-
-        }
+      
         /// <summary>
         /// 查询列表
         /// </summary>

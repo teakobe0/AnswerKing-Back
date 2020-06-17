@@ -65,6 +65,8 @@ namespace JzAPI.Controllers
                     {
 
                         question.CreateBy = ID.ToString();
+                        string url = AppConfig.Configuration["imgurl"];
+                        question.Content = question.Content.Replace(url, "");
                         r.Data = _quedal.Add(question);
                     }
                     else
@@ -78,7 +80,7 @@ namespace JzAPI.Controllers
                     r.Status = RmStatus.Error;
                     r.Msg = "你的积分不足，不能发布问题";
                 }
-               
+
             }
             catch (Exception ex)
             {
@@ -95,29 +97,37 @@ namespace JzAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("QuestionPage")]
-        public ResultModel QuestionPage(string type, int pagenum = 1, int pagesize = 40)
+        public ResultModel QuestionPage(string name, string type, int pagenum = 1, int pagesize = 40)
         {
             ResultModel r = new ResultModel();
             PageData page = new PageData();
             r.Status = RmStatus.OK;
             try
             {
-                var ls = _quedal.GetList();
+                var ls = _quedal.GetList().Where(x => x.EndTime >= DateTime.Now);
+                if (!string.IsNullOrEmpty(name))
+                {
+                    ls = ls.Where(x => x.Title.Contains(name) || x.Content.Contains(name)).ToList();
+                }
                 if (type == "time")
                 {
-                    ls = ls.Where(x => x.Answerer == 0&& x.Status != (int)questionStatus.Close).OrderByDescending(x => x.EndTime).ToList();
-                }
-                else if (type == "finish")
-                {
-                    ls = ls.Where(x => x.Status == (int)questionStatus.Complete).OrderByDescending(x => x.Id).ToList();
+                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.EndTime).ToList();
                 }
                 else if (type == "currency")
                 {
                     ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.Currency).ToList();
                 }
-                else
+                else if (type == "finish")
                 {
-                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.CreateTime).ToList();
+                    ls = ls.Where(x => x.Status == (int)questionStatus.Complete).OrderByDescending(x => x.Id).ToList();
+                }
+                foreach (var item in ls)
+                {
+                    if (item.Content.Contains("<img src=\""))
+                    {
+                        string url = AppConfig.Configuration["imgurl"];
+                        item.Content = item.Content.Replace("<img src=\"", "<img src=\"" + url);
+                    }
                 }
                 page.Data = ls.Skip(pagesize * (pagenum - 1)).Take(pagesize);
                 page.PageTotal = ls.Count();
@@ -129,7 +139,84 @@ namespace JzAPI.Controllers
             }
             return r;
         }
+        /// <summary>
+        /// 我的问题列表
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="pagenum"></param>
+        /// <param name="pagesize"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("MyQuestionPage")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel MyQuestionPage(string name, string type, int pagenum = 1, int pagesize = 10)
+        {
+            ResultModel r = new ResultModel();
+            PageData page = new PageData();
+            r.Status = RmStatus.OK;
+            try
+            {
+                queinfo queinfo = null;
+                List<queinfo> queinfos = new List<queinfo>();
+                var ls = _quedal.GetList().Where(x => x.EndTime >= DateTime.Now);
+                if (!string.IsNullOrEmpty(name))
+                {
+                    ls = ls.Where(x => x.Title.Contains(name) || x.Content.Contains(name)).ToList();
+                }
+                if (type == "time")
+                {
+                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.EndTime).ToList();
+                }
+                else if (type == "currency")
+                {
+                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.Currency).ToList();
+                }
+                else if (type == "finish")
+                {
+                    ls = ls.Where(x => x.Status == (int)questionStatus.Complete).OrderByDescending(x => x.Id).ToList();
+                }
+                foreach(var item in ls)
+                {
+                    queinfo = new queinfo();
+                    var bidding = _biddal.GetBidding(item.Id, ID);
+                    if (item.Content.Contains("<img src=\""))
+                    {
+                        string url = AppConfig.Configuration["imgurl"];
+                        item.Content = item.Content.Replace("<img src=\"", "<img src=\"" + url);
+                     }
+                    queinfo.que = item;
+                    if (bidding != null && item.Status == (int)questionStatus.Bidding)
+                    {
+                        queinfo.bidd = "正在竞拍";
+                    }
+                    if (item.CreateBy == ID.ToString())
+                    {
+                        queinfo.myque = "我的提问";
+                    }
+                    if (item.Answerer == ID && item.Status == (int)questionStatus.Complete)
+                    {
+                        queinfo.myanswer = "我的回答";
+                    }
+                    queinfos.Add(queinfo);
+                }
+                page.Data = queinfos.Skip(pagesize * (pagenum - 1)).Take(pagesize);
+                page.PageTotal = queinfos.Count();
+                r.Data = page;
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
 
+        public class queinfo
+        {
+            public Question que { get; set; }
+            public string myque { get; set; }
+            public string bidd { get; set; }
+            public string myanswer { get; set; }
+        }
         /// <summary>
         /// 选择竞拍者
         /// </summary>
@@ -207,7 +294,7 @@ namespace JzAPI.Controllers
                     r.Status = RmStatus.Error;
                     r.Msg = "未回答的问题不能评价。";
                 }
-               
+
             }
             catch (Exception ex)
             {
@@ -231,7 +318,7 @@ namespace JzAPI.Controllers
             try
             {
                 var que = _quedal.GetQuestion(questionid);
-                if (que.Status!= (int)questionStatus.Complete)
+                if (que.Status != (int)questionStatus.Complete)
                 {
                     r.Data = _quedal.ForService(questionid, reason);
                     if ((int)r.Data == 0)
@@ -320,14 +407,19 @@ namespace JzAPI.Controllers
                 {
                     answer = _ansdal.Answer(questionid);
 
-                    if (answer != null&& answer.Content.Contains("<img src=\""))
+                    if (answer != null && answer.Content.Contains("<img src=\""))
                     {
                         answer.Content = answer.Content.Replace("<img src=\"", "<img src=\"" + url);
                     }
                     var bidding = _biddal.GetBidding(questionid, que.Answerer);
                     que.EndTime = bidding.EndTime;
                     que.Currency = bidding.Currency;
-                    
+                    binfo = new binfo();
+                    binfo.bidding = bidding;
+                    var client = _clientdal.GetClientById(int.Parse(bidding.CreateBy));
+                    binfo.name = client.Name;
+                    binfo.image = !string.IsNullOrEmpty(client.Image) ? AppConfig.Configuration["imgurl"] + client.Image : client.Image;
+                    bls.Add(binfo);
                 }
                 else
                 {
@@ -368,15 +460,20 @@ namespace JzAPI.Controllers
         [HttpGet]
         [Route("MyQuestion")]
         [Authorize(Roles = C_Role.all)]
-        public ResultModel MyQuestion()
+        public ResultModel MyQuestion(string name,int pagenum = 1, int pagesize = 10)
         {
             ResultModel r = new ResultModel();
+            PageData page = new PageData();
             r.Status = RmStatus.OK;
             try
             {
                 List<qinfo> ls = new List<qinfo>();
                 qinfo qinfo = null;
                 var question = _quedal.GetList(ID);
+                if (!string.IsNullOrEmpty(name))
+                {
+                    question = question.Where(x => x.Title.Contains(name) || x.Content.Contains(name)).ToList();
+                }
                 foreach (var item in question)
                 {
                     qinfo = new qinfo();
@@ -385,7 +482,10 @@ namespace JzAPI.Controllers
                     qinfo.number = bidding.Count();
                     ls.Add(qinfo);
                 }
-                r.Data = ls;
+                page.Data = ls.Skip(pagesize * (pagenum - 1)).Take(pagesize);
+                page.PageTotal = ls.Count();
+                r.Data = page;
+
             }
             catch (Exception ex)
             {
@@ -393,7 +493,36 @@ namespace JzAPI.Controllers
             }
             return r;
         }
+        /// <summary>
+        /// 状态
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Status")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Status()
+        {
+            ResultModel r = new ResultModel();
+            PageData page = new PageData();
+            r.Status = RmStatus.OK;
+            try
+            {
+                var que = _quedal.GetList(ID);
+                //竞拍中
+                int bnum = que.Where(x => x.Status == (int)questionStatus.Bidding ).Count();
+                //待回答
+                int nonum = que.Where(x => x.Status == (int)questionStatus.Choose).Count();
+                //已回答
+                int answernum = que.Where(x => x.Status == (int)questionStatus.Answer).Count();
 
+                r.Data = new { bnum, nonum, answernum };
 
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
     }
 }
