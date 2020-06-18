@@ -35,6 +35,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public int Add(Answer answer)
         {
+            //CreateTime:更新时间
             answer.CreateTime = DateTime.Now;
             _context.Answer.Add(answer);
             return _context.SaveChanges();
@@ -77,8 +78,12 @@ namespace DAL.DAL
        /// <returns></returns>
         public List<Answer> GetList(int clientid)
         {
-            var list = GetListData().Where(x => x.CreateBy == clientid.ToString());
-            return list.ToList();
+            var list = GetListData().OrderByDescending(x => x.Id).ToList();
+            if (clientid != 0)
+            {
+                list = list.Where(x => x.CreateBy == clientid.ToString()).ToList();
+            }
+            return list;
 
         }
     }

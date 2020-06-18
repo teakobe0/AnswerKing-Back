@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DAL.IDAL;
 using DAL.Model;
 using DAL.Model.Const;
+using DAL.Tools;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
@@ -257,6 +258,7 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
+                string url = AppConfig.Configuration["imgurl"];
                 List<cinfo> ls = new List<cinfo>();
                 cinfo cinfo = null;
                 var cils = _cidal.GetLs(classid).Where(x=>x.Status==(int)classInfoStatus.Audited);
@@ -265,10 +267,18 @@ namespace JzAPI.Controllers
                     cinfo = new cinfo();
                     cinfo.classinfo = item;
                     var client = _clientdal.GetClientById(item.ClientId);
+                    
                     if (client != null)
                     {
                         cinfo.clientname = client.Name;
-                        cinfo.clientimg = client.Image;
+                        if (client.Image.Contains("/clientImg"))
+                        {
+                            cinfo.clientimg = client.Image.Replace("/clientImg", url + "/clientImg");
+                        }
+                        else
+                        {
+                            cinfo.clientimg = client.Image;
+                        }
                     }
                     ls.Add(cinfo);
                 }

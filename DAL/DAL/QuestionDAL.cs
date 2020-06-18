@@ -28,7 +28,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public List<Question> GetList(int clientId)
         {
-            var list = GetListData().ToList();
+            var list = GetListData().OrderByDescending(x=>x.Id).ToList();
             if (clientId != 0)
             {
                 list = list.Where(x => x.CreateBy == clientId.ToString()).ToList();

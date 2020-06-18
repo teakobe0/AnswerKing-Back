@@ -121,11 +121,11 @@ namespace JzAPI.Controllers
                 {
                     ls = ls.Where(x => x.Status == (int)questionStatus.Complete).OrderByDescending(x => x.Id).ToList();
                 }
+                string url = AppConfig.Configuration["imgurl"];
                 foreach (var item in ls)
                 {
                     if (item.Content.Contains("<img src=\""))
                     {
-                        string url = AppConfig.Configuration["imgurl"];
                         item.Content = item.Content.Replace("<img src=\"", "<img src=\"" + url);
                     }
                 }
@@ -142,6 +142,7 @@ namespace JzAPI.Controllers
         /// <summary>
         /// 我的问题列表
         /// </summary>
+        /// <param name="name"></param>
         /// <param name="type"></param>
         /// <param name="pagenum"></param>
         /// <param name="pagesize"></param>
@@ -175,15 +176,15 @@ namespace JzAPI.Controllers
                 {
                     ls = ls.Where(x => x.Status == (int)questionStatus.Complete).OrderByDescending(x => x.Id).ToList();
                 }
-                foreach(var item in ls)
+                string url = AppConfig.Configuration["imgurl"];
+                foreach (var item in ls)
                 {
                     queinfo = new queinfo();
                     var bidding = _biddal.GetBidding(item.Id, ID);
                     if (item.Content.Contains("<img src=\""))
                     {
-                        string url = AppConfig.Configuration["imgurl"];
                         item.Content = item.Content.Replace("<img src=\"", "<img src=\"" + url);
-                     }
+                    }
                     queinfo.que = item;
                     if (bidding != null && item.Status == (int)questionStatus.Bidding)
                     {
@@ -400,9 +401,13 @@ namespace JzAPI.Controllers
                 Answer answer = null;
                 List<binfo> bls = new List<binfo>();
                 binfo binfo = null;
-                var que = _quedal.GetQuestion(questionid);
-                //已选竞拍者
                 string url = AppConfig.Configuration["imgurl"];
+                var que = _quedal.GetQuestion(questionid);
+                if (que.Content.Contains("<img src=\""))
+                {
+                    que.Content = que.Content.Replace("<img src=\"", "<img src=\"" + url);
+                }
+                //已选竞拍者
                 if (que.Answerer != 0)
                 {
                     answer = _ansdal.Answer(questionid);
@@ -424,18 +429,16 @@ namespace JzAPI.Controllers
                 else
                 {
                     var biddings = _biddal.GetList(questionid);
-                    if (biddings.Count() > 0)
+                    foreach (var item in biddings)
                     {
-                        foreach (var item in biddings)
-                        {
-                            binfo = new binfo();
-                            binfo.bidding = item;
-                            var client = _clientdal.GetClientById(int.Parse(item.CreateBy));
-                            binfo.name = client.Name;
-                            binfo.image = !string.IsNullOrEmpty(client.Image) ? AppConfig.Configuration["imgurl"] + client.Image : client.Image;
-                            bls.Add(binfo);
-                        }
+                        binfo = new binfo();
+                        binfo.bidding = item;
+                        var client = _clientdal.GetClientById(int.Parse(item.CreateBy));
+                        binfo.name = client.Name;
+                        binfo.image = !string.IsNullOrEmpty(client.Image) ? AppConfig.Configuration["imgurl"] + client.Image : client.Image;
+                        bls.Add(binfo);
                     }
+
                 }
 
                 r.Data = new { que, bls, answer };
@@ -460,7 +463,7 @@ namespace JzAPI.Controllers
         [HttpGet]
         [Route("MyQuestion")]
         [Authorize(Roles = C_Role.all)]
-        public ResultModel MyQuestion(string name,int pagenum = 1, int pagesize = 10)
+        public ResultModel MyQuestion(string name, int pagenum = 1, int pagesize = 10)
         {
             ResultModel r = new ResultModel();
             PageData page = new PageData();
@@ -474,9 +477,14 @@ namespace JzAPI.Controllers
                 {
                     question = question.Where(x => x.Title.Contains(name) || x.Content.Contains(name)).ToList();
                 }
+                string url = AppConfig.Configuration["imgurl"];
                 foreach (var item in question)
                 {
                     qinfo = new qinfo();
+                    if (item.Content.Contains("<img src=\""))
+                    {
+                        item.Content = item.Content.Replace("<img src=\"", "<img src=\"" + url);
+                    }
                     qinfo.que = item;
                     var bidding = _biddal.GetList(item.Id);
                     qinfo.number = bidding.Count();
@@ -503,13 +511,12 @@ namespace JzAPI.Controllers
         public ResultModel Status()
         {
             ResultModel r = new ResultModel();
-            PageData page = new PageData();
             r.Status = RmStatus.OK;
             try
             {
                 var que = _quedal.GetList(ID);
                 //竞拍中
-                int bnum = que.Where(x => x.Status == (int)questionStatus.Bidding ).Count();
+                int bnum = que.Where(x => x.Status == (int)questionStatus.Bidding).Count();
                 //待回答
                 int nonum = que.Where(x => x.Status == (int)questionStatus.Choose).Count();
                 //已回答

@@ -79,7 +79,7 @@ namespace DAL.DAL
         {
             if (clientid != 0)
             {
-                var list = GetList().Where(x => x.CreateBy == clientid.ToString());
+                var list = GetList().Where(x => x.CreateBy == clientid.ToString()).OrderByDescending(x=>x.Id);
                 return list.ToList();
             }
             return null;
