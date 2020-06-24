@@ -23,13 +23,15 @@ namespace JzAPI.Controllers
         private IUniversityDAL _udal;
         private IClientDAL _clientdal;
         private IClassDAL _cladal;
-        public ClassController(IClassInfoDAL cidal, IClientDAL clientdal, IClassDAL cladal, IUniversityDAL udal)
+        private IIntegralRecordsDAL _integraldal;
+        public ClassController(IClassInfoDAL cidal, IClientDAL clientdal, IClassDAL cladal, IUniversityDAL udal, IIntegralRecordsDAL integraldal)
         {
 
             _cidal = cidal;
             _clientdal = clientdal;
             _cladal = cladal;
             _udal = udal;
+            _integraldal = integraldal;
         }
         /// <summary>
         /// 根据课程名称检索 
@@ -191,12 +193,14 @@ namespace JzAPI.Controllers
                     if (cit.ClientId == 553)
                     {
                         cit.Status = (int)classInfoStatus.Audited;
+                        _integraldal.Give(cit.ClientId);
+                       
                     }
                     Random random = new Random();
                     int num = random.Next(10000000, 99999999);
                     cit.Name = "题库集" + num;
                     var classInfo = _cidal.Add(cit);
-
+                   
                     r.Data = new { clas, classInfo };
                 }
             }

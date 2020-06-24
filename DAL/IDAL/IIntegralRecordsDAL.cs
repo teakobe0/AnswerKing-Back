@@ -18,5 +18,11 @@ namespace DAL.IDAL
         /// </summary>
         /// <returns></returns> 
         List<IntegralRecords> GetList();
+        /// <summary>
+        /// 赠送积分
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
+        int Give(int clientId);
     }
 }

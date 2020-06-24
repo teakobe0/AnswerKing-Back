@@ -1,5 +1,6 @@
 ﻿using DAL.IDAL;
 using DAL.Model;
+using DAL.Model.Const;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,6 +35,28 @@ namespace DAL.DAL
 
         }
 
+        /// <summary>
+        /// 赠送积分
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
+        public int Give(int clientId)
+        {
+            //添加积分
+            var client = _context.Client.FirstOrDefault(x => x.Id == clientId);
+            if (client != null)
+            {
+                client.Integral += Integral.addcontent;
+                //积分记录表
+                IntegralRecords ir = new IntegralRecords();
+                ir.ClientId = client.Id;
+                ir.Integral = Integral.addcontent;
+                ir.Source = "贡献资源";
+                ir.CreateTime = DateTime.Now;
+                _context.IntegralRecords.Add(ir);
+            }
+            return _context.SaveChanges();
+        }
 
         private IQueryable<IntegralRecords> GetListData()
         {
