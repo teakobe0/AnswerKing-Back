@@ -22,12 +22,14 @@ namespace JzAPI.Controllers
         private IBiddingDAL _biddal;
         private IAnswerDAL _ansdal;
         private IClientDAL _clientdal;
-        public QuestionsController(IQuestionDAL quedal, IBiddingDAL biddal, IAnswerDAL ansdal, IClientDAL clientdal)
+        private INoticeDAL _noticedal;
+        public QuestionsController(IQuestionDAL quedal, IBiddingDAL biddal, IAnswerDAL ansdal, IClientDAL clientdal, INoticeDAL noticedal)
         {
             _quedal = quedal;
             _biddal = biddal;
             _ansdal = ansdal;
             _clientdal = clientdal;
+            _noticedal = noticedal;
         }
         /// <summary>
         /// 发布问题
@@ -46,6 +48,7 @@ namespace JzAPI.Controllers
 
                 //查询客户积分
                 var client = _clientdal.GetClientById(ID);
+                List<Bidding> bls = null;
                 if (client.Integral >= question.Currency)
                 {
                     if (question.Id != 0)
@@ -57,6 +60,7 @@ namespace JzAPI.Controllers
                         else
                         {
                             //修改question状态为已删除，退回发布问题的积分
+                            bls = _biddal.GetList(question.Id);
                             _quedal.Del(question.Id);
                             question.Id = 0;
                         }
@@ -68,6 +72,17 @@ namespace JzAPI.Controllers
                         string url = AppConfig.Configuration["imgurl"];
                         question.Content = question.Content.Replace(url, "");
                         r.Data = _quedal.Add(question);
+                        //发通知
+                        Notice notice = null;
+                        string qurl = AppConfig.Configuration["questionurl"] + question.Id;
+                        foreach (var item in bls)
+                        {
+                            notice = new Notice();
+                            notice.ReceiveId = int.Parse(item.CreateBy);
+                            notice.SendId = ID;
+                            notice.ContentsUrl = "您竞拍的原问题:" + item.QuestionId + ",内容已经发生改变，请您重新参与竞拍,<a href=" + qurl + ">新问题地址</a>";
+                            _noticedal.Add(notice);
+                        }
                     }
                     else
                     {

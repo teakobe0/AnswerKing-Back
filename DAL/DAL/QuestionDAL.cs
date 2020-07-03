@@ -75,6 +75,7 @@ namespace DAL.DAL
             {
                 var que = _context.Question.FirstOrDefault(x => x.Id == id);
                 que.IsDel = true;
+                que.Status =(int) questionStatus.Close;
                 //删除竞拍表关于该问题的所有竞拍记录
                 var biddings = _context.Bidding.Where(x => x.QuestionId == id);
                 foreach (var i in biddings)
