@@ -95,5 +95,12 @@ namespace DAL.IDAL
         /// <param name="id"></param>
         /// <returns></returns>
          University GetNext(int id);
+        /// <summary>
+        /// 合并
+        /// </summary>
+        /// <param name="cbmodel"></param>
+        /// <param name="targetid"></param>
+        /// <returns></returns>
+        int Combine(University cbmodel, int targetid);
     }
 }

@@ -104,5 +104,24 @@ namespace DAL.IDAL
         /// <param name="id"></param>
         /// <returns></returns>
         Class GetNext(int id);
+        /// <summary>
+        /// 根据学校id查询
+        /// </summary>
+        /// <returns></returns> 
+        List<Class> GetClasses(int universityid);
+        /// <summary>
+        /// 根据条件检索
+        /// </summary>
+        /// <param name="universityId"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        Class GetClasses(int universityId, string name);
+        /// <summary>
+        /// 合并课程
+        /// </summary>
+        /// <param name="cbmodel"></param>
+        /// <param name="targetid"></param>
+        /// <returns></returns>
+        int Combine(Class cbmodel, int targetid);
     }
 }

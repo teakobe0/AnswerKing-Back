@@ -49,7 +49,7 @@ namespace DAL.IDAL
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        ClassInfoContent GeClassInfoContent(int id);
+        ClassInfoContent GetClassInfoContent(int id);
         /// <summary>
         /// 删除
         /// </summary>

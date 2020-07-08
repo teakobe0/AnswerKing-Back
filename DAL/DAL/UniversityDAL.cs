@@ -258,5 +258,31 @@ namespace DAL.DAL
 
             return _context.University.FirstOrDefault(x => x.Id > id && x.IsAudit == false && x.IsDel == false);
         }
+        /// <summary>
+        /// 合并
+        /// </summary>
+        /// <param name="cbmodel"></param>
+        /// <param name="targetid"></param>
+        /// <returns></returns>
+        public int Combine(University cbmodel, int targetid)
+        {
+            var target = _context.University.FirstOrDefault(x => x.Id == targetid);
+            cbmodel.IsDel = true;
+            _context.University.Update(cbmodel);
+            Utils.WriteInfoLog("University:CombineDel" + cbmodel.ToJson() + ",targetid:" + targetid);
+            var classes = _context.Class.Where(x => x.UniversityId == cbmodel.Id);
+            foreach (var cs in classes)
+            {
+                cs.UniversityId = target.Id;
+                cs.University = target.Name;
+            }
+            var cinfos = _context.ClassInfoContent.Where(x => x.UniversityId == cbmodel.Id);
+            foreach (var i in cinfos)
+            {
+                i.UniversityId = target.Id;
+            }
+            return _context.SaveChanges();
+        }
     }
 }
+

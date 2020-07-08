@@ -27,21 +27,17 @@ namespace DAL.Tools
             /// </summary>
             Answer = 4,
             /// <summary>
-            /// 提交修改
-            /// </summary>
-            Edit = 5,
-            /// <summary>
             /// 申请客服
             /// </summary>
-            ForService = 6,
+            ForService = 5,
             /// <summary>
             /// 已完成
             /// </summary>
-            Complete = 7,
+            Complete = 6,
             /// <summary>
             /// 已关闭
             /// </summary>
-            Close = 8
+            Close = 7
 
         }
         public enum classInfoStatus
@@ -62,6 +58,21 @@ namespace DAL.Tools
             /// 修改未审核
             /// </summary>
             Edit = 3
+        }
+        public  enum noticeType
+        {
+            /// <summary>
+            /// 系统通知
+            /// </summary>
+            System=0,
+            /// <summary>
+            /// 评论通知
+            /// </summary>
+            Comment=1,
+            /// <summary>
+            /// 聊天内容通知
+            /// </summary>
+            Chat=2
         }
     }
 }

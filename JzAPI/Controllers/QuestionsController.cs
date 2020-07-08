@@ -70,19 +70,23 @@ namespace JzAPI.Controllers
 
                         question.CreateBy = ID.ToString();
                         string url = AppConfig.Configuration["imgurl"];
-                        question.Content = question.Content.Replace(url, "");
+                        question.Img = !string.IsNullOrEmpty(question.Img) ? question.Img.Replace(url, "") : question.Img;
                         r.Data = _quedal.Add(question);
                         //发通知
-                        Notice notice = null;
-                        string qurl = AppConfig.Configuration["questionurl"] + question.Id;
-                        foreach (var item in bls)
+                        if (bls != null)
                         {
-                            notice = new Notice();
-                            notice.ReceiveId = int.Parse(item.CreateBy);
-                            notice.SendId = ID;
-                            notice.ContentsUrl = "您竞拍的原问题:" + item.QuestionId + ",内容已经发生改变，请您重新参与竞拍,<a href=" + qurl + ">新问题地址</a>";
-                            _noticedal.Add(notice);
+                            Notice notice = null;
+                            string qurl = AppConfig.Configuration["questionurl"] + question.Id;
+                            foreach (var item in bls)
+                            {
+                                notice = new Notice();
+                                notice.Type = (int)noticeType.System;
+                                notice.ReceiveId = int.Parse(item.CreateBy);
+                                notice.ContentsUrl = "您竞拍的原问题:" + item.QuestionId + ",内容已经发生改变,请您重新参与竞拍,<a href=" + qurl + ">新问题地址</a>";
+                                _noticedal.Add(notice);
+                            }
                         }
+
                     }
                     else
                     {
@@ -124,9 +128,9 @@ namespace JzAPI.Controllers
                 {
                     ls = ls.Where(x => x.Title.Contains(name) || x.Content.Contains(name)).ToList();
                 }
-                if (type == "time")
+                if (type == "new")
                 {
-                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.EndTime).ToList();
+                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.CreateTime).ToList();
                 }
                 else if (type == "currency")
                 {
@@ -136,13 +140,17 @@ namespace JzAPI.Controllers
                 {
                     ls = ls.Where(x => x.Status == (int)questionStatus.Complete).OrderByDescending(x => x.Id).ToList();
                 }
+
+                else if (type == "retime")
+                {
+                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderBy(x => x.EndTime).ToList();
+                }
                 string url = AppConfig.Configuration["imgurl"];
                 foreach (var item in ls)
                 {
-                    if (item.Content.Contains("<img src=\""))
-                    {
-                        item.Content = item.Content.Replace("<img src=\"", "<img src=\"" + url);
-                    }
+
+                    item.Img = !string.IsNullOrEmpty(item.Img) ? url + item.Img : item.Img;
+
                 }
                 page.Data = ls.Skip(pagesize * (pagenum - 1)).Take(pagesize);
                 page.PageTotal = ls.Count();
@@ -179,9 +187,9 @@ namespace JzAPI.Controllers
                 {
                     ls = ls.Where(x => x.Title.Contains(name) || x.Content.Contains(name)).ToList();
                 }
-                if (type == "time")
+                if (type == "new")
                 {
-                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.EndTime).ToList();
+                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.CreateTime).ToList();
                 }
                 else if (type == "currency")
                 {
@@ -191,15 +199,16 @@ namespace JzAPI.Controllers
                 {
                     ls = ls.Where(x => x.Status == (int)questionStatus.Complete).OrderByDescending(x => x.Id).ToList();
                 }
+                else if (type == "retime")
+                {
+                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderBy(x => x.EndTime).ToList();
+                }
                 string url = AppConfig.Configuration["imgurl"];
                 foreach (var item in ls)
                 {
                     queinfo = new queinfo();
                     var bidding = _biddal.GetBidding(item.Id, ID);
-                    if (item.Content.Contains("<img src=\""))
-                    {
-                        item.Content = item.Content.Replace("<img src=\"", "<img src=\"" + url);
-                    }
+                    item.Img = !string.IsNullOrEmpty(item.Img) ? url + item.Img : item.Img;
                     queinfo.que = item;
                     if (bidding != null && item.Status == (int)questionStatus.Bidding)
                     {
@@ -256,9 +265,27 @@ namespace JzAPI.Controllers
                     if (questionid != 0 && clienid != 0)
                     {
                         var bidding = _biddal.GetBidding(questionid, clienid);
-                        //修改问题表里面answerer
-                        _quedal.Update(questionid, int.Parse(bidding.CreateBy));
-                        r.Data = bidding.EndTime;
+                        // 查询悬赏价格和竞拍价格是否一致
+                        var que = _quedal.GetQuestion(questionid);
+                        if (que.Currency < bidding.Currency)
+                        {
+                            int integral = que.Currency - bidding.Currency;
+                            if (client.Integral < integral)
+                            {
+                                r.Msg = "积分不足，不能选择该竞拍者。";
+                                r.Status = RmStatus.Error;
+                                r.Data = null;
+                            }
+                            else
+                            {
+                                //补扣积分
+                                _clientdal.Deduct(ID, integral);
+                                //修改问题表里面answerer
+                                _quedal.Update(questionid, int.Parse(bidding.CreateBy));
+                                r.Data = bidding.EndTime;
+                            }
+                        }
+
 
                     }
                     else
@@ -334,57 +361,10 @@ namespace JzAPI.Controllers
             try
             {
                 var que = _quedal.GetQuestion(questionid);
-                if (que.Status != (int)questionStatus.Complete)
-                {
-                    r.Data = _quedal.ForService(questionid, reason);
-                    if ((int)r.Data == 0)
-                    {
-                        r.Status = RmStatus.Error;
-                    }
-                }
-                else
+                r.Data = _quedal.ForService(questionid, reason);
+                if ((int)r.Data == 0)
                 {
                     r.Status = RmStatus.Error;
-                    r.Msg = "已完成的问题不能的申请客服。";
-                }
-            }
-            catch (Exception ex)
-            {
-                r.Status = RmStatus.Error;
-            }
-            return r;
-        }
-        /// <summary>
-        /// 提交修改
-        /// </summary>
-        /// <param name="quetionid"></param>
-        /// <param name="reason"></param>
-        /// <returns></returns>
-        [HttpPut]
-        [Route("Edit")]
-        [Authorize(Roles = C_Role.all)]
-        public ResultModel Edit(int questionid)
-        {
-            ResultModel r = new ResultModel();
-            r.Status = RmStatus.OK;
-            try
-            {
-                var que = _quedal.GetQuestion(questionid);
-                var bidd = _biddal.GetBidding(que.Id, que.Answerer);
-
-                if (que.Status == (int)questionStatus.Answer)
-                {
-                    r.Data = _quedal.Edit(questionid);
-                    if ((int)r.Data == 0)
-                    {
-                        r.Status = RmStatus.Error;
-                    }
-                }
-                else
-                {
-                    r.Status = RmStatus.Error;
-                    r.Msg = "只有已回答的问题才能提交修改。";
-
                 }
             }
             catch (Exception ex)
@@ -418,9 +398,9 @@ namespace JzAPI.Controllers
                 binfo binfo = null;
                 string url = AppConfig.Configuration["imgurl"];
                 var que = _quedal.GetQuestion(questionid);
-                if (que.Content.Contains("<img src=\""))
+                if (!string.IsNullOrEmpty(que.Img))
                 {
-                    que.Content = que.Content.Replace("<img src=\"", "<img src=\"" + url);
+                    que.Img = url + que.Img;
                 }
                 //已选竞拍者
                 if (que.Answerer != 0)
@@ -496,9 +476,9 @@ namespace JzAPI.Controllers
                 foreach (var item in question)
                 {
                     qinfo = new qinfo();
-                    if (item.Content.Contains("<img src=\""))
+                    if (!string.IsNullOrEmpty(item.Img))
                     {
-                        item.Content = item.Content.Replace("<img src=\"", "<img src=\"" + url);
+                        item.Img = url + item.Img;
                     }
                     qinfo.que = item;
                     var bidding = _biddal.GetList(item.Id);
@@ -517,13 +497,13 @@ namespace JzAPI.Controllers
             return r;
         }
         /// <summary>
-        /// 状态
+        /// 问题状态
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("Status")]
+        [Route("QuestionStatus")]
         [Authorize(Roles = C_Role.all)]
-        public ResultModel Status()
+        public ResultModel QuestionStatus()
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
@@ -539,6 +519,141 @@ namespace JzAPI.Controllers
 
                 r.Data = new { bnum, nonum, answernum };
 
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 回答状态
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("AnswerStatus")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel AnswerStatus()
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                var que = _quedal.GetListByClientid(ID);
+                //竞拍中
+                int bnum = que.Where(x => x.Status == (int)questionStatus.Bidding).Count();
+                //待回答
+                int nonum = que.Where(x => x.Status == (int)questionStatus.Choose).Count();
+                //已回答
+                int answernum = que.Where(x => x.Status == (int)questionStatus.Answer).Count();
+
+                r.Data = new { bnum, nonum, answernum };
+
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+
+        /// <summary>
+        /// 最新问题ls
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("GetNewQuestion")]
+        public ResultModel GetNewQuestion(DateTime time)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                var ls = _quedal.GetList().Where(x => x.CreateTime > time).OrderByDescending(x => x.CreateTime);
+                string url = AppConfig.Configuration["imgurl"];
+                foreach (var item in ls)
+                {
+
+                    item.Img = !string.IsNullOrEmpty(item.Img) ? url + item.Img : item.Img;
+
+                }
+
+                r.Data = ls;
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        ///获取数量
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("GetNumber")]
+        public ResultModel GetNumber(DateTime time)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                int num = 0;
+                DateTime datetime = DateTime.MinValue;
+                var ls = _quedal.GetList().Where(x => x.CreateTime > time).OrderByDescending(x => x.CreateTime);
+                if (ls.Count() > 0)
+                {
+                   num  = ls.Count();
+                  datetime = ls.FirstOrDefault().CreateTime;
+                }
+                r.Data = new { num, datetime };
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 删除图片
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        [Route("RemoveImg")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel RemoveImg(int id, string imgurl)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                if (id != 0)
+                {
+                    //删除数据库图片
+                    int clientid = int.Parse(_quedal.GetQuestion(id).CreateBy);
+                    if (clientid == ID)
+                    {
+                        r.Data = _quedal.DelImg(id, imgurl);
+                    }
+                    else
+                    {
+                        r.Status = RmStatus.Error;
+                        r.Msg = "你没有权限操作";
+                    }
+                }
+                if (r.Msg == null)
+                {
+                    //转换为绝对路径
+                    string path = AppConfig.Configuration["uploadurl"] + imgurl;
+                    //删除本地
+                    if (System.IO.File.Exists(path))
+                    {
+                        System.IO.File.Delete(path);
+                    }
+                }
             }
             catch (Exception ex)
             {

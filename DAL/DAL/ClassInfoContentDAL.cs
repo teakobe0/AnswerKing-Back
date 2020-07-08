@@ -168,7 +168,7 @@ namespace DAL.DAL
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public ClassInfoContent GeClassInfoContent(int id)
+        public ClassInfoContent GetClassInfoContent(int id)
         {
             return _context.ClassInfoContent.FirstOrDefault(x => x.Id == id);
 

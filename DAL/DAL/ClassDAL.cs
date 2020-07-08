@@ -1,5 +1,6 @@
 ﻿using DAL.IDAL;
 using DAL.Model;
+using DAL.Tools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -261,6 +262,15 @@ namespace DAL.DAL
             return null;
         }
         /// <summary>
+        /// 根据学校id查询
+        /// </summary>
+        /// <returns></returns> 
+        public List<Class> GetClasses(int universityid)
+        {
+            var list = GetListData().Where(x => x.UniversityId == universityid);
+            return list.ToList();
+        }
+        /// <summary>
         /// 审核
         /// </summary>
         /// <param name="clas"></param>
@@ -289,5 +299,40 @@ namespace DAL.DAL
 
             return _context.Class.FirstOrDefault(x => x.Id > id && x.IsAudit == false && x.IsDel == false);
         }
+        /// <summary>
+        /// 根据条件检索
+        /// </summary>
+        /// <param name="universityId"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public Class GetClasses(int universityId, string name)
+        {
+            return _context.Class.FirstOrDefault(x => x.UniversityId == universityId && x.Name.Trim() == name.Trim() && x.IsDel == false);
+
+        }
+        /// <summary>
+        /// 合并课程
+        /// </summary>
+        /// <param name="cbmodel"></param>
+        /// <param name="targetid"></param>
+        /// <returns></returns>
+        public int Combine(Class cbmodel, int targetid)
+        {
+            cbmodel.IsDel = true;
+            _context.Class.Update(cbmodel);
+            Utils.WriteInfoLog("Class:CombineDel" + cbmodel.ToJson() + ",targetid:" + targetid);
+            var classinfo = _context.ClassInfo.Where(x => x.ClassId == cbmodel.Id);
+            foreach (var ci in classinfo)
+            {
+                ci.ClassId = targetid;
+            }
+            var classinfocontent = _context.ClassInfoContent.Where(x => x.ClassId == cbmodel.Id);
+            foreach (var co in classinfocontent)
+            {
+                co.ClassId = targetid;
+            }
+            return _context.SaveChanges();
+        }
+
     }
 }

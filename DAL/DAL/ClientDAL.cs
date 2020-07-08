@@ -308,6 +308,25 @@ namespace DAL.DAL
             _context.SaveChanges();
             return client;
         }
+        /// <summary>
+        /// 扣除积分
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public int Deduct(int id,int currency)
+        {
+            var client = _context.Client.FirstOrDefault(x => x.Id == id);
+            client.Integral -= currency;
+            _context.Client.Update(client);
+            //积分记录表
+            IntegralRecords integral = new IntegralRecords();
+            integral.Integral = currency;
+            integral.CreateBy = client.Id.ToString();
+            integral.CreateTime = DateTime.Now;
+            integral.Source = "发布问题";
+            _context.IntegralRecords.Add(integral);
+            return _context.SaveChanges();
+        }
     }
 }
 

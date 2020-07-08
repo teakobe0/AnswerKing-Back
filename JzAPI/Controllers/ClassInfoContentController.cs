@@ -168,7 +168,7 @@ namespace JzAPI.Controllers
                 if (id != 0)
                 {
                     //删除数据库图片
-                    var clientid = _cicdal.GeClassInfoContent(id).ClientId;
+                    var clientid = _cicdal.GetClassInfoContent(id).ClientId;
                     if (clientid == ID)
                     {
                         r.Data = _cicdal.DelImg(id, imgurl);
@@ -209,7 +209,7 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                var ClassInfoContent = _cicdal.GeClassInfoContent(id);
+                var ClassInfoContent = _cicdal.GetClassInfoContent(id);
                 var universtiyname = _udal.GetUniversity(ClassInfoContent.UniversityId) == null ? null : _udal.GetUniversity(ClassInfoContent.UniversityId).Name;
                 var classname = _cdal.GetClass(ClassInfoContent.ClassId) == null ? null : _cdal.GetClass(ClassInfoContent.ClassId).Name;
                 r.Data = new { ClassInfoContent, universtiyname, classname };
@@ -234,7 +234,7 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                var clientid = _cicdal.GeClassInfoContent(id).ClientId;
+                var clientid = _cicdal.GetClassInfoContent(id).ClientId;
                 if (clientid == ID)
                 {
                     r.Data = _cicdal.Del(id);

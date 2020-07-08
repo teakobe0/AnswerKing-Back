@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static DAL.Tools.EnumAll;
 
 namespace DAL.DAL
 {
@@ -69,6 +70,7 @@ namespace DAL.DAL
             Notice notice = new Notice();
             notice.CreateTime = DateTime.Now;
             notice.SendId = comment_v.ClientId;
+            notice.Type =(int) noticeType.Comment;
             var cpid = int.Parse(comment_v.ParentId.Substring(comment_v.ParentId.LastIndexOf(",") + 1));
             var clientid = _context.Comment.FirstOrDefault(x => x.Id == cpid).ClientId;
             notice.ReceiveId = clientid;

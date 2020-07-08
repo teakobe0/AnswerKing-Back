@@ -13,7 +13,7 @@ namespace DAL.IDAL
         /// </summary>
         /// <param name="question"></param>
         /// <returns></returns>
-        int Add(Question question);
+        Question Add(Question question);
         /// <summary>
         /// 删除
         /// </summary>
@@ -41,13 +41,6 @@ namespace DAL.IDAL
         /// <returns></returns>
         int ForService(int id, string reason);
         /// <summary>
-        /// 提交修改
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="reason"></param>
-        /// <returns></returns>
-        int Edit(int id);
-        /// <summary>
         /// 根据问题id查询
         /// </summary>
         /// <param name="id"></param>
@@ -59,6 +52,11 @@ namespace DAL.IDAL
         /// <param name="clientid"></param>
         /// <returns></returns>
         List<Question> GetList(int clientid);
+        /// <summary>
+        /// 根据客户id检索(回答者)
+        /// </summary>
+        /// <returns></returns>
+         List<Question> GetListByClientid(int clientId);
         /// <summary>
         /// 查询列表
         /// </summary>
@@ -90,5 +88,12 @@ namespace DAL.IDAL
         /// </summary>
         /// <returns></returns>
         int ChangeStatus();
+        /// <summary>
+        /// 删除图片
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="img"></param>
+        /// <returns></returns>
+        int DelImg(int id, string img);
     }
 }
