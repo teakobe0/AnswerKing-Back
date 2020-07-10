@@ -20,12 +20,6 @@ namespace DAL.IDAL
         /// <returns></returns>
         int Add(Answer answer);
         /// <summary>
-        /// 编辑
-        /// </summary>
-        /// <param name="answer"></param>
-        /// <returns></returns>
-        int Edit(Answer answer);
-        /// <summary>
         /// 根据答案id查询
         /// </summary>
         /// <param name="id"></param>
@@ -36,13 +30,20 @@ namespace DAL.IDAL
         /// </summary>
         /// <param name="questionid"></param>
         /// <returns></returns>
-        Answer Answer(int questionid);
+        List<Answer> GetLs(int questionid);
         /// <summary>
         /// 根据客户id查询
         /// </summary>
         /// <param name="clientid"></param>
         /// <returns></returns>
         List<Answer> GetList(int clientid);
+        /// <summary>
+        /// 删除图片
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="img"></param>
+        /// <returns></returns>
+        int DelImg(int id, string img);
     }
 }
 

@@ -324,6 +324,27 @@ namespace JzAPI.Controllers
             }
             return r;
         }
+        /// <summary>
+        /// 查询学校数量
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("UniversityNum")]
+        public ResultModel UniversityNum()
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                r.Data =_undal.GetList().Count();
 
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+
+            }
+            return r;
+        }
     }
 }

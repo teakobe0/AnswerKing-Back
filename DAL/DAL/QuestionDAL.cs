@@ -361,7 +361,7 @@ namespace DAL.DAL
             var que = GetList().Where(x => x.Status == (int)questionStatus.Answer);
             foreach (var item in que)
             {
-                var answer = _context.Answer.FirstOrDefault(x => x.QuestionId == item.Id);
+                var answer = _context.Answer.Where(x => x.QuestionId == item.Id).OrderByDescending(x=>x.Id).FirstOrDefault();
                 if (answer.CreateTime.AddDays(7) >= DateTime.Now)
                 {
                     item.Status = (int)questionStatus.Complete;

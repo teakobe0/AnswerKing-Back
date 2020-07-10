@@ -35,23 +35,11 @@ namespace DAL.DAL
         /// <returns></returns>
         public int Add(Answer answer)
         {
-            //CreateTime:更新时间
+           
             answer.CreateTime = DateTime.Now;
             _context.Answer.Add(answer);
             return _context.SaveChanges();
              
-        }
-        /// <summary>
-        /// 编辑
-        /// </summary>
-        /// <param name="answer"></param>
-        /// <returns></returns>
-        public int Edit(Answer answer)
-        {
-            //CreateTime:更新时间
-            answer.CreateTime = DateTime.Now;
-            _context.Answer.Update(answer);
-            return _context.SaveChanges();
         }
         /// <summary>
         /// 根据答案id查询
@@ -67,9 +55,14 @@ namespace DAL.DAL
         /// </summary>
         /// <param name="questionid"></param>
         /// <returns></returns>
-        public Answer Answer(int questionid)
+        public List<Answer> GetLs(int questionid)
         {
-            return _context.Answer.FirstOrDefault(x => x.QuestionId==questionid);
+            var list = GetListData().ToList();
+            if (questionid != 0)
+            {
+                list = list.Where(x => x.QuestionId==questionid).ToList();
+            }
+            return list;
         }
        /// <summary>
        /// 根据客户id查询
@@ -84,6 +77,26 @@ namespace DAL.DAL
                 list = list.Where(x => x.CreateBy == clientid.ToString()).ToList();
             }
             return list;
+
+        }
+        /// <summary>
+        /// 删除图片
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="img"></param>
+        /// <returns></returns>
+        public int DelImg(int id, string img)
+        {
+            if (id != 0)
+            {
+                var answer = _context.Answer.FirstOrDefault(x => x.Id == id);
+                if (!string.IsNullOrEmpty(answer.Img))
+                {
+                    answer.Img = answer.Img.Replace(img, "");
+                    return _context.SaveChanges();
+                }
+            }
+            return 0;
 
         }
     }

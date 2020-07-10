@@ -84,6 +84,7 @@ namespace JzAPI.Controllers
             try
             {
                 notice.SendId = ID;
+                notice.Type =(int)noticeType.Chat;
                 r.Data = _notdal.Add(notice);
 
             }

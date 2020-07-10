@@ -55,7 +55,23 @@ namespace JzAPI.Controllers
                     {
                         if (question.Status == (int)questionStatus.Answer)
                         {
-                            r.Msg = "该问题已经有人回答，不能关闭该问题。";
+                            r.Msg = "该问题已经有人回答，不能重新发布。";
+                            r.Status = RmStatus.Error;
+                        }
+                        else if (question.Status == (int)questionStatus.ForService)
+                        {
+                            r.Msg = "该问题已经申请客服，不能重新发布。";
+                            r.Status = RmStatus.Error;
+                        }
+                        else if (question.Status == (int)questionStatus.Complete)
+                        {
+                            r.Msg = "该问题已经完成，不能重新发布。";
+                            r.Status = RmStatus.Error;
+                        }
+                        else if (question.Status == (int)questionStatus.Close)
+                        {
+                            r.Msg = "该问题已经关闭，不能重新发布。";
+                            r.Status = RmStatus.Error;
                         }
                         else
                         {
@@ -65,34 +81,38 @@ namespace JzAPI.Controllers
                             question.Id = 0;
                         }
                     }
-                    if (!string.IsNullOrEmpty(question.Title) && !string.IsNullOrEmpty(question.Content))
+                    if (r.Msg == null)
                     {
-
-                        question.CreateBy = ID.ToString();
-                        string url = AppConfig.Configuration["imgurl"];
-                        question.Img = !string.IsNullOrEmpty(question.Img) ? question.Img.Replace(url, "") : question.Img;
-                        r.Data = _quedal.Add(question);
-                        //发通知
-                        if (bls != null)
+                        if (!string.IsNullOrEmpty(question.Title) && !string.IsNullOrEmpty(question.Content))
                         {
-                            Notice notice = null;
-                            string qurl = AppConfig.Configuration["questionurl"] + question.Id;
-                            foreach (var item in bls)
-                            {
-                                notice = new Notice();
-                                notice.Type = (int)noticeType.System;
-                                notice.ReceiveId = int.Parse(item.CreateBy);
-                                notice.ContentsUrl = "您竞拍的原问题:" + item.QuestionId + ",内容已经发生改变,请您重新参与竞拍,<a href=" + qurl + ">新问题地址</a>";
-                                _noticedal.Add(notice);
-                            }
-                        }
 
+                            question.CreateBy = ID.ToString();
+                            string url = AppConfig.Configuration["imgurl"];
+                            question.Img = !string.IsNullOrEmpty(question.Img) ? question.Img.Replace(url, "") : question.Img;
+                            r.Data = _quedal.Add(question);
+                            //发通知
+                            if (bls != null)
+                            {
+                                Notice notice = null;
+                                string qurl = AppConfig.Configuration["questionurl"] + question.Id;
+                                foreach (var item in bls)
+                                {
+                                    notice = new Notice();
+                                    notice.Type = (int)noticeType.System;
+                                    notice.ReceiveId = int.Parse(item.CreateBy);
+                                    notice.ContentsUrl = "您竞拍的原问题:" + item.QuestionId + ",内容已经发生改变,请您重新参与竞拍,<a href=" + qurl + ">新问题地址</a>";
+                                    _noticedal.Add(notice);
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            r.Status = RmStatus.Error;
+                            r.Msg = "问题的标题和内容不能为空";
+                        }
                     }
-                    else
-                    {
-                        r.Status = RmStatus.Error;
-                        r.Msg = "问题的标题和内容不能为空";
-                    }
+
                 }
                 else
                 {
@@ -145,13 +165,28 @@ namespace JzAPI.Controllers
                 {
                     ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderBy(x => x.EndTime).ToList();
                 }
-                string url = AppConfig.Configuration["imgurl"];
-                foreach (var item in ls)
-                {
-
-                    item.Img = !string.IsNullOrEmpty(item.Img) ? url + item.Img : item.Img;
-
-                }
+                //后期是否需要图片显示
+                //string url = AppConfig.Configuration["imgurl"];
+                //foreach (var item in ls)
+                //{
+                //    if (!string.IsNullOrEmpty(item.Img))
+                //    {
+                //        if (item.Img.Contains("|"))
+                //        {
+                //            Array qimgs = item.Img.Split("|");
+                //            item.Img = "";
+                //            foreach (var t in qimgs)
+                //            {
+                //                item.Img += "|" + url + t;
+                //            }
+                //            item.Img = item.Img.Substring(1);
+                //        }
+                //        else
+                //        {
+                //            item.Img = url + item.Img;
+                //        }
+                //    }
+                //}
                 page.Data = ls.Skip(pagesize * (pagenum - 1)).Take(pagesize);
                 page.PageTotal = ls.Count();
                 r.Data = page;
@@ -208,7 +243,24 @@ namespace JzAPI.Controllers
                 {
                     queinfo = new queinfo();
                     var bidding = _biddal.GetBidding(item.Id, ID);
-                    item.Img = !string.IsNullOrEmpty(item.Img) ? url + item.Img : item.Img;
+                    //后期是否需要图片显示
+                    //if (!string.IsNullOrEmpty(item.Img))
+                    //{
+                    //    if (item.Img.Contains("|"))
+                    //    {
+                    //        Array qimgs = item.Img.Split("|");
+                    //        item.Img = "";
+                    //        foreach (var t in qimgs)
+                    //        {
+                    //            item.Img += "|" + url + t;
+                    //        }
+                    //        item.Img = item.Img.Substring(1);
+                    //    }
+                    //    else
+                    //    {
+                    //        item.Img = url + item.Img;
+                    //    }
+                    //}
                     queinfo.que = item;
                     if (bidding != null && item.Status == (int)questionStatus.Bidding)
                     {
@@ -280,13 +332,11 @@ namespace JzAPI.Controllers
                             {
                                 //补扣积分
                                 _clientdal.Deduct(ID, integral);
-                                //修改问题表里面answerer
-                                _quedal.Update(questionid, int.Parse(bidding.CreateBy));
-                                r.Data = bidding.EndTime;
                             }
                         }
-
-
+                        //修改问题表里面answerer
+                        _quedal.Update(questionid, int.Parse(bidding.CreateBy));
+                        r.Data = bidding.EndTime;
                     }
                     else
                     {
@@ -377,9 +427,16 @@ namespace JzAPI.Controllers
         public class binfo
         {
             public Bidding bidding { get; set; }
-            public string name { get; set; }
-            public string image { get; set; }
+            public string bname { get; set; }
+            public string bimage { get; set; }
         }
+        public class que
+        {
+            public Question question { get; set; }
+            public string qname { get; set; }
+            public string qimage { get; set; }
+        }
+
         /// <summary>
         /// 问题详情
         /// </summary>
@@ -393,32 +450,68 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                Answer answer = null;
+                List<Answer> als = new List<Answer>();
                 List<binfo> bls = new List<binfo>();
                 binfo binfo = null;
+                que que = new que();
                 string url = AppConfig.Configuration["imgurl"];
-                var que = _quedal.GetQuestion(questionid);
-                if (!string.IsNullOrEmpty(que.Img))
+                var question = _quedal.GetQuestion(questionid);
+                if (!string.IsNullOrEmpty(question.Img))
                 {
-                    que.Img = url + que.Img;
-                }
-                //已选竞拍者
-                if (que.Answerer != 0)
-                {
-                    answer = _ansdal.Answer(questionid);
-
-                    if (answer != null && answer.Content.Contains("<img src=\""))
+                    if (question.Img.Contains("|"))
                     {
-                        answer.Content = answer.Content.Replace("<img src=\"", "<img src=\"" + url);
+                        Array qimgs = question.Img.Split("|");
+                        question.Img = "";
+                        foreach (var t in qimgs)
+                        {
+                            question.Img += "|" + url + t;
+                        }
+                        question.Img = question.Img.Substring(1);
                     }
-                    var bidding = _biddal.GetBidding(questionid, que.Answerer);
-                    que.EndTime = bidding.EndTime;
-                    que.Currency = bidding.Currency;
+                    else
+                    {
+                        question.Img = url + question.Img;
+                    }
+                }
+                var client = _clientdal.GetClientById(int.Parse(question.CreateBy));
+                que.question = question;
+                que.qname = client.Name;
+                que.qimage = !string.IsNullOrEmpty(client.Image) ? AppConfig.Configuration["imgurl"] + client.Image : client.Image;
+                //已选竞拍者
+                if (question.Answerer != 0)
+                {
+                    als = _ansdal.GetLs(questionid);
+                    if (als.Count() > 0)
+                    {
+                        foreach (var item in als)
+                        {
+                            if (!string.IsNullOrEmpty(item.Img))
+                            {
+                                if (item.Img.Contains("|"))
+                                {
+                                    Array aimgs = item.Img.Split("|");
+                                    item.Img = "";
+                                    foreach (var m in aimgs)
+                                    {
+                                        item.Img += "|" + url + m;
+                                    }
+                                    item.Img = item.Img.Substring(1);
+                                }
+                                else
+                                {
+                                    item.Img = url + item.Img;
+                                }
+                            }
+                        }
+                    }
+                    var bidding = _biddal.GetBidding(questionid, question.Answerer);
+                    question.EndTime = bidding.EndTime;
+                    question.Currency = bidding.Currency;
                     binfo = new binfo();
                     binfo.bidding = bidding;
-                    var client = _clientdal.GetClientById(int.Parse(bidding.CreateBy));
-                    binfo.name = client.Name;
-                    binfo.image = !string.IsNullOrEmpty(client.Image) ? AppConfig.Configuration["imgurl"] + client.Image : client.Image;
+                    client = _clientdal.GetClientById(int.Parse(bidding.CreateBy));
+                    binfo.bname = client.Name;
+                    binfo.bimage = !string.IsNullOrEmpty(client.Image) ? AppConfig.Configuration["imgurl"] + client.Image : client.Image;
                     bls.Add(binfo);
                 }
                 else
@@ -428,15 +521,15 @@ namespace JzAPI.Controllers
                     {
                         binfo = new binfo();
                         binfo.bidding = item;
-                        var client = _clientdal.GetClientById(int.Parse(item.CreateBy));
-                        binfo.name = client.Name;
-                        binfo.image = !string.IsNullOrEmpty(client.Image) ? AppConfig.Configuration["imgurl"] + client.Image : client.Image;
+                        client = _clientdal.GetClientById(int.Parse(item.CreateBy));
+                        binfo.bname = client.Name;
+                        binfo.bimage = !string.IsNullOrEmpty(client.Image) ? AppConfig.Configuration["imgurl"] + client.Image : client.Image;
                         bls.Add(binfo);
                     }
 
                 }
 
-                r.Data = new { que, bls, answer };
+                r.Data = new { que, bls, als };
             }
             catch (Exception ex)
             {
@@ -478,7 +571,20 @@ namespace JzAPI.Controllers
                     qinfo = new qinfo();
                     if (!string.IsNullOrEmpty(item.Img))
                     {
-                        item.Img = url + item.Img;
+                        if (item.Img.Contains("|"))
+                        {
+                            Array qimgs = item.Img.Split("|");
+                            item.Img = "";
+                            foreach (var t in qimgs)
+                            {
+                                item.Img += "|" + url + t;
+                            }
+                            item.Img = item.Img.Substring(1);
+                        }
+                        else
+                        {
+                            item.Img = url + item.Img;
+                        }
                     }
                     qinfo.que = item;
                     var bidding = _biddal.GetList(item.Id);
@@ -570,16 +676,35 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                var ls = _quedal.GetList().Where(x => x.CreateTime > time).OrderByDescending(x => x.CreateTime);
-                string url = AppConfig.Configuration["imgurl"];
+                queinfo queinfo = null;
+                List<queinfo> queinfos = new List<queinfo>();
+                var ls = _quedal.GetList().Where(x => x.CreateTime >= time).OrderByDescending(x => x.CreateTime);
+                //string url = AppConfig.Configuration["imgurl"];
                 foreach (var item in ls)
                 {
-
-                    item.Img = !string.IsNullOrEmpty(item.Img) ? url + item.Img : item.Img;
-
+                    queinfo = new queinfo();
+                    //后期是否需要图片显示
+                    //if (!string.IsNullOrEmpty(item.Img))
+                    //{
+                    //    if (item.Img.Contains("|"))
+                    //    {
+                    //        Array qimgs = item.Img.Split("|");
+                    //        item.Img = "";
+                    //        foreach (var t in qimgs)
+                    //        {
+                    //            item.Img += "|" + url + t;
+                    //        }
+                    //        item.Img = item.Img.Substring(1);
+                    //    }
+                    //    else
+                    //    {
+                    //        item.Img = url + item.Img;
+                    //    }
+                    //}
+                    queinfo.que = item;
+                    queinfos.Add(queinfo);
                 }
-
-                r.Data = ls;
+                r.Data = queinfos;
             }
             catch (Exception ex)
             {
@@ -605,8 +730,8 @@ namespace JzAPI.Controllers
                 var ls = _quedal.GetList().Where(x => x.CreateTime > time).OrderByDescending(x => x.CreateTime);
                 if (ls.Count() > 0)
                 {
-                   num  = ls.Count();
-                  datetime = ls.FirstOrDefault().CreateTime;
+                    num = ls.Count();
+                    datetime = ls.FirstOrDefault().CreateTime;
                 }
                 r.Data = new { num, datetime };
             }
@@ -619,24 +744,25 @@ namespace JzAPI.Controllers
         /// <summary>
         /// 删除图片
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="questionid"></param>
+        /// <param name="imgurl"></param>
         /// <returns></returns>
         [HttpDelete]
         [Route("RemoveImg")]
         [Authorize(Roles = C_Role.all)]
-        public ResultModel RemoveImg(int id, string imgurl)
+        public ResultModel RemoveImg(int questionid, string imgurl)
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             try
             {
-                if (id != 0)
+                if (questionid != 0)
                 {
                     //删除数据库图片
-                    int clientid = int.Parse(_quedal.GetQuestion(id).CreateBy);
+                    int clientid = int.Parse(_quedal.GetQuestion(questionid).CreateBy);
                     if (clientid == ID)
                     {
-                        r.Data = _quedal.DelImg(id, imgurl);
+                        r.Data = _quedal.DelImg(questionid, imgurl);
                     }
                     else
                     {

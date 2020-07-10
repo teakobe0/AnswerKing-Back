@@ -8,6 +8,7 @@ using DAL.Model.Const;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static DAL.Tools.EnumAll;
 
 namespace JzAPI.Controllers
 {
@@ -80,11 +81,20 @@ namespace JzAPI.Controllers
             try
             {
                 var bidds = _biddal.GetListByCid(ID);
-                foreach(var item in bidds)
+                foreach (var item in bidds)
                 {
                     binfo = new biddinfo();
                     binfo.bidding = item;
-                    binfo.title = _quedal.GetQuestion(item.QuestionId).Title;
+                    var que = _quedal.GetQuestion(item.QuestionId);
+                    if (que.Answerer == ID)
+                    {
+                        binfo.bstatus = "已中竞拍";
+                    }
+                    else
+                    {
+                        binfo.bstatus = "未中竞拍";
+                    }
+                    binfo.title = que.Title;
                     ls.Add(binfo);
                 }
                 r.Data = ls;
@@ -99,6 +109,8 @@ namespace JzAPI.Controllers
         {
             public Bidding bidding { get; set; }
             public string title { get; set; }
+            public string bstatus { get; set; }
+
         }
     }
 }

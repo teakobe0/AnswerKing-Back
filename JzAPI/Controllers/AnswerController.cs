@@ -7,6 +7,7 @@ using DAL.Tools;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using static DAL.Tools.EnumAll;
 
 namespace JzAPI.Controllers
 {
@@ -41,62 +42,26 @@ namespace JzAPI.Controllers
                 if (!string.IsNullOrEmpty(answer.Content))
                 {
                     string url = AppConfig.Configuration["imgurl"];
-                    answer.Content = answer.Content.Replace(url, "");
-                    if (answer.Id == 0)
+                    answer.Img = !string.IsNullOrEmpty(answer.Img) ? answer.Img.Replace(url, "") : answer.Img;
+                    answer.CreateBy = ID.ToString();
+                    r.Data = _ansdal.Add(answer);
+                    var que = _quedal.GetQuestion(answer.QuestionId);
+
+                    if ((int)r.Data == 1 && que.Status == (int)questionStatus.Choose)
                     {
-                        answer.CreateBy = ID.ToString();
-                        r.Data = _ansdal.Add(answer);
-                    }
-                    else
-                    {
-                        if (int.Parse(answer.CreateBy) == ID)
-                        {
-                           
-                            r.Data = _ansdal.Edit(answer);
-                        }
-                        else
-                        {
-                            r.Status = RmStatus.Error;
-                            r.Msg = "你没有权限操作";
-                        }
+                        //变更问题的状态为已回答
+                        _quedal.ChangeStatus(answer.QuestionId);
                     }
                 }
                 else
                 {
                     r.Status = RmStatus.Error;
-                    r.Msg = "答案不能为空";
+                    r.Msg = "答案内容不能为空";
                 }
             }
             catch (Exception ex)
             {
                 r.Status = RmStatus.Error;
-            }
-            return r;
-        }
-        /// <summary>
-        /// 根据答案id
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("GetAnswer")]
-        public ResultModel GetAnswer(int id)
-        {
-            ResultModel r = new ResultModel();
-            r.Status = RmStatus.OK;
-            try
-            {
-                r.Data = _ansdal.GetAnswer(id);
-                if (r.Data == null)
-                {
-                    r.Status = RmStatus.Error;
-                    r.Msg = "查询失败";
-                }
-            }
-            catch (Exception ex)
-            {
-                r.Status = RmStatus.Error;
-
             }
             return r;
         }
@@ -121,7 +86,7 @@ namespace JzAPI.Controllers
                 List<ainfo> ls = new List<ainfo>();
                 ainfo ainfo = null;
                 var ans = _ansdal.GetList(ID);
-                foreach(var item in ans)
+                foreach (var item in ans)
                 {
                     ainfo = new ainfo();
                     ainfo.answer = item;
@@ -137,53 +102,27 @@ namespace JzAPI.Controllers
             }
             return r;
         }
-        /// <summary>
-        /// 确认提交
-        /// </summary>
-        /// <param name="answer"></param>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("Submit")]
-        [Authorize(Roles = C_Role.all)]
-        public ResultModel Submit([FromBody] Answer answer)
-        {
 
+        /// <summary>
+        /// 删除图片
+        /// </summary>
+        /// <param name="imgurl"></param>
+        /// <returns></returns>
+        [HttpDelete]
+        [Route("RemoveImg")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel RemoveImg(string imgurl)
+        {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             try
             {
-                if (!string.IsNullOrEmpty(answer.Content))
+                //转换为绝对路径
+                string path = AppConfig.Configuration["uploadurl"] + imgurl;
+                //删除本地
+                if (System.IO.File.Exists(path))
                 {
-                    string url = AppConfig.Configuration["imgurl"];
-                    answer.Content = answer.Content.Replace(url, "");
-                    if (answer.Id == 0)
-                    {
-                        answer.CreateBy = ID.ToString();
-                        r.Data = _ansdal.Add(answer);
-                    }
-                    else
-                    {
-                        if (int.Parse(answer.CreateBy) == ID)
-                        {
-
-                            r.Data = _ansdal.Edit(answer);
-                        }
-                        else
-                        {
-                            r.Status = RmStatus.Error;
-                            r.Msg = "你没有权限操作";
-                        }
-                    }
-                    if (r.Status == RmStatus.OK)
-                    {
-                        //变更问题的状态为已回答
-                        _quedal.ChangeStatus(answer.QuestionId);
-                    }
-                }
-                else
-                {
-                    r.Status = RmStatus.Error;
-                    r.Msg = "答案不能为空";
+                    System.IO.File.Delete(path);
                 }
 
             }
