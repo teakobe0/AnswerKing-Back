@@ -143,6 +143,8 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
+                que que = null;
+                List<que> ques = new List<que>();
                 var ls = _quedal.GetList().Where(x => x.EndTime >= DateTime.Now);
                 if (!string.IsNullOrEmpty(name))
                 {
@@ -166,29 +168,18 @@ namespace JzAPI.Controllers
                     ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderBy(x => x.EndTime).ToList();
                 }
                 //后期是否需要图片显示
-                //string url = AppConfig.Configuration["imgurl"];
-                //foreach (var item in ls)
-                //{
-                //    if (!string.IsNullOrEmpty(item.Img))
-                //    {
-                //        if (item.Img.Contains("|"))
-                //        {
-                //            Array qimgs = item.Img.Split("|");
-                //            item.Img = "";
-                //            foreach (var t in qimgs)
-                //            {
-                //                item.Img += "|" + url + t;
-                //            }
-                //            item.Img = item.Img.Substring(1);
-                //        }
-                //        else
-                //        {
-                //            item.Img = url + item.Img;
-                //        }
-                //    }
-                //}
-                page.Data = ls.Skip(pagesize * (pagenum - 1)).Take(pagesize);
-                page.PageTotal = ls.Count();
+                string url = AppConfig.Configuration["imgurl"];
+                foreach (var item in ls)
+                {
+                    que = new que();
+                    var client = _clientdal.GetClientById(int.Parse(item.CreateBy));
+                    que.question = item;
+                    que.qname = client.Name;
+                    que.qimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
+                    ques.Add(que);
+                }
+                page.Data = ques.Skip(pagesize * (pagenum - 1)).Take(pagesize);
+                page.PageTotal = ques.Count();
                 r.Data = page;
             }
             catch (Exception ex)
@@ -217,6 +208,7 @@ namespace JzAPI.Controllers
             {
                 queinfo queinfo = null;
                 List<queinfo> queinfos = new List<queinfo>();
+                string url = AppConfig.Configuration["imgurl"];
                 var ls = _quedal.GetList().Where(x => x.EndTime >= DateTime.Now);
                 if (!string.IsNullOrEmpty(name))
                 {
@@ -238,30 +230,15 @@ namespace JzAPI.Controllers
                 {
                     ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderBy(x => x.EndTime).ToList();
                 }
-                string url = AppConfig.Configuration["imgurl"];
+
                 foreach (var item in ls)
                 {
                     queinfo = new queinfo();
                     var bidding = _biddal.GetBidding(item.Id, ID);
-                    //后期是否需要图片显示
-                    //if (!string.IsNullOrEmpty(item.Img))
-                    //{
-                    //    if (item.Img.Contains("|"))
-                    //    {
-                    //        Array qimgs = item.Img.Split("|");
-                    //        item.Img = "";
-                    //        foreach (var t in qimgs)
-                    //        {
-                    //            item.Img += "|" + url + t;
-                    //        }
-                    //        item.Img = item.Img.Substring(1);
-                    //    }
-                    //    else
-                    //    {
-                    //        item.Img = url + item.Img;
-                    //    }
-                    //}
+                    var client = _clientdal.GetClientById(int.Parse(item.CreateBy));
                     queinfo.que = item;
+                    queinfo.qname = client.Name;
+                    queinfo.qimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
                     if (bidding != null && item.Status == (int)questionStatus.Bidding)
                     {
                         queinfo.bidd = "正在竞拍";
@@ -290,6 +267,8 @@ namespace JzAPI.Controllers
         public class queinfo
         {
             public Question que { get; set; }
+            public string qname { get; set; }
+            public string qimage { get; set; }
             public string myque { get; set; }
             public string bidd { get; set; }
             public string myanswer { get; set; }
@@ -476,31 +455,28 @@ namespace JzAPI.Controllers
                 var client = _clientdal.GetClientById(int.Parse(question.CreateBy));
                 que.question = question;
                 que.qname = client.Name;
-                que.qimage = !string.IsNullOrEmpty(client.Image) ? AppConfig.Configuration["imgurl"] + client.Image : client.Image;
+                que.qimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
                 //已选竞拍者
                 if (question.Answerer != 0)
                 {
                     als = _ansdal.GetLs(questionid);
-                    if (als.Count() > 0)
+                    foreach (var item in als)
                     {
-                        foreach (var item in als)
+                        if (!string.IsNullOrEmpty(item.Img))
                         {
-                            if (!string.IsNullOrEmpty(item.Img))
+                            if (item.Img.Contains("|"))
                             {
-                                if (item.Img.Contains("|"))
+                                Array aimgs = item.Img.Split("|");
+                                item.Img = "";
+                                foreach (var m in aimgs)
                                 {
-                                    Array aimgs = item.Img.Split("|");
-                                    item.Img = "";
-                                    foreach (var m in aimgs)
-                                    {
-                                        item.Img += "|" + url + m;
-                                    }
-                                    item.Img = item.Img.Substring(1);
+                                    item.Img += "|" + url + m;
                                 }
-                                else
-                                {
-                                    item.Img = url + item.Img;
-                                }
+                                item.Img = item.Img.Substring(1);
+                            }
+                            else
+                            {
+                                item.Img = url + item.Img;
                             }
                         }
                     }
@@ -511,7 +487,7 @@ namespace JzAPI.Controllers
                     binfo.bidding = bidding;
                     client = _clientdal.GetClientById(int.Parse(bidding.CreateBy));
                     binfo.bname = client.Name;
-                    binfo.bimage = !string.IsNullOrEmpty(client.Image) ? AppConfig.Configuration["imgurl"] + client.Image : client.Image;
+                    binfo.bimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
                     bls.Add(binfo);
                 }
                 else
@@ -523,7 +499,7 @@ namespace JzAPI.Controllers
                         binfo.bidding = item;
                         client = _clientdal.GetClientById(int.Parse(item.CreateBy));
                         binfo.bname = client.Name;
-                        binfo.bimage = !string.IsNullOrEmpty(client.Image) ? AppConfig.Configuration["imgurl"] + client.Image : client.Image;
+                        binfo.bimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
                         bls.Add(binfo);
                     }
 
@@ -679,28 +655,9 @@ namespace JzAPI.Controllers
                 queinfo queinfo = null;
                 List<queinfo> queinfos = new List<queinfo>();
                 var ls = _quedal.GetList().Where(x => x.CreateTime >= time).OrderByDescending(x => x.CreateTime);
-                //string url = AppConfig.Configuration["imgurl"];
                 foreach (var item in ls)
                 {
                     queinfo = new queinfo();
-                    //后期是否需要图片显示
-                    //if (!string.IsNullOrEmpty(item.Img))
-                    //{
-                    //    if (item.Img.Contains("|"))
-                    //    {
-                    //        Array qimgs = item.Img.Split("|");
-                    //        item.Img = "";
-                    //        foreach (var t in qimgs)
-                    //        {
-                    //            item.Img += "|" + url + t;
-                    //        }
-                    //        item.Img = item.Img.Substring(1);
-                    //    }
-                    //    else
-                    //    {
-                    //        item.Img = url + item.Img;
-                    //    }
-                    //}
                     queinfo.que = item;
                     queinfos.Add(queinfo);
                 }
