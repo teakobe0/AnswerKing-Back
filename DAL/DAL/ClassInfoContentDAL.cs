@@ -30,7 +30,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public List<ClassInfoContent> ImgLs()
         {
-            var list = _context.ClassInfoContent.Where(x => x.IsDel == false && !string.IsNullOrEmpty(x.Url) && string.IsNullOrEmpty(x.Contents));
+            var list = _context.ClassInfoContent.Where(x => x.IsDel == false && x.IsAudit == true && !string.IsNullOrEmpty(x.Url) && string.IsNullOrEmpty(x.Contents));
             return list.ToList();
 
         }
