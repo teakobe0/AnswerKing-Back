@@ -173,6 +173,23 @@ namespace JzAPI.Controllers
                 {
                     que = new que();
                     var client = _clientdal.GetClientById(int.Parse(item.CreateBy));
+                    if (!string.IsNullOrEmpty(item.Img))
+                    {
+                        if (item.Img.Contains("|"))
+                        {
+                            Array qimgs = item.Img.Split("|");
+                            item.Img = "";
+                            foreach (var t in qimgs)
+                            {
+                                item.Img += "|" + url + t;
+                            }
+                            item.Img = item.Img.Substring(1);
+                        }
+                        else
+                        {
+                            item.Img = url + item.Img;
+                        }
+                    }
                     que.question = item;
                     que.qname = client.Name;
                     que.qimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
@@ -230,12 +247,28 @@ namespace JzAPI.Controllers
                 {
                     ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderBy(x => x.EndTime).ToList();
                 }
-
                 foreach (var item in ls)
                 {
                     queinfo = new queinfo();
                     var bidding = _biddal.GetBidding(item.Id, ID);
                     var client = _clientdal.GetClientById(int.Parse(item.CreateBy));
+                    if (!string.IsNullOrEmpty(item.Img))
+                    {
+                        if (item.Img.Contains("|"))
+                        {
+                            Array qimgs = item.Img.Split("|");
+                            item.Img = "";
+                            foreach (var t in qimgs)
+                            {
+                                item.Img += "|" + url + t;
+                            }
+                            item.Img = item.Img.Substring(1);
+                        }
+                        else
+                        {
+                            item.Img = url + item.Img;
+                        }
+                    }
                     queinfo.que = item;
                     queinfo.qname = client.Name;
                     queinfo.qimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
