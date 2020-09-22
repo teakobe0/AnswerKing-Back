@@ -57,29 +57,40 @@ namespace DAL.DAL
                 }
             }
             int num = 0;
-            string[] urls = classInfoContent.Url.Split("|");
-            foreach (var item in urls)
+            if (!string.IsNullOrEmpty(classInfoContent.Url))
             {
-                ClassInfoContent cic = new ClassInfoContent();
-                cic.ClassWeek = classInfoContent.ClassWeek;
-                cic.CreateBy = classInfoContent.CreateBy;
-                cic.ClassWeekType = classInfoContent.ClassWeekType;
-                cic.ClassInfoId = classInfoContent.ClassInfoId;
-                cic.Name = classInfoContent.Name;
-                cic.NameUrl = classInfoContent.NameUrl;
-                cic.IsAudit = classInfoContent.IsAudit;
-                cic.ClientId = classInfoContent.ClientId;
-                cic.Url = item;
-                cic.Contents = classInfoContent.Contents;
-                cic.CreateTime = DateTime.Now;
-                cic.ClassId = _context.ClassInfo.FirstOrDefault(x => x.Id == cic.ClassInfoId).ClassId;
-                cic.UniversityId = _context.Class.FirstOrDefault(x => x.Id == cic.ClassId).UniversityId;
-                _context.ClassInfoContent.Add(cic);
-                num += _context.SaveChanges();
-                id += ","+ cic.Id;
-                
+                string[] urls = classInfoContent.Url.Split("|");
+                foreach (var item in urls)
+                {
+                    ClassInfoContent cic = new ClassInfoContent();
+                    cic.ClassWeek = classInfoContent.ClassWeek;
+                    cic.CreateBy = classInfoContent.CreateBy;
+                    cic.ClassWeekType = classInfoContent.ClassWeekType;
+                    cic.ClassInfoId = classInfoContent.ClassInfoId;
+                    cic.Name = classInfoContent.Name;
+                    cic.NameUrl = classInfoContent.NameUrl;
+                    cic.IsAudit = classInfoContent.IsAudit;
+                    cic.ClientId = classInfoContent.ClientId;
+                    cic.Url = item;
+                    cic.Contents = classInfoContent.Contents;
+                    cic.CreateTime = DateTime.Now;
+                    cic.ClassId = _context.ClassInfo.FirstOrDefault(x => x.Id == cic.ClassInfoId).ClassId;
+                    cic.UniversityId = _context.Class.FirstOrDefault(x => x.Id == cic.ClassId).UniversityId;
+                    _context.ClassInfoContent.Add(cic);
+                    num += _context.SaveChanges();
+                    id += "," + cic.Id;
+                    id = id.Substring(1);
+                }
             }
-            id = id.Substring(1);
+            else
+            {
+                classInfoContent.CreateTime = DateTime.Now;
+                classInfoContent.ClassId = _context.ClassInfo.FirstOrDefault(x => x.Id == classInfoContent.ClassInfoId).ClassId;
+                classInfoContent.UniversityId = _context.Class.FirstOrDefault(x => x.Id == classInfoContent.ClassId).UniversityId;
+                _context.ClassInfoContent.Add(classInfoContent);
+                num = _context.SaveChanges();
+                id = classInfoContent.Id.ToString();
+            }
             return num;
         }
         /// <summary>
