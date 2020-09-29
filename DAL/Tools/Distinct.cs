@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DAL.Tools
 {
+    /// <summary>
+    /// 时间操作类
+    /// </summary>
     public static class Distinct
     {
         public static IEnumerable<TSource> DistinctBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)

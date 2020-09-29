@@ -4,7 +4,9 @@ using System.Text;
 
 namespace DAL.Model
 {
-
+    /// <summary>
+    /// 评论表
+    /// </summary>
     public class Comment:BaseModel
     {
         public string  ParentId { get; set; } //评论父级id

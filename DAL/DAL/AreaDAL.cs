@@ -7,6 +7,9 @@ using System.Text;
 
 namespace DAL.DAL
 {
+    /// <summary>
+    /// 地区表数据访问层
+    /// </summary>
     public class AreaDAL : BaseDAL, IAreaDAL
     {
         public AreaDAL(DataContext context)

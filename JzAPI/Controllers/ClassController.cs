@@ -13,6 +13,9 @@ using static DAL.Tools.EnumAll;
 
 namespace JzAPI.Controllers
 {
+    /// <summary>
+    /// 课程表控制层
+    /// </summary>
     [EnableCors("CorsPolicy")]
     [Produces("application/json")]
     [Route("api/Class")]
@@ -24,6 +27,7 @@ namespace JzAPI.Controllers
         private IClientDAL _clientdal;
         private IClassDAL _cladal;
         private IIntegralRecordsDAL _integraldal;
+        
         public ClassController(IClassInfoDAL cidal, IClientDAL clientdal, IClassDAL cladal, IUniversityDAL udal, IIntegralRecordsDAL integraldal)
         {
 

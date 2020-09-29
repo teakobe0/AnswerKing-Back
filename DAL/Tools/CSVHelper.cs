@@ -10,6 +10,9 @@ using System.Text;
 
 namespace DAL.Tools
 {
+    /// <summary>
+    /// csv数据操作类
+    /// </summary>
     public class CSVHelper
     {
 

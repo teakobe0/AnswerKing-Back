@@ -4,9 +4,15 @@ using System.Text;
 
 namespace DAL.Tools
 {
+    /// <summary>
+    /// 枚举
+    /// </summary>
     public class EnumAll
 
     {
+        /// <summary>
+        /// 问题状态
+        /// </summary>
         public enum questionStatus
         {
 
@@ -40,6 +46,9 @@ namespace DAL.Tools
             Close = 7
 
         }
+        /// <summary>
+        /// 题库集状态
+        /// </summary>
         public enum classInfoStatus
         {
             /// <summary>
@@ -59,6 +68,9 @@ namespace DAL.Tools
             /// </summary>
             Edit = 3
         }
+        /// <summary>
+        /// 通知类别
+        /// </summary>
         public  enum noticeType
         {
             /// <summary>

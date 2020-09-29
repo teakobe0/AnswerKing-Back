@@ -16,6 +16,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JzAPI.Controllers
 {
+    /// <summary>
+    /// 学校表控制层
+    /// </summary>
     [EnableCors("CorsPolicy")]
     [Produces("application/json")]
     [Route("api/University")]

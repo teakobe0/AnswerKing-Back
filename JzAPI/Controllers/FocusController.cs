@@ -12,6 +12,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JzAPI.Controllers
 {
+    /// <summary>
+    /// 关注表控制层
+    /// </summary>
     [EnableCors("CorsPolicy")]
     [Produces("application/json")]
     [Route("api/Focus")]

@@ -7,6 +7,9 @@ using System.Text;
 
 namespace DAL.PgSql
 {
+    /// <summary>
+    /// pg数据操作类
+    /// </summary>
     public class PgHelper
     {
         private NpgsqlConnection conn;

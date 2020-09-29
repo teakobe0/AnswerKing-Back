@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace JzAPI
 {
+    /// <summary>
+    /// 微信支付配置文件
+    /// </summary>
     public class WxPayConfig
     {
         public static WxPayConfig Instance = new WxPayConfig();

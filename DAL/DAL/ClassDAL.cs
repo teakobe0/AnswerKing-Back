@@ -8,6 +8,9 @@ using System.Text;
 
 namespace DAL.DAL
 {
+    /// <summary>
+    /// 课程表数据访问层
+    /// </summary>
     public class ClassDAL : BaseDAL, IClassDAL
     {
         public ClassDAL(DataContext context)

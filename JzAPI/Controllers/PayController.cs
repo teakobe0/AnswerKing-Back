@@ -17,6 +17,9 @@ using Newtonsoft.Json.Linq;
 
 namespace JzAPI.Controllers
 {
+    /// <summary>
+    /// 支付控制层
+    /// </summary>
     [EnableCors("CorsPolicy")]
     [Produces("application/json")]
     [Route("api/Pay")]

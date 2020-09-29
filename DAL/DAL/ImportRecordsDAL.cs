@@ -7,6 +7,9 @@ using System.Text;
 
 namespace DAL.DAL
 {
+    /// <summary>
+    ///导入记录表数据访问层
+    /// </summary>
     public class ImportRecordsDAL : BaseDAL, IImportRecordsDAL
     {
         public ImportRecordsDAL(DataContext context)

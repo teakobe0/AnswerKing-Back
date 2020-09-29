@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DAL.Model
 {
+    /// <summary>
+    /// 竞拍表
+    /// </summary>
     public class Bidding : BaseModel
     {
 

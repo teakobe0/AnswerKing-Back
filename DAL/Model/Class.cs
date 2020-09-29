@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DAL.Model
 {
+    /// <summary>
+    /// 课程表
+    /// </summary>
    public class Class: BaseModel
     {
         public string Name { get; set; }//课程名称
@@ -16,6 +19,9 @@ namespace DAL.Model
         public bool IsDel { get; set; }//是否删除 0：未删除 1：已删除
 
     }
+    /// <summary>
+    /// 学校表
+    /// </summary>
     public class University : BaseModel
     {
         public string Name { get; set; }//学校名称
@@ -28,7 +34,9 @@ namespace DAL.Model
         public bool IsAudit { get; set; }//是否审核 0：未审核，1：已审核
         public bool IsDel { get; set; }//是否删除 0：未删除 1：已删除
     }
-
+    /// <summary>
+    /// 题库集表
+    /// </summary>
     public class ClassInfo : BaseModel
     {
         public string Name { get; set; } //标题
@@ -40,7 +48,9 @@ namespace DAL.Model
         public bool IsDel { get; set; }//是否删除 0：未删除 1：已删除
         public int Status { get; set; } //状态 0：未创建 1：全新未审核  2：已审核 3：修改未审核
     }
-
+    /// <summary>
+    /// 答案表
+    /// </summary>
     public class ClassInfoContent : BaseModel
     {
         public string Name { get; set; }//题目

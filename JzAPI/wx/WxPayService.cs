@@ -10,6 +10,9 @@ using System.Xml.Linq;
 
 namespace JzAPI
 {
+    /// <summary>
+    /// 微信操作类
+    /// </summary>
     public class WxPayService
     {
 

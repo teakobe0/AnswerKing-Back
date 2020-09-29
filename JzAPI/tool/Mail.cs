@@ -16,6 +16,9 @@ using System.Threading.Tasks;
 
 namespace JzAPI.tool
 {
+    /// <summary>
+    /// 邮件类
+    /// </summary>
     public class Mail
     {
         public static void SendEmailAsync(string sendTo, int id)

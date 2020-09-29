@@ -7,7 +7,10 @@ using System.Text;
 
 namespace DAL.Sql
 {
-   public class SqlHelper
+    /// <summary>
+    /// sql数据操作类
+    /// </summary>
+    public class SqlHelper
     {
         private SqlConnection conn;
         string path = AppConfig.Configuration["sql"];

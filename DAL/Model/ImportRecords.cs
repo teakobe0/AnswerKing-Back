@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DAL.Model
 {
+    /// <summary>
+    /// 导入记录表
+    /// </summary>
   public class ImportRecords:BaseModel
     {
         public int StartId { get; set; }//起始id

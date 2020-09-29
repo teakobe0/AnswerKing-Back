@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DAL.Model
 {
+    /// <summary>
+    /// 回答表
+    /// </summary>
     public class Answer : BaseModel
     {
         public int QuestionId { get; set; }//问题id

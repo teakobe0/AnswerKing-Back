@@ -6,6 +6,9 @@ using System.Text;
 
 namespace DAL.DAL
 {
+    /// <summary>
+    /// 后台首页数据访问层
+    /// </summary>
     public class HomeDAL : BaseDAL,IHomeDAL
     {
         public HomeDAL(DataContext context)

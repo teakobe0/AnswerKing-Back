@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DAL.Model
 {
+    /// <summary>
+    /// 订单表
+    /// </summary>
     public class Order : BaseModel
     {
         public string Name { get; set; }//订单名称

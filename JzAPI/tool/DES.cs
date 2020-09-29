@@ -6,6 +6,9 @@ using System.Text;
 
 namespace JzAPI.tool
 {
+    /// <summary>
+    /// 数据加密类
+    /// </summary>
     public class DES
     {
 

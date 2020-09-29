@@ -13,6 +13,9 @@ using System.Text;
 
 namespace DAL.Tools
 {
+    /// <summary>
+    /// http数据操作类
+    /// </summary>
     public class HttpMethods
     {
         #region POST

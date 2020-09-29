@@ -13,6 +13,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JzAPI.Controllers
 {
+    /// <summary>
+    /// 评论表控制层
+    /// </summary>
     [EnableCors("CorsPolicy")]
     [Produces("application/json")]
     [Route("api/Comment")]

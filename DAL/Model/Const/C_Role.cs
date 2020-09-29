@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DAL.Model.Const
 {
+    /// <summary>
+    /// 角色配置类
+    /// </summary>
    public class C_Role
     {
         /// <summary>

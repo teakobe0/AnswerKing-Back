@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DAL.Model
 {
+    /// <summary>
+    /// 关注表
+    /// </summary>
    public class Focus:BaseModel
     {
         public int ClientId { get; set; }//客户id

@@ -14,6 +14,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JzAPI.Controllers
 {
+    /// <summary>
+    /// 答案表控制层
+    /// </summary>
     [EnableCors("CorsPolicy")]
     [Produces("application/json")]
     [Route("api/ClassInfoContent")]
@@ -23,6 +26,7 @@ namespace JzAPI.Controllers
         private IUniversityDAL _udal;
         private IClassDAL _cdal;
         private IClassInfoDAL _cidal;
+        
         public ClassInfoContentController(IClassInfoContentDAL cicdal, IUniversityDAL udal, IClassDAL cdal, IClassInfoDAL cidal)
         {
             _cicdal = cicdal;

@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace DAL.Ioc
 {
+    /// <summary>
+    /// 配置DAL层的依赖注入
+    /// </summary>
     public class BLLDIRegister
     {
         public void DIRegister_DAL(IServiceCollection services)

@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace JzAPI
 {
+    /// <summary>
+    /// http数据操作类
+    /// </summary>
     public class HttpHelper
     {
         public static string PostForm(string url, string userName, string password, Dictionary<string, object> dic, Encoding encoding)

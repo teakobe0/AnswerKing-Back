@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DAL.Model
 {
+    /// <summary>
+    /// 反馈表
+    /// </summary>
    public class Feedback:BaseModel
     {
         public string Name { get; set; } //主题

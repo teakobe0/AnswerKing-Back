@@ -10,6 +10,9 @@ using static DAL.Tools.EnumAll;
 
 namespace DAL.DAL
 {
+    /// <summary>
+    /// 题库集表数据访问层
+    /// </summary>
     public class ClassInfoDAL : BaseDAL, IClassInfoDAL
     {
         public ClassInfoDAL(DataContext context)

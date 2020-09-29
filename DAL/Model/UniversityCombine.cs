@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DAL.Model
 {
+    /// <summary>
+    /// 学校合并表
+    /// </summary>
     public class UniversityCombine : BaseModel
     {
         public int OriginalId { get; set; }//原始id(合并前的学校id)

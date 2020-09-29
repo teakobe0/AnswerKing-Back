@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace JzAPI.paypal
 {
+    /// <summary>
+    /// paypal支付配置文件
+    /// </summary>
     public class PaypalConfig
     {
         /// <summary>

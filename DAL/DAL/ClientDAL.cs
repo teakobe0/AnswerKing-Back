@@ -10,6 +10,9 @@ using DAL.Tools;
 
 namespace DAL.DAL
 {
+    /// <summary>
+    /// 客户表数据访问层
+    /// </summary>
     public class ClientDAL : BaseDAL, IClientDAL
     {
         public ClientDAL(DataContext context)

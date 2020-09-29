@@ -9,6 +9,9 @@ using static DAL.Tools.EnumAll;
 
 namespace DAL.DAL
 {
+    /// <summary>
+    /// 通知表数据访问层
+    /// </summary>
     public class NoticeDAL : BaseDAL, INoticeDAL
     {
 

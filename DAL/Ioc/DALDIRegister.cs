@@ -8,14 +8,15 @@ using System.Threading.Tasks;
 
 namespace DAL.Ioc
 {
+    /// <summary>
+    /// 依赖注入映射关系配置类
+    /// </summary>
     public class DALDIRegister
     {
         public void DIRegister_DAL(IServiceCollection services)
         {
             services.AddTransient(typeof(IClientDAL), typeof(ClientDAL));
             services.AddTransient(typeof(IUserDAL), typeof(UserDAL));
-            services.AddTransient(typeof(IClassWeekDAL), typeof(ClassWeekDAL));
-            services.AddTransient(typeof(IClassWeekTypeDAL), typeof(ClassWeekTypeDAL));
             services.AddTransient(typeof(IHomeDAL), typeof(HomeDAL));
             services.AddTransient(typeof(IAreaDAL), typeof(AreaDAL));
             services.AddTransient(typeof(IImportRecordsDAL), typeof(ImportRecordsDAL));

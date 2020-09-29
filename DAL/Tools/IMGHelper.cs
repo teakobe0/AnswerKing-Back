@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace DAL.Tools
 {
+    /// <summary>
+    /// img数据操作类
+    /// </summary>
     public class IMGHelper
     {
         /// <summary>

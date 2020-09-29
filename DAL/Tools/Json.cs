@@ -8,6 +8,9 @@ using System.Text;
 
 namespace DAL.Tools
 {
+    /// <summary>
+    /// json类
+    /// </summary>
     public static class Json
     {
         public static object ToJson(this string Json)

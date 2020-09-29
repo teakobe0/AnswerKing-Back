@@ -10,6 +10,9 @@ using DAL.Tools;
 
 namespace DAL.DAL
 {
+    /// <summary>
+    /// 管理员表数据访问层
+    /// </summary>
     public class UserDAL : BaseDAL, IUserDAL
     {
         public UserDAL(DataContext context)

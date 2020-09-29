@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DAL.Model
 {
+    /// <summary>
+    /// 管理员表
+    /// </summary>
    public class User:BaseUser
     {
         public string Group { get; set; }//部门

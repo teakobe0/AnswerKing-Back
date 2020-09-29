@@ -8,6 +8,9 @@ using System.Text;
 
 namespace DAL.DAL
 {
+    /// <summary>
+    /// 评论表数据访问层
+    /// </summary>
     public class CommentDAL : BaseDAL, ICommentDAL
     {
         public CommentDAL(DataContext context)

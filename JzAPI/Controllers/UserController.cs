@@ -14,6 +14,9 @@ using Microsoft.AspNetCore.Cors;
 
 namespace JzAPI.Controllers
 {
+    /// <summary>
+    /// 管路员表控制层
+    /// </summary>
     [EnableCors("CorsPolicy")]
     [Produces("application/json")]
     [Route("api/User")]

@@ -8,6 +8,9 @@ using static DAL.Tools.EnumAll;
 
 namespace DAL.DAL
 {
+    /// <summary>
+    /// 竞拍表数据访问层
+    /// </summary>
     public class BiddingDAL : BaseDAL, IBiddingDAL
     {
         public BiddingDAL(DataContext context)

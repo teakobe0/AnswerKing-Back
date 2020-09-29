@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DAL.Model
 {
+    /// <summary>
+    /// 积分记录表
+    /// </summary>
    public class IntegralRecords : BaseModel
     {
         public int ClientId { get; set; }//客户id

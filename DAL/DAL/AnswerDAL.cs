@@ -8,6 +8,9 @@ using static DAL.Tools.EnumAll;
 
 namespace DAL.DAL
 {
+    /// <summary>
+    /// 回答表数据访问层
+    /// </summary>
     public class AnswerDAL:BaseDAL, IAnswerDAL
     {
         public AnswerDAL(DataContext context)

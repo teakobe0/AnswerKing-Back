@@ -8,6 +8,9 @@ using System.Text;
 
 namespace DAL.DAL
 {
+    /// <summary>
+    /// 关注表数据访问层
+    /// </summary>
     public class FocusDAL : BaseDAL, IFocusDAL
     {
         public FocusDAL(DataContext context)

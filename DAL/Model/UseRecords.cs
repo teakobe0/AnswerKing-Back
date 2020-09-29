@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DAL.Model
 {
+    /// <summary>
+    /// 有用记录表
+    /// </summary>
    public class UseRecords:BaseModel
     {
         public int ClientId { get; set; }//客户id

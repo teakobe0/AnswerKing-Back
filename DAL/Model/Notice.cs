@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DAL.Model
 {
+    /// <summary>
+    /// 通知表
+    /// </summary>
     public class Notice : BaseModel
     {
         public int SendId { get; set; } //发送人id

@@ -7,6 +7,9 @@ using System.Text;
 
 namespace DAL.DAL
 {
+    /// <summary>
+    /// 有用记录表数据访问层
+    /// </summary>
     public class UseRecordsDAL : BaseDAL, IUseRecordsDAL
     {
         public UseRecordsDAL(DataContext context)

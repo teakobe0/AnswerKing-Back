@@ -8,6 +8,9 @@ using System.Text;
 
 namespace DAL.DAL
 {
+    /// <summary>
+    /// 反馈表数据访问层
+    /// </summary>
     public class FeedbackDAL : BaseDAL, IFeedbackDAL
     {
         public FeedbackDAL(DataContext context)

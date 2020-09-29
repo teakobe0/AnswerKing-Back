@@ -14,6 +14,9 @@ using static DAL.Tools.EnumAll;
 
 namespace JzAPI.Controllers
 {
+    /// <summary>
+    /// 通知表控制层
+    /// </summary>
     [EnableCors("CorsPolicy")]
     [Produces("application/json")]
     [Route("api/Notice")]

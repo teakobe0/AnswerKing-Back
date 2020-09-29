@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace JzAPI.paypal
 {
+   /// <summary>
+   /// paypal类
+   /// </summary>
     public class Payment
     {
         public string id { get; set; }

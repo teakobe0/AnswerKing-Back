@@ -8,7 +8,10 @@ using System.Text;
 
 namespace DAL.DAL
 {
-   public class IntegralRecordsDAL:BaseDAL, IIntegralRecordsDAL
+    /// <summary>
+    /// 积分表数据访问层
+    /// </summary>
+    public class IntegralRecordsDAL:BaseDAL, IIntegralRecordsDAL
     {
         public IntegralRecordsDAL(DataContext context)
         {

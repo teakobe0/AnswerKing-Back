@@ -5,6 +5,9 @@ using System.Text;
 
 namespace DAL.Model
 {
+    /// <summary>
+    /// 问题表
+    /// </summary>
     public class Question : BaseModel
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]

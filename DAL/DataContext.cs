@@ -14,8 +14,6 @@ namespace DAL
         }
         public DbSet<User> User { get; set; }
         public DbSet<Client> Client { get; set; }
-        public DbSet<ClassWeek> ClassWeek { get; set; }
-        public DbSet<ClassWeekType> ClassWeekType { get; set; }
         public DbSet<Area> Area { get; set; }
         public DbSet<ImportRecords> ImportRecords { get; set; }
         public DbSet<Comment> Comment { get; set; }

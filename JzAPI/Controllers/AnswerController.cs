@@ -11,6 +11,9 @@ using static DAL.Tools.EnumAll;
 
 namespace JzAPI.Controllers
 {
+    /// <summary>
+    /// 回答表控制层
+    /// </summary>
     [EnableCors("CorsPolicy")]
     [Produces("application/json")]
     [Route("api/Answer")]

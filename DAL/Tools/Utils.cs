@@ -6,6 +6,9 @@ using System.Text;
 
 namespace DAL.Tools
 {
+    /// <summary>
+    /// 工具类
+    /// </summary>
    public class Utils
     {
         public static string GetMD5(string password)

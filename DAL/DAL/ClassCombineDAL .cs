@@ -8,7 +8,10 @@ using System.Text;
 
 namespace DAL.DAL
 {
-   public class ClassCombineDAL:BaseDAL, IClassCombineDAL
+    /// <summary>
+    /// 课程合并表数据访问层
+    /// </summary>
+    public class ClassCombineDAL:BaseDAL, IClassCombineDAL
     {
         public ClassCombineDAL(DataContext context)
         {

@@ -15,6 +15,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JzAPI.Controllers
 {
+    /// <summary>
+    /// 订单表控制层
+    /// </summary>
     [EnableCors("CorsPolicy")]
     [Produces("application/json")]
     [Route("api/Order")]

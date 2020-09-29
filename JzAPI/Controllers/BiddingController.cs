@@ -12,13 +12,15 @@ using static DAL.Tools.EnumAll;
 
 namespace JzAPI.Controllers
 {
+    /// <summary>
+    /// 竞拍表控制层
+    /// </summary>
     [Produces("application/json")]
     [Route("api/Bidding")]
     public class BiddingController : BaseController
     {
         private IBiddingDAL _biddal;
         private IQuestionDAL _quedal;
-
         public BiddingController(IBiddingDAL biddal, IQuestionDAL quedal)
         {
             _biddal = biddal;

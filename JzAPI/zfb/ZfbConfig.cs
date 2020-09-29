@@ -5,6 +5,9 @@ using System.Threading.Tasks;
 
 namespace JzAPI.zfb
 {
+    /// <summary>
+    /// 支付宝支付配置文件
+    /// </summary>
     public class ZfbConfig
     {
         /// <summary>

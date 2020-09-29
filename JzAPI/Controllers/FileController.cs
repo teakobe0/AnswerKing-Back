@@ -18,6 +18,9 @@ using JzAPI.tool;
 
 namespace JzAPI.Controllers
 {
+    /// <summary>
+    /// 文件上传控制层
+    /// </summary>
     [EnableCors("CorsPolicy")]
     [Produces("application/json")]
     [Route("api/File")]

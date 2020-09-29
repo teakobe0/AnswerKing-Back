@@ -6,6 +6,9 @@ using System.Text;
 
 namespace DAL.Model
 {
+    /// <summary>
+    /// 客户表
+    /// </summary>
     public class Client : BaseUser
     {
 

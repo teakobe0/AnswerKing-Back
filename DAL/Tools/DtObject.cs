@@ -7,7 +7,7 @@ using System.Reflection;
 namespace DAL.Tools
 {
     /// <summary>
-    ///     数据表转换类
+    /// 数据表转换类
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class DtObject<T> where T : new()

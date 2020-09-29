@@ -7,6 +7,9 @@ using System.Text;
 
 namespace DAL.DAL
 {
+    /// <summary>
+    /// 订单表数据访问层
+    /// </summary>
     public class OrderDAL:BaseDAL, IOrderDAL
     {
         public OrderDAL(DataContext context)

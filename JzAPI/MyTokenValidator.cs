@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace JzAPI
 {
+    /// <summary>
+    /// token验证类
+    /// </summary>
     [EnableCors("CorsPolicy")]
     public class MyTokenValidator : ISecurityTokenValidator
     {

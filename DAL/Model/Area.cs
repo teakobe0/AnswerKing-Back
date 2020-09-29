@@ -4,6 +4,9 @@ using System.Text;
 
 namespace DAL.Model
 {
+    /// <summary>
+    /// 地区表
+    /// </summary>
     public class Area:BaseModel
     {
         public int ParentId { get; set; }//父级id

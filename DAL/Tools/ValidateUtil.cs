@@ -5,6 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace DAL.Tools
 {
+    /// <summary>
+    /// 验证类
+    /// </summary>
     public class ValidateUtil
     {
         //private static Regex RegEmail = new Regex(@"^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$");
