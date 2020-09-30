@@ -14,6 +14,7 @@ using System.Text;
 using DAL;
 using Microsoft.EntityFrameworkCore;
 using DAL.Ioc;
+using JzAPI.tool;
 
 namespace JzAPI
 {
@@ -92,6 +93,7 @@ namespace JzAPI
                    .Build());
 
             });
+            services.Configure<HostOptions>(Configuration.GetSection("Host"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

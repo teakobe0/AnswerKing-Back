@@ -67,7 +67,7 @@ namespace DAL.IDAL
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        int Update(int id, int clientid);
+        int Update(int id, Bidding bidding);
         /// <summary>
         /// 修改状态
         /// </summary>

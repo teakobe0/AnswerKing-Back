@@ -12,6 +12,7 @@ namespace DAL.Model
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public int Number { get; set; } //问题编号
+        public int Type { get; set; } //问题类别
         public string Title { get; set; }//标题
         public string Content { get; set; }//内容
         public string Img { get; set; }//图片

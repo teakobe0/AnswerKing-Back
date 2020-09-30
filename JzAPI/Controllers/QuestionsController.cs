@@ -47,79 +47,67 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-
-                //查询客户积分
-                var client = _clientdal.GetClientById(ID);
                 List<Bidding> bls = null;
-                if (client.Integral >= question.Currency)
+                if (question.Id != 0)
                 {
-                    if (question.Id != 0)
+                    if (question.Status == (int)questionStatus.Answer)
                     {
-                        if (question.Status == (int)questionStatus.Answer)
-                        {
-                            r.Msg = "该问题已经有人回答，不能重新发布。";
-                            r.Status = RmStatus.Error;
-                        }
-                        else if (question.Status == (int)questionStatus.ForService)
-                        {
-                            r.Msg = "该问题已经申请客服，不能重新发布。";
-                            r.Status = RmStatus.Error;
-                        }
-                        else if (question.Status == (int)questionStatus.Complete)
-                        {
-                            r.Msg = "该问题已经完成，不能重新发布。";
-                            r.Status = RmStatus.Error;
-                        }
-                        else if (question.Status == (int)questionStatus.Close)
-                        {
-                            r.Msg = "该问题已经关闭，不能重新发布。";
-                            r.Status = RmStatus.Error;
-                        }
-                        else
-                        {
-                            //修改question状态为已删除，退回发布问题的积分
-                            bls = _biddal.GetList(question.Id);
-                            _quedal.Del(question.Id);
-                            question.Id = 0;
-                        }
+                        r.Msg = "该问题已经有人回答，不能重新发布。";
+                        r.Status = RmStatus.Error;
                     }
-                    if (r.Msg == null)
+                    else if (question.Status == (int)questionStatus.ForService)
                     {
-                        if (!string.IsNullOrEmpty(question.Title) && !string.IsNullOrEmpty(question.Content))
-                        {
-
-                            question.CreateBy = ID.ToString();
-                            string url = AppConfig.Configuration["imgurl"];
-                            question.Img = !string.IsNullOrEmpty(question.Img) ? question.Img.Replace(url, "") : question.Img;
-                            r.Data = _quedal.Add(question);
-                            //发通知
-                            if (bls != null)
-                            {
-                                Notice notice = null;
-                                string qurl = AppConfig.Configuration["questionurl"] + question.Id;
-                                foreach (var item in bls)
-                                {
-                                    notice = new Notice();
-                                    notice.Type = (int)noticeType.System;
-                                    notice.ReceiveId = int.Parse(item.CreateBy);
-                                    notice.ContentsUrl = "您竞拍的原问题:" + item.QuestionId + ",内容已经发生改变,请您重新参与竞拍,<a href=" + qurl + ">新问题地址</a>";
-                                    _noticedal.Add(notice);
-                                }
-                            }
-
-                        }
-                        else
-                        {
-                            r.Status = RmStatus.Error;
-                            r.Msg = "问题的标题和内容不能为空";
-                        }
+                        r.Msg = "该问题已经申请客服，不能重新发布。";
+                        r.Status = RmStatus.Error;
                     }
-
+                    else if (question.Status == (int)questionStatus.Complete)
+                    {
+                        r.Msg = "该问题已经完成，不能重新发布。";
+                        r.Status = RmStatus.Error;
+                    }
+                    else if (question.Status == (int)questionStatus.Close)
+                    {
+                        r.Msg = "该问题已经关闭，不能重新发布。";
+                        r.Status = RmStatus.Error;
+                    }
+                    else
+                    {
+                        //修改question状态为已删除
+                        bls = _biddal.GetList(question.Id);
+                        _quedal.Del(question.Id);
+                        question.Id = 0;
+                    }
                 }
-                else
+                if (r.Msg == null)
                 {
-                    r.Status = RmStatus.Error;
-                    r.Msg = "你的积分不足，不能发布问题";
+                    if (!string.IsNullOrEmpty(question.Title) && !string.IsNullOrEmpty(question.Content))
+                    {
+
+                        question.CreateBy = ID.ToString();
+                        string url = AppConfig.Configuration["imgurl"];
+                        question.Img = !string.IsNullOrEmpty(question.Img) ? question.Img.Replace(url, "") : question.Img;
+                        r.Data = _quedal.Add(question);
+                        //发通知
+                        if (bls != null)
+                        {
+                            Notice notice = null;
+                            string qurl = AppConfig.Configuration["questionurl"] + question.Id;
+                            foreach (var item in bls)
+                            {
+                                notice = new Notice();
+                                notice.Type = (int)noticeType.System;
+                                notice.ReceiveId = int.Parse(item.CreateBy);
+                                notice.ContentsUrl = "您竞拍的原问题:" + item.QuestionId + ",内容已经发生改变,请您重新参与竞拍,<a href=" + qurl + ">新问题地址</a>";
+                                _noticedal.Add(notice);
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        r.Status = RmStatus.Error;
+                        r.Msg = "问题的标题和内容不能为空";
+                    }
                 }
 
             }
@@ -147,7 +135,7 @@ namespace JzAPI.Controllers
             {
                 que que = null;
                 List<que> ques = new List<que>();
-                var ls = _quedal.GetList().Where(x => x.EndTime >= DateTime.Now);
+                var ls = _quedal.GetList();
                 if (!string.IsNullOrEmpty(name))
                 {
                     ls = ls.Where(x => x.Title.Contains(name) || x.Content.Contains(name)).ToList();
@@ -164,7 +152,6 @@ namespace JzAPI.Controllers
                 {
                     ls = ls.Where(x => x.Status == (int)questionStatus.Complete).OrderByDescending(x => x.Id).ToList();
                 }
-
                 else if (type == "retime")
                 {
                     ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderBy(x => x.EndTime).ToList();
@@ -228,7 +215,7 @@ namespace JzAPI.Controllers
                 queinfo queinfo = null;
                 List<queinfo> queinfos = new List<queinfo>();
                 string url = AppConfig.Configuration["imgurl"];
-                var ls = _quedal.GetList().Where(x => x.EndTime >= DateTime.Now);
+                var ls = _quedal.GetList();
                 if (!string.IsNullOrEmpty(name))
                 {
                     ls = ls.Where(x => x.Title.Contains(name) || x.Content.Contains(name)).ToList();
@@ -331,25 +318,17 @@ namespace JzAPI.Controllers
                     if (questionid != 0 && clienid != 0)
                     {
                         var bidding = _biddal.GetBidding(questionid, clienid);
-                        // 查询悬赏价格和竞拍价格是否一致
-                        var que = _quedal.GetQuestion(questionid);
-                        if (que.Currency < bidding.Currency)
+                        // 查询发布人积分
+                        if (client.Integral < bidding.Currency)
                         {
-                            int integral = que.Currency - bidding.Currency;
-                            if (client.Integral < integral)
-                            {
-                                r.Msg = "积分不足，不能选择该竞拍者。";
-                                r.Status = RmStatus.Error;
-                                r.Data = null;
-                            }
-                            else
-                            {
-                                //补扣积分
-                                _clientdal.Deduct(ID, integral);
-                            }
+                            r.Msg = "积分不足，不能选择该竞拍者。";
+                            r.Status = RmStatus.Error;
+                            r.Data = null;
                         }
-                        //修改问题表里面answerer
-                        _quedal.Update(questionid, int.Parse(bidding.CreateBy));
+                        //扣除发布人积分
+                        _clientdal.Deduct(ID, bidding.Currency);
+                        //更新问题表
+                        _quedal.Update(questionid, bidding);
                         r.Data = bidding.EndTime;
                     }
                     else

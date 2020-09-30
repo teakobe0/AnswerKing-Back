@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using JzAPI.tool;
+using static DAL.Tools.EnumAll;
 
 namespace JzAPI.Controllers
 {
@@ -35,7 +36,8 @@ namespace JzAPI.Controllers
         private IUseRecordsDAL _urdal;
         private IClassDAL _clasdal;
         private IIntegralRecordsDAL _irdal;
-        public ClientController(IClientDAL clidal, IConfiguration configuration, IHostingEnvironment environment, IFocusDAL focusdal, ICommentDAL comdal, IClassInfoDAL clindal, IUseRecordsDAL urdal, IClassDAL clasdal, IIntegralRecordsDAL irdal)
+        private IQuestionDAL _quedal;
+        public ClientController(IQuestionDAL quedal,IClientDAL clidal, IConfiguration configuration, IHostingEnvironment environment, IFocusDAL focusdal, ICommentDAL comdal, IClassInfoDAL clindal, IUseRecordsDAL urdal, IClassDAL clasdal, IIntegralRecordsDAL irdal)
         {
             _configuration = configuration;
             _clidal = clidal;
@@ -46,6 +48,7 @@ namespace JzAPI.Controllers
             _urdal = urdal;
             _clasdal = clasdal;
             _irdal = irdal;
+            _quedal = quedal;
         }
         /// <summary>
         /// 注册
@@ -668,6 +671,24 @@ namespace JzAPI.Controllers
             }
             return r;
 
+        }
+        /// <summary>
+        /// 客户详情
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("GetClientDetail")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel GetClientDetail(int clientid)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            var que = _quedal.GetList().Where(x => x.Answerer == clientid);
+            int good = que.Where(x => x.Sign == (int)questionSign.Good).Count();
+            int answer = que.Where(x => x.Status == (int)questionStatus.Answer).Count();
+            int inanswer = que.Where(x => x.Status == (int)questionStatus.Choose).Count();
+            r.Data = new { good, answer, inanswer };
+            return r;
         }
     }
 }

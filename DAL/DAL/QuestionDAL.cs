@@ -67,17 +67,6 @@ namespace DAL.DAL
             question.Status = (int)questionStatus.Save;
             question.CreateTime = DateTime.Now;
             _context.Question.Add(question);
-            //先扣除客户发布问题的积分
-            var client = _context.Client.FirstOrDefault(x => x.Id == int.Parse(question.CreateBy));
-            client.Integral -= question.Currency;
-            _context.Client.Update(client);
-            //积分记录表
-            IntegralRecords integral = new IntegralRecords();
-            integral.Integral = question.Currency;
-            integral.CreateBy = client.Id.ToString();
-            integral.CreateTime = DateTime.Now;
-            integral.Source = "发布问题";
-            _context.IntegralRecords.Add(integral);
             _context.SaveChanges();
             return question;
 
@@ -102,35 +91,6 @@ namespace DAL.DAL
                 {
                     i.IsDel = true;
                 }
-                var fclient = _context.Client.FirstOrDefault(x => x.Id == int.Parse(que.CreateBy));
-                if (que.Status == (int)questionStatus.Choose)
-                {
-                    var bidding = biddings.FirstOrDefault(x => x.CreateBy == que.Answerer.ToString());
-                    //退回提问人在发布问题时扣除的积分
-                    if (bidding != null)
-                    {
-                        if (bidding.Currency > que.Currency)
-                        {
-                            fclient.Integral += bidding.Currency;
-                        }
-                        else
-                        {
-                            fclient.Integral += que.Currency;
-                        }
-                    }
-                }
-                else
-                {
-                    fclient.Integral += que.Currency;
-                }
-                _context.Client.Update(fclient);
-                //积分记录表
-                IntegralRecords integrals = new IntegralRecords();
-                integrals.ClientId = int.Parse(que.CreateBy);
-                integrals.Integral = fclient.Integral;
-                integrals.Source = "系统退回发布问题积分";
-                integrals.CreateTime = DateTime.Now;
-                _context.IntegralRecords.Add(integrals);
                 return _context.SaveChanges();
             }
             return 0;
@@ -150,31 +110,14 @@ namespace DAL.DAL
                 que.Evaluate = content;
                 que.Status = (int)questionStatus.Complete;
                 que.Sign = grade;
-                var bidding = _context.Bidding.FirstOrDefault(x => x.CreateBy == que.Answerer.ToString() && x.QuestionId == que.Id);
-                if (que.Currency > bidding.Currency)
-                {
-                    var integral = que.Currency - bidding.Currency;
-                    //将多扣除的积分退回提问人
-                    var tclient = _context.Client.FirstOrDefault(x => x.Id == int.Parse(que.CreateBy));
-                    tclient.Integral += integral;
-                    _context.Client.Update(tclient);
-                    //积分记录表
-                    IntegralRecords record = new IntegralRecords();
-                    record.ClientId = int.Parse(que.CreateBy);
-                    record.Integral = integral;
-                    record.Source = "系统退回积分";
-                    record.CreateTime = DateTime.Now;
-                    _context.IntegralRecords.Add(record);
-                    _context.SaveChanges();
-                }
                 //回答人获取积分
-                var answerclient = _context.Client.FirstOrDefault(x => x.Id == que.Answerer);
-                answerclient.Integral += bidding.Currency;
-                _context.Client.Update(answerclient);
+                var client = _context.Client.FirstOrDefault(x => x.Id == que.Answerer);
+                client.Integral += que.Currency;
+                _context.Client.Update(client);
                 //积分记录表
                 IntegralRecords records = new IntegralRecords();
                 records.ClientId = que.Answerer;
-                records.Integral = bidding.Currency;
+                records.Integral = que.Currency;
                 records.Source = "回答问题";
                 records.CreateTime = DateTime.Now;
                 _context.IntegralRecords.Add(records);
@@ -249,12 +192,13 @@ namespace DAL.DAL
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public int Update(int id, int clientid)
+        public int Update(int id, Bidding bidding)
         {
             if (id != 0)
             {
                 var que = _context.Question.FirstOrDefault(x => x.Id == id);
-                que.Answerer = clientid;
+                que.Answerer = int.Parse(bidding.CreateBy);
+                que.Currency = bidding.Currency;
                 que.Status = (int)questionStatus.Choose;
                 _context.Update(que);
                 return _context.SaveChanges();
@@ -286,23 +230,8 @@ namespace DAL.DAL
         public int Audit(int id, int userid, int qintegral, int aintegral)
         {
             var que = _context.Question.FirstOrDefault(x => x.Id == id);
-            var bidding = _context.Bidding.FirstOrDefault(x => x.QuestionId == id && x.CreateBy == que.Answerer.ToString());
             var fclient = _context.Client.FirstOrDefault(x => x.Id == int.Parse(que.CreateBy));
-            if (bidding != null)
-            {
-                if (bidding.Currency > que.Currency)
-                {
-                    fclient.Integral += bidding.Currency;
-                }
-                else
-                {
-                    fclient.Integral += que.Currency;
-                }
-            }
-            else
-            {
-                fclient.Integral += que.Currency;
-            }
+            fclient.Integral += que.Currency;
             _context.Client.Update(fclient);
             _context.SaveChanges();
             //积分记录表
@@ -364,36 +293,19 @@ namespace DAL.DAL
             var que = GetList().Where(x => x.Status == (int)questionStatus.Answer);
             foreach (var item in que)
             {
-                var answer = _context.Answer.Where(x => x.QuestionId == item.Id).OrderByDescending(x=>x.Id).FirstOrDefault();
+                var answer = _context.Answer.Where(x => x.QuestionId == item.Id).OrderByDescending(x => x.Id).FirstOrDefault();
                 if (answer.CreateTime.AddDays(7) >= DateTime.Now)
                 {
                     item.Status = (int)questionStatus.Complete;
                     _context.Question.Update(item);
-                    var bidding = _context.Bidding.FirstOrDefault(x => x.CreateBy == item.Answerer.ToString() && x.QuestionId == item.Id);
-                    if (item.Currency > bidding.Currency)
-                    {
-                        var integral = item.Currency - bidding.Currency;
-                        //将多扣除的积分退回提问人
-                        var tclient = _context.Client.FirstOrDefault(x => x.Id == int.Parse(item.CreateBy));
-                        tclient.Integral += integral;
-                        _context.Client.Update(tclient);
-                        //积分记录表
-                        IntegralRecords record = new IntegralRecords();
-                        record.ClientId = int.Parse(item.CreateBy);
-                        record.Integral = integral;
-                        record.Source = "系统退回积分";
-                        record.CreateTime = DateTime.Now;
-                        _context.IntegralRecords.Add(record);
-                        _context.SaveChanges();
-                    }
                     //回答人获取积分
                     var answerclient = _context.Client.FirstOrDefault(x => x.Id == item.Answerer);
-                    answerclient.Integral += bidding.Currency;
+                    answerclient.Integral += item.Currency;
                     _context.Client.Update(answerclient);
                     //积分记录表
                     IntegralRecords records = new IntegralRecords();
                     records.ClientId = item.Answerer;
-                    records.Integral = bidding.Currency;
+                    records.Integral = item.Currency;
                     records.Source = "回答问题";
                     records.CreateTime = DateTime.Now;
                     _context.IntegralRecords.Add(records);

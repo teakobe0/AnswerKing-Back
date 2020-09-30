@@ -86,5 +86,24 @@ namespace DAL.Tools
             /// </summary>
             Chat=2
         }
+        /// <summary>
+        /// 问题标记类别
+        /// </summary>
+        public enum questionSign
+        {
+            /// <summary>
+            /// 差评
+            /// </summary>
+            Bad = 1,
+            /// <summary>
+            /// 超时
+            /// </summary>
+            Overtime = 2,
+            /// <summary>
+            /// 好评
+            /// </summary>
+            Good = 5
+          
+        }
     }
 }
