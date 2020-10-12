@@ -334,5 +334,26 @@ namespace DAL.DAL
             return 0;
 
         }
+        /// <summary>
+        /// 查询未识别的图片集
+        /// </summary>
+        /// <returns></returns>
+        public List<Question> ImgLs()
+        {
+            var list = _context.Question.Where(x => x.IsDel == false && !string.IsNullOrEmpty(x.Img) && string.IsNullOrEmpty(x.Content));
+            return list.ToList();
+
+        }
+        /// <summary>
+        /// 更新ls
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+        public int Update(List<Question> ls)
+        {
+
+            _context.Question.UpdateRange(ls);
+            return _context.SaveChanges();
+        }
     }
 }

@@ -95,5 +95,16 @@ namespace DAL.IDAL
         /// <param name="img"></param>
         /// <returns></returns>
         int DelImg(int id, string img);
+        /// <summary>
+        /// 查询未识别的图片集
+        /// </summary>
+        /// <returns></returns>
+        List<Question> ImgLs();
+        /// <summary>
+        /// 更新ls
+        /// </summary>
+        /// <param name="ls"></param>
+        /// <returns></returns>
+         int Update(List<Question> ls);
     }
 }

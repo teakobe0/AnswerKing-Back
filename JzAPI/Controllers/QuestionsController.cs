@@ -156,6 +156,10 @@ namespace JzAPI.Controllers
                 {
                     ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderBy(x => x.EndTime).ToList();
                 }
+                else
+                {
+                    ls = ls.OrderByDescending(x => x.Id).ToList();
+                }
                 //后期是否需要图片显示
                 string url = AppConfig.Configuration["imgurl"];
                 foreach (var item in ls)
@@ -235,6 +239,10 @@ namespace JzAPI.Controllers
                 else if (type == "retime")
                 {
                     ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderBy(x => x.EndTime).ToList();
+                }
+                else
+                {
+                    ls = ls.OrderByDescending(x => x.Id).ToList();
                 }
                 foreach (var item in ls)
                 {
