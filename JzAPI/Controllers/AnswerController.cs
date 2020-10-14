@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using DAL.IDAL;
 using DAL.Model;
 using DAL.Model.Const;
@@ -68,11 +69,6 @@ namespace JzAPI.Controllers
             }
             return r;
         }
-        public class ainfo
-        {
-            public Answer answer { get; set; }
-            public string title { get; set; }
-        }
         /// <summary>
         ///我的回答
         /// </summary>
@@ -86,18 +82,16 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                List<ainfo> ls = new List<ainfo>();
-                ainfo ainfo = null;
-                var ans = _ansdal.GetList(ID);
-                foreach (var item in ans)
-                {
-                    ainfo = new ainfo();
-                    ainfo.answer = item;
-                    var que = _quedal.GetQuestion(item.QuestionId);
-                    ainfo.title = que.Title;
-                    ls.Add(ainfo);
-                }
-                r.Data = ls;
+                var ans = from x in _ansdal.GetList(ID)
+                          select new
+                          {
+                              x.Id,
+                              x.CreateTime,
+                              x.QuestionId,
+                              title= _quedal.GetQuestion(x.QuestionId).Title
+                          };
+                
+                r.Data = ans;
             }
             catch (Exception ex)
             {

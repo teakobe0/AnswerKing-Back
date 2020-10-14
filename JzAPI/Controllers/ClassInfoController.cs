@@ -28,7 +28,7 @@ namespace JzAPI.Controllers
         private IClassDAL _cdal;
         private IClientDAL _clientdal;
         private IUseRecordsDAL _urdal;
-       
+
         public ClassInfoController(IClassInfoDAL cidal, IUniversityDAL udal, IClassDAL cdal, IClientDAL clientdal, IUseRecordsDAL urdal)
         {
 
@@ -85,7 +85,6 @@ namespace JzAPI.Controllers
             public ClassInfo cict { get; set; }
             public string university { get; set; }
             public string clas { get; set; }
-
         }
         /// <summary>
         /// 根据题库集id检索
@@ -172,7 +171,7 @@ namespace JzAPI.Controllers
                     actioninfo.id = i.Id;
                     actioninfo.name = i.Name;
                     actioninfo.type = "学校";
-                    actioninfo.status = i.IsAudit==false?0:1;
+                    actioninfo.status = i.IsAudit == false ? 0 : 1;
                     actioninfo.CreateTime = i.CreateTime;
                     list.Add(actioninfo);
                 }
@@ -265,13 +264,12 @@ namespace JzAPI.Controllers
                 string url = AppConfig.Configuration["imgurl"];
                 List<cinfo> ls = new List<cinfo>();
                 cinfo cinfo = null;
-                var cils = _cidal.GetLs(classid).Where(x=>x.Status==(int)classInfoStatus.Audited);
+                var cils = _cidal.GetLs(classid).Where(x => x.Status == (int)classInfoStatus.Audited);
                 foreach (var item in cils)
                 {
                     cinfo = new cinfo();
                     cinfo.classinfo = item;
                     var client = _clientdal.GetClientById(item.ClientId);
-                    
                     if (client != null)
                     {
                         cinfo.clientname = client.Name;
@@ -317,7 +315,7 @@ namespace JzAPI.Controllers
 
             try
             {
-                r.Data =_cidal.Change(ID, classInfoId, type, check, null);
+                r.Data = _cidal.Change(ID, classInfoId, type, check, null);
 
 
             }
@@ -343,7 +341,8 @@ namespace JzAPI.Controllers
             try
             {
 
-                r.Data = _urdal.GetUseRecords(ID, classInfoid);
+               var useRecords= _urdal.GetUseRecords(ID, classInfoid);
+                r.Data = new { useRecords.Type, useRecords.Check };
 
 
             }
@@ -382,10 +381,10 @@ namespace JzAPI.Controllers
             List<model> ls = new List<model>();
             try
             {
-                var clas = _cdal.GetList().Where(x=>x.IsAudit==true);
+                var clas = _cdal.GetList().Where(x => x.IsAudit == true);
                 var num = new Random().Next(1, clas.Count() - 15);
                 var eachclas = clas.Where(x => x.Id > num).Take(15);
-                var classinfos = _cidal.GetList().Where(x=>x.Status==(int)classInfoStatus.Audited);
+                var classinfos = _cidal.GetList().Where(x => x.Status == (int)classInfoStatus.Audited);
                 model m = null;
                 foreach (var item in eachclas)
                 {
@@ -396,7 +395,7 @@ namespace JzAPI.Controllers
                     m.class_name = item.Name;
                     m.class_id = item.Id;
                     m.classinfo_num = classinfos.Count();
-                    var classinfo = classinfos.Where(x=>x.ClassId==item.Id);
+                    var classinfo = classinfos.Where(x => x.ClassId == item.Id);
                     foreach (var i in classinfo)
                     {
                         var client = _clientdal.GetClientById(i.ClientId);
@@ -407,7 +406,7 @@ namespace JzAPI.Controllers
                             break;
                         }
                     }
-                    m.client_num =_cidal.GetClients();
+                    m.client_num = _cidal.GetClients();
                     ls.Add(m);
                 }
 

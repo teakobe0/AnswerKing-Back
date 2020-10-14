@@ -49,10 +49,9 @@ namespace JzAPI.Controllers
             ResultModel r = new ResultModel();
             PageData page = new PageData();
             r.Status = RmStatus.OK;
-
             try
             {
-                var queryList = _undal.GetList(name,-1).Where(x=>x.IsAudit==true);
+                var queryList = _undal.GetList(name, -1).Where(x => x.IsAudit == true);
                 page.Data = queryList.Skip(pagesize * (pagenum - 1)).Take(pagesize).ToList();
                 page.PageTotal = queryList.Count();
                 r.Data = page;
@@ -91,7 +90,7 @@ namespace JzAPI.Controllers
                             r.Msg = "该学校名称已经存在";
                         }
                         else
-                        {  
+                        {
                             //针对李龙添加的学校状态为已审核
                             if (university.ClientId == 553)
                             {
@@ -171,8 +170,12 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _undal.GetList(name,-1).Where(x=>x.IsAudit==true).Take(10);
-
+                r.Data = from x in _undal.GetList(name, -1).Where(x => x.IsAudit == true).Take(10)
+                         select new
+                         {
+                             x.Id,
+                             x.Name
+                         };
             }
             catch (Exception ex)
             {
@@ -241,15 +244,12 @@ namespace JzAPI.Controllers
             }
             return r;
         }
-        public class uinfo
-        {
-            public University university { get; set; }
-            public int number { get; set; }
-        }
+       
         /// <summary>
         /// 根据国家 州/省份检索学校
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="name"></param>
+        /// <param name="state"></param>
         /// <returns></returns>
         [HttpGet]
         [Route("GetUniversitys")]
@@ -259,21 +259,14 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-
-                List<uinfo> ls = new List<uinfo>();
-                uinfo uinfo = null;
-                var university = _undal.GetByCountry(name, state).Where(x=>x.IsAudit==true);
-
-                foreach (var item in university)
-                {
-                    uinfo = new uinfo();
-                   
-                    uinfo.university = item;
-                    var clas = _cladal.GetLs(item.Id);
-                    uinfo.number = clas.Count();
-                    ls.Add(uinfo);
-                }
-                r.Data = ls;
+                var university = from x in _undal.GetByCountry(name, state).Where(x => x.IsAudit == true)
+                                 select new
+                                 {
+                                     x.Id,
+                                     x.Name,
+                                     number= _cladal.GetLs(x.Id).Count()
+                                 };
+                r.Data = university;
             }
             catch (Exception ex)
             {
@@ -294,7 +287,7 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _areadal.GetCountryList();
+                r.Data = from x in _areadal.GetCountryList() select new { x.Id, x.Country };
 
             }
             catch (Exception ex)
@@ -317,7 +310,7 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _areadal.GetList(name);
+                r.Data = from x in _areadal.GetList(name) select new { x.Id, x.State };
 
             }
             catch (Exception ex)
@@ -339,7 +332,7 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data =_undal.GetList().Count();
+                r.Data = _undal.GetList().Count();
 
             }
             catch (Exception ex)

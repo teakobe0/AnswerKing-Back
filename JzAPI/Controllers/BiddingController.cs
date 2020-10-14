@@ -78,41 +78,24 @@ namespace JzAPI.Controllers
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
-            List<biddinfo> ls = new List<biddinfo>();
-            biddinfo binfo = null;
             try
             {
-                var bidds = _biddal.GetListByCid(ID);
-                foreach (var item in bidds)
-                {
-                    binfo = new biddinfo();
-                    binfo.bidding = item;
-                    var que = _quedal.GetQuestion(item.QuestionId);
-                    if (que.Answerer == ID)
-                    {
-                        binfo.bstatus = "已中竞拍";
-                    }
-                    else
-                    {
-                        binfo.bstatus = "未中竞拍";
-                    }
-                    binfo.title = que.Title;
-                    ls.Add(binfo);
-                }
-                r.Data = ls;
+                var bidds = from x in _biddal.GetListByCid(ID)
+                            select new
+                            {
+                                x.Id,
+                                x.CreateTime,
+                                x.QuestionId,
+                                title= _quedal.GetQuestion(x.QuestionId).Title,
+                                bstatus = _quedal.GetQuestion(x.QuestionId).Answerer == ID ? "已中竞拍" : "未中竞拍"
+                            };
+                r.Data = bidds;
             }
             catch (Exception ex)
             {
                 r.Status = RmStatus.Error;
             }
             return r;
-        }
-        public class biddinfo
-        {
-            public Bidding bidding { get; set; }
-            public string title { get; set; }
-            public string bstatus { get; set; }
-
         }
     }
 }

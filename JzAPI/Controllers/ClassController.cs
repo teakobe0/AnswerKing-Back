@@ -27,7 +27,7 @@ namespace JzAPI.Controllers
         private IClientDAL _clientdal;
         private IClassDAL _cladal;
         private IIntegralRecordsDAL _integraldal;
-        
+
         public ClassController(IClassInfoDAL cidal, IClientDAL clientdal, IClassDAL cladal, IUniversityDAL udal, IIntegralRecordsDAL integraldal)
         {
 
@@ -53,19 +53,16 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                List<cinfo> ls = new List<cinfo>();
-                cinfo c = null;
-                var query = _cladal.GetList(name).Where(x=>x.IsAudit==true);
-                var model = query.Skip(pagesize * (pagenum - 1)).Take(pagesize).ToList();
-                foreach (var item in model)
-                {
-                    c = new cinfo();
-                    c.cla = item;
-                    var classinfo = _cidal.GetLs(item.Id);
-                    c.order = classinfo.Count();
-                    ls.Add(c);
-                }
-                page.Data = ls;
+                var query = _cladal.GetList(name).Where(x => x.IsAudit == true);
+                var model = from x in query.Skip(pagesize * (pagenum - 1)).Take(pagesize).ToList()
+                            select new
+                            {
+                                x.Id,
+                                x.Name,
+                                x.University,
+                                order = _cidal.GetLs(x.Id).Count()
+                            };
+                page.Data = model;
                 page.PageTotal = query.Count();
                 r.Data = page;
             }
@@ -75,11 +72,7 @@ namespace JzAPI.Controllers
             }
             return r;
         }
-        public class cinfo
-        {
-            public Class cla { get; set; }
-            public int order { get; set; }
-        }
+        
         /// <summary>
         /// 根据学校id/课程首字母/课程名称检索课程
         /// </summary>
@@ -95,19 +88,15 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                List<cinfo> ls = new List<cinfo>();
-                cinfo info = null;
-                var cla = _cladal.GetList(universityid, alif, name);
-                foreach (var item in cla)
-                {
-                    info = new cinfo();
-                    info.cla = item;
-                    var clas = _cidal.GetLs(item.Id);
-                    info.order = clas.Count();
-                    ls.Add(info);
-                }
-                r.Data = ls;
-
+                var cla = from x in _cladal.GetList(universityid, alif, name)
+                          select new
+                          {
+                              x.Id,
+                              x.Name,
+                              x.University,
+                              order = _cidal.GetLs(x.Id).Count()
+                          };
+                r.Data = cla;
             }
             catch (Exception ex)
             {
@@ -129,10 +118,13 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _cladal.GetList(universityId, name).Where(x=>x.IsAudit==true).Take(10);
-
+                r.Data = from x in _cladal.GetList(universityId, name).Where(x => x.IsAudit == true).Take(10)
+                         select new
+                         {
+                             x.Id,
+                             x.Name
+                         };
             }
-           
             catch (Exception ex)
             {
                 r.Status = RmStatus.Error;
@@ -198,13 +190,13 @@ namespace JzAPI.Controllers
                     {
                         cit.Status = (int)classInfoStatus.Audited;
                         _integraldal.Give(cit.ClientId);
-                       
+
                     }
                     Random random = new Random();
                     int num = random.Next(10000000, 99999999);
                     cit.Name = "题库集" + num;
                     var classInfo = _cidal.Add(cit);
-                   
+
                     r.Data = new { clas, classInfo };
                 }
             }
@@ -229,6 +221,7 @@ namespace JzAPI.Controllers
             try
             {
                 r.Data = _cladal.GetClass(id);
+            
             }
             catch (Exception ex)
             {

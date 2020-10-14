@@ -135,7 +135,7 @@ namespace JzAPI.Controllers
             {
                 que que = null;
                 List<que> ques = new List<que>();
-                var ls = _quedal.GetList();
+                var ls = _quedal.GetList().Where(x => x.EndTime >= DateTime.Now);
                 if (!string.IsNullOrEmpty(name))
                 {
                     ls = ls.Where(x => x.Title.Contains(name) || x.Content.Contains(name)).ToList();
@@ -219,7 +219,7 @@ namespace JzAPI.Controllers
                 queinfo queinfo = null;
                 List<queinfo> queinfos = new List<queinfo>();
                 string url = AppConfig.Configuration["imgurl"];
-                var ls = _quedal.GetList();
+                var ls = _quedal.GetList().Where(x => x.EndTime >= DateTime.Now);
                 if (!string.IsNullOrEmpty(name))
                 {
                     ls = ls.Where(x => x.Title.Contains(name) || x.Content.Contains(name)).ToList();
@@ -672,14 +672,19 @@ namespace JzAPI.Controllers
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
+
             try
             {
                 queinfo queinfo = null;
                 List<queinfo> queinfos = new List<queinfo>();
                 var ls = _quedal.GetList().Where(x => x.CreateTime >= time).OrderByDescending(x => x.CreateTime);
+                string url = AppConfig.Configuration["imgurl"];
                 foreach (var item in ls)
                 {
+                    var client = _clientdal.GetClientById(int.Parse(item.CreateBy));
                     queinfo = new queinfo();
+                    queinfo.qname = client.Name;
+                    queinfo.qimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
                     queinfo.que = item;
                     queinfos.Add(queinfo);
                 }
@@ -706,7 +711,7 @@ namespace JzAPI.Controllers
             {
                 int num = 0;
                 DateTime datetime = DateTime.MinValue;
-                var ls = _quedal.GetList().Where(x => x.CreateTime > time).OrderByDescending(x => x.CreateTime);
+                var ls = _quedal.GetList().Where(x => DateTime.Parse(x.CreateTime.ToString("G")) > time).OrderByDescending(x => x.CreateTime);
                 if (ls.Count() > 0)
                 {
                     num = ls.Count();

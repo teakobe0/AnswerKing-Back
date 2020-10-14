@@ -26,7 +26,7 @@ namespace JzAPI.Controllers
         private IUniversityDAL _udal;
         private IClassDAL _cdal;
         private IClassInfoDAL _cidal;
-        
+
         public ClassInfoContentController(IClassInfoContentDAL cicdal, IUniversityDAL udal, IClassDAL cdal, IClassInfoDAL cidal)
         {
             _cicdal = cicdal;
@@ -57,7 +57,7 @@ namespace JzAPI.Controllers
                         classInfoContent.IsAudit = true;
                     }
                     string id = "";
-                    r.Data = _cicdal.Add(classInfoContent,out id);
+                    r.Data = _cicdal.Add(classInfoContent, out id);
                 }
                 else
                 {
@@ -115,10 +115,10 @@ namespace JzAPI.Controllers
             ClassInfoContent classInfoContent = null;
             try
             {
-                var cict = _cicdal.GetLs(ID, classInfoId) ;
+                var cict = _cicdal.GetLs(ID, classInfoId);
                 var maxweek = cict.OrderByDescending(x => x.ClassWeek).FirstOrDefault().ClassWeek;
 
-                for(int i = 1; i <= maxweek; i++)
+                for (int i = 1; i <= maxweek; i++)
                 {
                     var weekls = cict.Where(x => x.ClassWeek == i);
                     info = new info();
@@ -135,7 +135,7 @@ namespace JzAPI.Controllers
                     }
                     ls.Add(info);
                 }
-                r.Data = ls.OrderByDescending(x=>x.week);
+                r.Data = ls.OrderByDescending(x => x.week);
                 if (r.Data == null)
                 {
                     r.Status = RmStatus.Error;
@@ -150,11 +150,11 @@ namespace JzAPI.Controllers
 
         public class info
         {
-           
+
             public int week { get; set; }
             public List<ClassInfoContent> list { get; set; }
-        }
-
+        } 
+      
         /// <summary>
         /// 删除图片
         /// </summary>
@@ -313,12 +313,12 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                var ls = _cicdal.Types(classinfoid, weekname).Where(x=>x.IsAudit==true);
+                var ls = _cicdal.Types(classinfoid, weekname).Where(x => x.IsAudit == true);
                 var img = AppConfig.Configuration["imgurl"];
-             
+
                 foreach (var item in ls)
                 {
-                   
+
                     if (!string.IsNullOrEmpty(item.Url))
                     {
                         item.Url = img + item.Url;
@@ -327,9 +327,9 @@ namespace JzAPI.Controllers
                     {
                         item.NameUrl = img + item.NameUrl;
                     }
-                   
+
                 }
-                r.Data =ls;
+                r.Data = ls;
 
             }
             catch (Exception ex)
@@ -339,5 +339,29 @@ namespace JzAPI.Controllers
             }
             return r;
         }
+        /// <summary>
+        /// 根据学校名称、课程名称检索
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Search")]
+        public ResultModel Search(string name)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                var classes = from x in _cdal.GetList(name).Take(10) select new { x.Id, x.Name, x.University };
+                var university = from x in _udal.GetList(name, -1).Take(10) select new { x.Id, x.Name };
+                r.Data = new { classes, university };
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+
     }
 }

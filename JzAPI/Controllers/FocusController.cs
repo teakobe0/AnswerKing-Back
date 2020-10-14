@@ -21,7 +21,7 @@ namespace JzAPI.Controllers
     public class FocusController : BaseController
     {
         private IFocusDAL _focusdal;
-      
+
         public FocusController(IFocusDAL focusdal)
         {
             _focusdal = focusdal;
@@ -39,8 +39,14 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _focusdal.GetListByClientid(ID,false);
-
+                r.Data = from x in _focusdal.GetListByClientid(ID, false)
+                         select new
+                         {
+                             x.Id,
+                             x.Name,
+                             x.Type,
+                             x.TypeId
+                         };
             }
             catch (Exception ex)
             {

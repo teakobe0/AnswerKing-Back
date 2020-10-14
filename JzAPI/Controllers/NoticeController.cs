@@ -29,7 +29,7 @@ namespace JzAPI.Controllers
             _notdal = notdal;
             _clientdal = clientdal;
         }
-        
+
         /// <summary>
         /// 根据客户id检索通知消息
         /// </summary>
@@ -87,7 +87,7 @@ namespace JzAPI.Controllers
             try
             {
                 notice.SendId = ID;
-                notice.Type =(int)noticeType.Chat;
+                notice.Type = (int)noticeType.Chat;
                 r.Data = _notdal.Add(notice);
 
             }
@@ -104,7 +104,7 @@ namespace JzAPI.Controllers
         [HttpGet]
         [Route("ChatRecords")]
         [Authorize(Roles = C_Role.all)]
-        public  ResultModel ChatRecords(int receiveid)
+        public ResultModel ChatRecords(int receiveid)
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
@@ -115,12 +115,19 @@ namespace JzAPI.Controllers
                 var client = _clientdal.GetClientById(ID);
                 var answerclient = _clientdal.GetClientById(receiveid);
                 string url = AppConfig.Configuration["imgurl"];
-                var notices = _notdal.GetList().Where(x => x.Type == (int)noticeType.Chat);
-                notices = notices.Where(x => (x.SendId == ID && x.ReceiveId == receiveid) || (x.SendId == receiveid && x.ReceiveId == ID)).OrderBy(x => x.CreateTime);
-                foreach(var item in notices)
+                var notices = from x in _notdal.GetList()
+                              .Where(x => x.Type == (int)noticeType.Chat && (x.SendId == ID && x.ReceiveId == receiveid) || (x.SendId == receiveid && x.ReceiveId == ID))
+                              select new
+                              {
+                                  x.ContentsUrl,
+                                  x.CreateTime,
+                                  x.SendId
+                              };
+                foreach (var item in notices)
                 {
                     ninfo = new ninfo();
-                    ninfo.notice = item;
+                    ninfo.contentsUrl = item.ContentsUrl;
+                    ninfo.createTime = item.CreateTime;
                     if (item.SendId == ID)
                     {
                         ninfo.img = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
@@ -131,7 +138,7 @@ namespace JzAPI.Controllers
                     }
                     ls.Add(ninfo);
                 }
-                r.Data = ls;
+                r.Data =ls;
             }
             catch (Exception ex)
             {
@@ -142,7 +149,8 @@ namespace JzAPI.Controllers
 
         public class ninfo
         {
-            public Notice notice { get; set; } 
+            public string contentsUrl { get; set; }
+            public DateTime createTime { get; set; }
             public string img { get; set; } //图像
         }
     }
