@@ -504,7 +504,6 @@ namespace JzAPI.Controllers
                     }
                     var bidding = _biddal.GetBidding(questionid, question.Answerer);
                     question.EndTime = bidding.EndTime;
-                    question.Currency = bidding.Currency;
                     binfo = new binfo();
                     binfo.bidding = bidding;
                     client = _clientdal.GetClientById(int.Parse(bidding.CreateBy));
