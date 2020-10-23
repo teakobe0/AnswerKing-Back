@@ -16,6 +16,7 @@ namespace DAL.Model
         public string Title { get; set; }//标题
         public string Content { get; set; }//内容
         public string Img { get; set; }//图片
+        public string ImgContent { get; set; }//图片内容
         public DateTime EndTime { get; set; }//截止时间
         public int Currency { get; set; }//货币
         public int Answerer { get; set; }//回答者

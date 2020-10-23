@@ -290,29 +290,40 @@ namespace DAL.DAL
         /// <returns></returns>
         public int ChangeStatus()
         {
+            int num = 0;
             var que = GetList().Where(x => x.Status == (int)questionStatus.Answer);
             foreach (var item in que)
             {
-                var answer = _context.Answer.Where(x => x.QuestionId == item.Id).OrderByDescending(x => x.Id).FirstOrDefault();
-                if (answer.CreateTime.AddDays(7) >= DateTime.Now)
+                //查询竞拍人的截止时间
+                var bidding = _context.Bidding.FirstOrDefault(x => x.CreateBy == item.Answerer.ToString() && x.QuestionId == item.Id);
+                //已经到截止日
+                if (bidding.EndTime <= DateTime.Now)
                 {
-                    item.Status = (int)questionStatus.Complete;
-                    _context.Question.Update(item);
-                    //回答人获取积分
-                    var answerclient = _context.Client.FirstOrDefault(x => x.Id == item.Answerer);
-                    answerclient.Integral += item.Currency;
-                    _context.Client.Update(answerclient);
-                    //积分记录表
-                    IntegralRecords records = new IntegralRecords();
-                    records.ClientId = item.Answerer;
-                    records.Integral = item.Currency;
-                    records.Source = "回答问题";
-                    records.CreateTime = DateTime.Now;
-                    _context.IntegralRecords.Add(records);
+                    var answer = _context.Answer.Where(x => x.QuestionId == item.Id).OrderByDescending(x => x.Id).FirstOrDefault();
+                    if (answer.CreateTime.AddDays(7) <= DateTime.Now)
+                    {
+                        item.Status = (int)questionStatus.Complete;
+                        item.Content = "评价方未及时作出评价，系统默认好评!";
+                        item.Sign = (int)questionSign.Good;
+                        _context.Question.Update(item);
+                        num += _context.SaveChanges();
+                        //回答人获取积分
+                        var answerclient = _context.Client.FirstOrDefault(x => x.Id == item.Answerer);
+                        answerclient.Integral += item.Currency;
+                        _context.Client.Update(answerclient);
+                        //积分记录表
+                        IntegralRecords records = new IntegralRecords();
+                        records.ClientId = item.Answerer;
+                        records.Integral = item.Currency;
+                        records.Source = "回答问题";
+                        records.CreateTime = DateTime.Now;
+                        _context.IntegralRecords.Add(records);
+                        _context.SaveChanges();
 
+                    }
                 }
             }
-            return _context.SaveChanges();
+            return num;
         }
         /// <summary>
         /// 删除图片
@@ -340,7 +351,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public List<Question> ImgLs()
         {
-            var list = _context.Question.Where(x => x.IsDel == false && !string.IsNullOrEmpty(x.Img) && string.IsNullOrEmpty(x.Content));
+            var list = _context.Question.Where(x => x.IsDel == false && !string.IsNullOrEmpty(x.Img) && string.IsNullOrEmpty(x.ImgContent));
             return list.ToList();
 
         }

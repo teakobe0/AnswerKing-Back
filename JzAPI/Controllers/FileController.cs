@@ -148,7 +148,7 @@ namespace JzAPI.Controllers
             string name = DateTime.Now.ToString("yyyyMMdd");
             filePath = CheckFile(name);
             string file = "";
-            string content = "";
+            string imgContent = "";
             foreach (var formFile in files)
             {
                 if (formFile.Length > 0)
@@ -170,10 +170,10 @@ namespace JzAPI.Controllers
                     {
                         return BadRequest("该文件已存在！请重命名后重新上传");
                     }
-                    content = Ocr(pathImg);
+                    imgContent = Ocr(pathImg);
                 }
             }
-            return Ok(new { count = files.Count, size, file, content });
+            return Ok(new { count = files.Count, size, file, imgContent });
 
         }
         private string CheckDirectory(int classinfoid)

@@ -70,6 +70,11 @@ namespace JzAPI.Controllers
                         r.Msg = "该问题已经关闭，不能重新发布。";
                         r.Status = RmStatus.Error;
                     }
+                    else if (question.Status == (int)questionStatus.Choose)
+                    {
+                        r.Msg = "该问题已选竞拍者，不能重新发布";
+                        r.Status = RmStatus.Error;
+                    }
                     else
                     {
                         //修改question状态为已删除
@@ -143,14 +148,6 @@ namespace JzAPI.Controllers
                 if (type == "new")
                 {
                     ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.CreateTime).ToList();
-                }
-                else if (type == "currency")
-                {
-                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.Currency).ToList();
-                }
-                else if (type == "finish")
-                {
-                    ls = ls.Where(x => x.Status == (int)questionStatus.Complete).OrderByDescending(x => x.Id).ToList();
                 }
                 else if (type == "retime")
                 {
@@ -227,14 +224,6 @@ namespace JzAPI.Controllers
                 if (type == "new")
                 {
                     ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.CreateTime).ToList();
-                }
-                else if (type == "currency")
-                {
-                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.Currency).ToList();
-                }
-                else if (type == "finish")
-                {
-                    ls = ls.Where(x => x.Status == (int)questionStatus.Complete).OrderByDescending(x => x.Id).ToList();
                 }
                 else if (type == "retime")
                 {
@@ -684,6 +673,7 @@ namespace JzAPI.Controllers
                     queinfo = new queinfo();
                     queinfo.qname = client.Name;
                     queinfo.qimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
+                    item.Img= !string.IsNullOrEmpty(item.Img) ? url + item.Img : item.Img;
                     queinfo.que = item;
                     queinfos.Add(queinfo);
                 }
