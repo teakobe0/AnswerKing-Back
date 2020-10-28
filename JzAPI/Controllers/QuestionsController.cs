@@ -25,13 +25,17 @@ namespace JzAPI.Controllers
         private IAnswerDAL _ansdal;
         private IClientDAL _clientdal;
         private INoticeDAL _noticedal;
-        public QuestionsController(IQuestionDAL quedal, IBiddingDAL biddal, IAnswerDAL ansdal, IClientDAL clientdal, INoticeDAL noticedal)
+        private IFavouriteDAL _favouritedal;
+        private IClientQuestionInfoDAL _clientqidal;
+        public QuestionsController(IClientQuestionInfoDAL clientqidal, IQuestionDAL quedal, IBiddingDAL biddal, IAnswerDAL ansdal, IClientDAL clientdal, INoticeDAL noticedal, IFavouriteDAL favouritedal)
         {
             _quedal = quedal;
             _biddal = biddal;
             _ansdal = ansdal;
             _clientdal = clientdal;
             _noticedal = noticedal;
+            _favouritedal = favouritedal;
+            _clientqidal = clientqidal;
         }
         /// <summary>
         /// 发布问题
@@ -47,7 +51,7 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                List<Bidding> bls = null;
+
                 if (question.Id != 0)
                 {
                     if (question.Status == (int)questionStatus.Answer)
@@ -77,36 +81,24 @@ namespace JzAPI.Controllers
                     }
                     else
                     {
-                        //修改question状态为已删除
-                        bls = _biddal.GetList(question.Id);
-                        _quedal.Del(question.Id);
-                        question.Id = 0;
+                        int num = _quedal.Edit(question);
+                        //有改动，去删除该问题下面的竞拍记录
+                        if (num == 1)
+                        {
+                            _biddal.DelLs(question.Id);
+                        }
                     }
                 }
-                if (r.Msg == null)
+                else
                 {
                     if (!string.IsNullOrEmpty(question.Title) && !string.IsNullOrEmpty(question.Content))
                     {
 
                         question.CreateBy = ID.ToString();
+
                         string url = AppConfig.Configuration["imgurl"];
                         question.Img = !string.IsNullOrEmpty(question.Img) ? question.Img.Replace(url, "") : question.Img;
                         r.Data = _quedal.Add(question);
-                        //发通知
-                        if (bls != null)
-                        {
-                            Notice notice = null;
-                            string qurl = AppConfig.Configuration["questionurl"] + question.Id;
-                            foreach (var item in bls)
-                            {
-                                notice = new Notice();
-                                notice.Type = (int)noticeType.System;
-                                notice.ReceiveId = int.Parse(item.CreateBy);
-                                notice.ContentsUrl = "您竞拍的原问题:" + item.QuestionId + ",内容已经发生改变,请您重新参与竞拍,<a href=" + qurl + ">新问题地址</a>";
-                                _noticedal.Add(notice);
-                            }
-                        }
-
                     }
                     else
                     {
@@ -131,7 +123,7 @@ namespace JzAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("QuestionPage")]
-        public ResultModel QuestionPage(string name, string type, int pagenum = 1, int pagesize = 40)
+        public ResultModel QuestionPage(string name, int classes, string type, int pagenum = 1, int pagesize = 10)
         {
             ResultModel r = new ResultModel();
             PageData page = new PageData();
@@ -140,22 +132,22 @@ namespace JzAPI.Controllers
             {
                 que que = null;
                 List<que> ques = new List<que>();
-                var ls = _quedal.GetList().Where(x => x.EndTime >= DateTime.Now);
+                var ls = _quedal.GetList().Where(x => x.Status != (int)questionStatus.Close && x.EndTime >= DateTime.Now).OrderByDescending(x => x.Id).ToList();
                 if (!string.IsNullOrEmpty(name))
                 {
                     ls = ls.Where(x => x.Title.Contains(name) || x.Content.Contains(name)).ToList();
                 }
+                if (classes != 0)
+                {
+                    ls = ls.Where(x => x.Type == classes).ToList();
+                }
                 if (type == "new")
                 {
-                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.CreateTime).ToList();
+                    ls = ls.Where(x => x.Answerer == 0).OrderByDescending(x => x.CreateTime).ToList();
                 }
-                else if (type == "retime")
+                else if (type == "moods")
                 {
-                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderBy(x => x.EndTime).ToList();
-                }
-                else
-                {
-                    ls = ls.OrderByDescending(x => x.Id).ToList();
+                    ls = ls.Where(x => x.Status == (int)questionStatus.Bidding).OrderByDescending(x => x.Views).ToList();
                 }
                 //后期是否需要图片显示
                 string url = AppConfig.Configuration["imgurl"];
@@ -206,7 +198,7 @@ namespace JzAPI.Controllers
         [HttpGet]
         [Route("MyQuestionPage")]
         [Authorize(Roles = C_Role.all)]
-        public ResultModel MyQuestionPage(string name, string type, int pagenum = 1, int pagesize = 10)
+        public ResultModel MyQuestionPage(string name, int classes, string type, int pagenum = 1, int pagesize = 10)
         {
             ResultModel r = new ResultModel();
             PageData page = new PageData();
@@ -216,22 +208,22 @@ namespace JzAPI.Controllers
                 queinfo queinfo = null;
                 List<queinfo> queinfos = new List<queinfo>();
                 string url = AppConfig.Configuration["imgurl"];
-                var ls = _quedal.GetList().Where(x => x.EndTime >= DateTime.Now);
+                var ls = _quedal.GetList().Where(x => x.Status != (int)questionStatus.Close && x.EndTime >= DateTime.Now).OrderByDescending(x => x.Id).ToList();
                 if (!string.IsNullOrEmpty(name))
                 {
                     ls = ls.Where(x => x.Title.Contains(name) || x.Content.Contains(name)).ToList();
                 }
+                if (classes != 0)
+                {
+                    ls = ls.Where(x => x.Type == classes).ToList();
+                }
                 if (type == "new")
                 {
-                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderByDescending(x => x.CreateTime).ToList();
+                    ls = ls.Where(x => x.Answerer == 0).OrderByDescending(x => x.CreateTime).ToList();
                 }
-                else if (type == "retime")
+                else if (type == "moods")
                 {
-                    ls = ls.Where(x => x.Answerer == 0 && x.Status != (int)questionStatus.Close).OrderBy(x => x.EndTime).ToList();
-                }
-                else
-                {
-                    ls = ls.OrderByDescending(x => x.Id).ToList();
+                    ls = ls.Where(x => x.Status == (int)questionStatus.Bidding).OrderByDescending(x => x.Views).ToList();
                 }
                 foreach (var item in ls)
                 {
@@ -258,6 +250,7 @@ namespace JzAPI.Controllers
                     queinfo.que = item;
                     queinfo.qname = client.Name;
                     queinfo.qimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
+                    queinfo.favourite = _favouritedal.GetNum(item.Id);
                     if (bidding != null && item.Status == (int)questionStatus.Bidding)
                     {
                         queinfo.bidd = "正在竞拍";
@@ -291,6 +284,7 @@ namespace JzAPI.Controllers
             public string myque { get; set; }
             public string bidd { get; set; }
             public string myanswer { get; set; }
+            public int favourite { get; set; }
         }
         /// <summary>
         /// 选择竞拍者
@@ -419,12 +413,17 @@ namespace JzAPI.Controllers
             public Bidding bidding { get; set; }
             public string bname { get; set; }
             public string bimage { get; set; }
+            public int integral { get; set; }
+            public decimal GoodReviewRate { get; set; }
+            public int qnum { get; set; }
+
         }
         public class que
         {
             public Question question { get; set; }
             public string qname { get; set; }
             public string qimage { get; set; }
+            public int favourite { get; set; }
         }
 
         /// <summary>
@@ -434,6 +433,7 @@ namespace JzAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("Details")]
+        [Authorize(Roles = C_Role.all)]
         public ResultModel Details(int questionid)
         {
             ResultModel r = new ResultModel();
@@ -445,7 +445,8 @@ namespace JzAPI.Controllers
                 binfo binfo = null;
                 que que = new que();
                 string url = AppConfig.Configuration["imgurl"];
-                var question = _quedal.GetQuestion(questionid);
+                //增加浏览次数
+                var question = _quedal.GetQuestionJk(questionid);
                 if (!string.IsNullOrEmpty(question.Img))
                 {
                     if (question.Img.Contains("|"))
@@ -465,6 +466,7 @@ namespace JzAPI.Controllers
                 }
                 var client = _clientdal.GetClientById(int.Parse(question.CreateBy));
                 que.question = question;
+                que.favourite = _favouritedal.GetNum(questionid);
                 que.qname = client.Name;
                 que.qimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
                 //已选竞拍者
@@ -492,12 +494,19 @@ namespace JzAPI.Controllers
                         }
                     }
                     var bidding = _biddal.GetBidding(questionid, question.Answerer);
-                    question.EndTime = bidding.EndTime;
                     binfo = new binfo();
                     binfo.bidding = bidding;
-                    client = _clientdal.GetClientById(int.Parse(bidding.CreateBy));
-                    binfo.bname = client.Name;
-                    binfo.bimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
+                    if (ID == question.Answerer)
+                    {
+                        binfo.bname = que.qname;
+                        binfo.bimage = que.qimage;
+                    }
+                    else
+                    {
+                        client = _clientdal.GetClientById(int.Parse(bidding.CreateBy));
+                        binfo.bname = client.Name;
+                        binfo.bimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
+                    }
                     bls.Add(binfo);
                 }
                 else
@@ -510,11 +519,14 @@ namespace JzAPI.Controllers
                         client = _clientdal.GetClientById(int.Parse(item.CreateBy));
                         binfo.bname = client.Name;
                         binfo.bimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
+                        binfo.integral = client.Integral;
+                        var clientinfo = _clientqidal.GetById(int.Parse(item.CreateBy));
+                        binfo.GoodReviewRate = clientinfo.GoodReviewRate;
+                        binfo.qnum = _quedal.GetListByClientid(int.Parse(item.CreateBy)).Count();
                         bls.Add(binfo);
                     }
 
                 }
-
                 r.Data = new { que, bls, als };
             }
             catch (Exception ex)
@@ -537,7 +549,7 @@ namespace JzAPI.Controllers
         [HttpGet]
         [Route("MyQuestion")]
         [Authorize(Roles = C_Role.all)]
-        public ResultModel MyQuestion(string name, int pagenum = 1, int pagesize = 10)
+        public ResultModel MyQuestion(int status, int pagenum = 1, int pagesize = 10)
         {
             ResultModel r = new ResultModel();
             PageData page = new PageData();
@@ -547,9 +559,9 @@ namespace JzAPI.Controllers
                 List<qinfo> ls = new List<qinfo>();
                 qinfo qinfo = null;
                 var question = _quedal.GetList(ID);
-                if (!string.IsNullOrEmpty(name))
+                if (status != 0)
                 {
-                    question = question.Where(x => x.Title.Contains(name) || x.Content.Contains(name)).ToList();
+                    question = question.Where(x => x.Status == status).ToList();
                 }
                 string url = AppConfig.Configuration["imgurl"];
                 foreach (var item in question)
@@ -602,14 +614,15 @@ namespace JzAPI.Controllers
             try
             {
                 var que = _quedal.GetList(ID);
-                //竞拍中
-                int bnum = que.Where(x => x.Status == (int)questionStatus.Bidding).Count();
-                //待回答
-                int nonum = que.Where(x => x.Status == (int)questionStatus.Choose).Count();
-                //已回答
-                int answernum = que.Where(x => x.Status == (int)questionStatus.Answer).Count();
-
-                r.Data = new { bnum, nonum, answernum };
+                //竞拍中的提问
+                int bidding = que.Where(x => x.Status == (int)questionStatus.Bidding).Count();
+                //待完成的提问
+                int no = que.Where(x => x.Status == (int)questionStatus.Choose).Count();
+                //待评价的提问
+                int evaluate = que.Where(x => x.Status == (int)questionStatus.Answer).Count();
+                //已完成的提问
+                int complete = que.Where(x => x.Status == (int)questionStatus.Complete).Count();
+                r.Data = new { bidding, no, evaluate, complete };
 
             }
             catch (Exception ex)
@@ -631,15 +644,25 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
+                //竞拍中的回答
+                int bidding = 0;
+                var bls = _biddal.GetListByCid(ID);
+                foreach (var item in bls)
+                {
+                    var q = _quedal.GetQuestion(item.QuestionId);
+                    if (q.Status == (int)questionStatus.Bidding)
+                    {
+                        bidding += 1;
+                    }
+                }
                 var que = _quedal.GetListByClientid(ID);
-                //竞拍中
-                int bnum = que.Where(x => x.Status == (int)questionStatus.Bidding).Count();
-                //待回答
-                int nonum = que.Where(x => x.Status == (int)questionStatus.Choose).Count();
-                //已回答
-                int answernum = que.Where(x => x.Status == (int)questionStatus.Answer).Count();
-
-                r.Data = new { bnum, nonum, answernum };
+                //待完成的回答
+                int no = que.Where(x => x.Status == (int)questionStatus.Choose).Count();
+                //待评价的回答
+                int evaluate = que.Where(x => x.Status == (int)questionStatus.Answer).Count();
+                //已完成的回答
+                int complete = que.Where(x => x.Status == (int)questionStatus.Answer).Count();
+                r.Data = new { bidding, no, evaluate, complete };
 
             }
             catch (Exception ex)
@@ -673,7 +696,7 @@ namespace JzAPI.Controllers
                     queinfo = new queinfo();
                     queinfo.qname = client.Name;
                     queinfo.qimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
-                    item.Img= !string.IsNullOrEmpty(item.Img) ? url + item.Img : item.Img;
+                    item.Img = !string.IsNullOrEmpty(item.Img) ? url + item.Img : item.Img;
                     queinfo.que = item;
                     queinfos.Add(queinfo);
                 }
@@ -753,6 +776,95 @@ namespace JzAPI.Controllers
                         System.IO.File.Delete(path);
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 查询科目
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("Classes")]
+        public ResultModel Classes()
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                Dictionary<int, string> type = new Dictionary<int, string>();
+                type.Add(1, "经济 economic");
+                type.Add(2, "金融 finance");
+                r.Data = type;
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 完成的问题
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("CompleteQuestions")]
+        public ResultModel CompleteQuestions(int type, int clientid, int pagenum = 1, int pagesize = 10)
+        {
+            ResultModel r = new ResultModel();
+            PageData page = new PageData();
+            r.Status = RmStatus.OK;
+            List<que> qls = new List<que>();
+            que que = null;
+            try
+            {
+                string url = AppConfig.Configuration["imgurl"];
+                var ls = _quedal.GetList().Where(x => x.Answerer == clientid && x.Status == (int)questionStatus.Complete);
+                if (clientid != 0)
+                {
+                    ls = ls.Where(x => x.Answerer == clientid);
+                }
+                if (type != 0)
+                {
+                    ls = ls.Where(x => x.Type == type);
+                }
+                foreach (var item in ls.Skip(pagesize * (pagenum - 1)).Take(pagesize))
+                {
+                    que = new que();
+                    que.question = item;
+                    var client = _clientdal.GetClientById(int.Parse(item.CreateBy));
+                    que.qname = client.Name;
+                    que.qimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
+                    qls.Add(que);
+                }
+                page.Data = qls;
+                page.PageTotal = ls.Count();
+                r.Data = page;
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 保存补充材料
+        /// </summary>
+        /// <param name="question"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("Save")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Save([FromBody] Question question)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                //var ques
             }
             catch (Exception ex)
             {

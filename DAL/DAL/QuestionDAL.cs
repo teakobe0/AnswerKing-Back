@@ -63,7 +63,6 @@ namespace DAL.DAL
         /// <returns></returns>
         public Question Add(Question question)
         {
-
             question.Status = (int)questionStatus.Save;
             question.CreateTime = DateTime.Now;
             _context.Question.Add(question);
@@ -71,7 +70,16 @@ namespace DAL.DAL
             return question;
 
         }
-
+        /// <summary>
+        /// 编辑
+        /// </summary>
+        /// <param name="question"></param>
+        /// <returns></returns>
+        public int Edit(Question question)
+        {
+            _context.Question.Update(question);
+            return _context.SaveChanges();
+        }
 
         /// <summary>
         /// 删除
@@ -85,16 +93,11 @@ namespace DAL.DAL
                 var que = _context.Question.FirstOrDefault(x => x.Id == id);
                 que.IsDel = true;
                 que.Status = (int)questionStatus.Close;
-                //删除竞拍表关于该问题的所有竞拍记录
-                var biddings = _context.Bidding.Where(x => x.QuestionId == id);
-                foreach (var i in biddings)
-                {
-                    i.IsDel = true;
-                }
                 return _context.SaveChanges();
             }
             return 0;
         }
+
         /// <summary>
         /// 评价
         /// </summary>
@@ -110,6 +113,19 @@ namespace DAL.DAL
                 que.Evaluate = content;
                 que.Status = (int)questionStatus.Complete;
                 que.Sign = grade;
+                //更新ClientQuestionInfo
+                ClientQuestionInfo info = new ClientQuestionInfo();
+                info.ClientId = que.Answerer;
+                if (grade == 5)
+                {
+                    info.GoodReviews = 1;
+                }
+                else
+                {
+                    info.BadReviews = 1;
+                }
+                info.CompletedQuestions = 1;
+                CommonUpdateInfo(info);
                 //回答人获取积分
                 var client = _context.Client.FirstOrDefault(x => x.Id == que.Answerer);
                 client.Integral += que.Currency;
@@ -153,7 +169,23 @@ namespace DAL.DAL
         {
             return _context.Question.FirstOrDefault(x => x.Id == id);
         }
-
+        /// <summary>
+        /// 根据问题id查询(接口),增加浏览次数
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public Question GetQuestionJk(int id)
+        {
+            var que = _context.Question.FirstOrDefault(x => x.Id == id);
+            que.Views += 1;
+            _context.SaveChanges();
+            //更新ClientQuestionInfo
+            ClientQuestionInfo info = new ClientQuestionInfo();
+            info.ClientId = int.Parse(que.CreateBy);
+            info.Views = 1;
+            CommonUpdateInfo(info);
+            return que;
+        }
         /// <summary>
         /// 查询列表
         /// </summary>
@@ -294,10 +326,8 @@ namespace DAL.DAL
             var que = GetList().Where(x => x.Status == (int)questionStatus.Answer);
             foreach (var item in que)
             {
-                //查询竞拍人的截止时间
-                var bidding = _context.Bidding.FirstOrDefault(x => x.CreateBy == item.Answerer.ToString() && x.QuestionId == item.Id);
                 //已经到截止日
-                if (bidding.EndTime <= DateTime.Now)
+                if (item.EndTime <= DateTime.Now)
                 {
                     var answer = _context.Answer.Where(x => x.QuestionId == item.Id).OrderByDescending(x => x.Id).FirstOrDefault();
                     if (answer.CreateTime.AddDays(7) <= DateTime.Now)
@@ -307,6 +337,12 @@ namespace DAL.DAL
                         item.Sign = (int)questionSign.Good;
                         _context.Question.Update(item);
                         num += _context.SaveChanges();
+                        //更新ClientQuestionInfo
+                        ClientQuestionInfo info = new ClientQuestionInfo();
+                        info.ClientId = item.Answerer;
+                        info.GoodReviews = 1;
+                        info.CompletedQuestions = 1;
+                        CommonUpdateInfo(info);
                         //回答人获取积分
                         var answerclient = _context.Client.FirstOrDefault(x => x.Id == item.Answerer);
                         answerclient.Integral += item.Currency;

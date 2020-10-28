@@ -38,13 +38,21 @@ namespace DAL.DAL
         /// <returns></returns>
         public int Add(Bidding bidding)
         {
+            int num = 0;
             bidding.CreateTime = DateTime.Now;
             _context.Bidding.Add(bidding);
             //变更问题状态为正在竞拍
             var que = _context.Question.FirstOrDefault(x => x.Id == bidding.QuestionId);
             que.Status = (int)questionStatus.Bidding;
+            que.BiddingNum += 1;
             _context.Update(que);
-            return _context.SaveChanges();
+            num = _context.SaveChanges();
+            //更新ClientQuestionInfo
+            ClientQuestionInfo info = new ClientQuestionInfo();
+            info.ClientId = int.Parse(bidding.CreateBy);
+            info.BiddingQuestions = 1;
+            CommonUpdateInfo(info);
+            return num;
 
         }
         /// <summary>
@@ -55,7 +63,7 @@ namespace DAL.DAL
         /// <returns></returns>
         public Bidding GetBidding(int questionId, int clientId)
         {
-            var bidding = _context.Bidding.FirstOrDefault(x => x.QuestionId == questionId && x.CreateBy == clientId.ToString());
+            var bidding = _context.Bidding.FirstOrDefault(x => x.QuestionId == questionId && x.CreateBy == clientId.ToString() && x.IsDel == false);
 
             return bidding;
         }
@@ -82,7 +90,7 @@ namespace DAL.DAL
         {
             if (clientid != 0)
             {
-                var list = GetList().Where(x => x.CreateBy == clientid.ToString()).OrderByDescending(x=>x.Id);
+                var list = GetList().Where(x => x.CreateBy == clientid.ToString()).OrderByDescending(x => x.Id);
                 return list.ToList();
             }
             return null;
@@ -100,6 +108,30 @@ namespace DAL.DAL
                 var bid = _context.Bidding.FirstOrDefault(x => x.Id == id);
                 bid.IsDel = true;
                 return _context.SaveChanges();
+            }
+            return 0;
+        }
+        /// <summary>
+        /// 根据问题id删除该问题的竞拍记录
+        /// </summary>
+        /// <param name="questionid"></param>
+        /// <returns></returns>
+        public int DelLs(int questionid)
+        {
+            if (questionid != 0)
+            {
+                //删除竞拍表关于该问题的所有竞拍记录
+                var biddings = _context.Bidding.Where(x => x.QuestionId == questionid);
+                foreach (var i in biddings)
+                {
+                    i.IsDel = true;
+                }
+                _context.Bidding.UpdateRange(biddings);
+                int bnum = biddings.Count();
+                var que = _context.Question.FirstOrDefault(x => x.Id == questionid);
+                que.BiddingNum -= bnum;
+                _context.Question.Update(que);
+                _context.SaveChanges();
             }
             return 0;
         }

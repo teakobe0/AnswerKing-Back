@@ -26,7 +26,8 @@ namespace DAL.Model
         public bool IsAudit { get; set; }//是否审核 0：未审核，1：已审核
         public bool IsDel { get; set; }//是否删除 0：未删除 1：已删除
         public int Status { get; set; }//状态 1:保存 2：正在竞拍 3：已选竞拍者，4：已回答，5：申请客服，6：已完成,7:已关闭
-
+        public int Views { get; set; }//浏览次数
+        public int BiddingNum { get; set; }//竞拍次数
     }
 }
 

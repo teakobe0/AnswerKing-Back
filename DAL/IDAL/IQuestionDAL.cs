@@ -15,6 +15,12 @@ namespace DAL.IDAL
         /// <returns></returns>
         Question Add(Question question);
         /// <summary>
+        /// 编辑
+        /// </summary>
+        /// <param name="question"></param>
+        /// <returns></returns>
+        int Edit(Question question);
+        /// <summary>
         /// 删除
         /// </summary>
         /// <param name="id"></param>
@@ -47,6 +53,12 @@ namespace DAL.IDAL
         /// <returns></returns>
         Question GetQuestion(int id);
         /// <summary>
+        /// 根据问题id查询(接口),增加浏览次数
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Question GetQuestionJk(int id);
+        /// <summary>
         /// 根据客户id检索问题
         /// </summary>
         /// <param name="clientid"></param>
@@ -56,7 +68,7 @@ namespace DAL.IDAL
         /// 根据客户id检索(回答者)
         /// </summary>
         /// <returns></returns>
-         List<Question> GetListByClientid(int clientId);
+        List<Question> GetListByClientid(int clientId);
         /// <summary>
         /// 查询列表
         /// </summary>
@@ -82,7 +94,7 @@ namespace DAL.IDAL
         /// <param name="qintegral"></param>
         /// <param name="aintegral"></param>
         /// <returns></returns>
-        int Audit(int id, int userid,int qintegral,int aintegral);
+        int Audit(int id, int userid, int qintegral, int aintegral);
         /// <summary>
         /// 修改未处理订单状态
         /// </summary>
@@ -105,6 +117,6 @@ namespace DAL.IDAL
         /// </summary>
         /// <param name="ls"></param>
         /// <returns></returns>
-         int Update(List<Question> ls);
+        int Update(List<Question> ls);
     }
 }

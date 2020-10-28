@@ -21,10 +21,12 @@ namespace JzAPI.Controllers
     {
         private IBiddingDAL _biddal;
         private IQuestionDAL _quedal;
-        public BiddingController(IBiddingDAL biddal, IQuestionDAL quedal)
+        private IClientQuestionInfoDAL _clientqidal;
+        public BiddingController(IBiddingDAL biddal, IQuestionDAL quedal, IClientQuestionInfoDAL clientqidal)
         {
             _biddal = biddal;
             _quedal = quedal;
+            _clientqidal = clientqidal;
         }
         /// <summary>
         /// 回应(竞拍)问题
@@ -58,6 +60,7 @@ namespace JzAPI.Controllers
                 {
                     bidding.CreateBy = ID.ToString();
                     r.Data = _biddal.Add(bidding);
+
                 }
 
             }
@@ -68,28 +71,46 @@ namespace JzAPI.Controllers
             return r;
         }
         /// <summary>
-        ///我竞拍的问题
+        ///我竞拍中问答
         /// </summary>
         /// <returns></returns>
         [HttpGet]
         [Route("MyBidding")]
         [Authorize(Roles = C_Role.all)]
-        public ResultModel MyBidding()
+        public ResultModel MyBidding(int pagenum = 1, int pagesize = 10)
         {
             ResultModel r = new ResultModel();
+            PageData page = new PageData();
             r.Status = RmStatus.OK;
             try
             {
-                var bidds = from x in _biddal.GetListByCid(ID)
+                List<Question> ls = new List<Question>();
+                Question question = null;
+                var bls = _biddal.GetListByCid(ID);
+                foreach (var item in bls)
+                {
+                    var q = _quedal.GetQuestion(item.QuestionId);
+                    if (q.Status == (int)questionStatus.Bidding && q.IsDel == false)
+                    {
+                        question = new Question();
+                        question = q;
+                        ls.Add(question);
+                    }
+                }
+                var model = from x in ls.Skip(pagesize * (pagenum - 1)).Take(pagesize)
                             select new
                             {
                                 x.Id,
                                 x.CreateTime,
-                                x.QuestionId,
-                                title= _quedal.GetQuestion(x.QuestionId).Title,
-                                bstatus = _quedal.GetQuestion(x.QuestionId).Answerer == ID ? "已中竞拍" : "未中竞拍"
+                                x.Title,
+                                x.Status,
+                                x.EndTime,
+                                currency = _biddal.GetBidding(x.Id, ID).Currency,
+                                bnum = _biddal.GetList(x.Id).Count()
                             };
-                r.Data = bidds;
+                page.Data = model;
+                page.PageTotal = ls.Count();
+                r.Data = page;
             }
             catch (Exception ex)
             {

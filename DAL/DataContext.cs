@@ -32,5 +32,7 @@ namespace DAL
         public DbSet<Bidding> Bidding { get; set; }
         public DbSet<Answer> Answer { get; set; }
         public DbSet<IntegralRecords> IntegralRecords { get; set; }
+        public DbSet<Favourite> Favourite { get; set; }
+        public DbSet<ClientQuestionInfo> ClientQuestionInfo { get; set; }
     }
 }

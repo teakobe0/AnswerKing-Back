@@ -672,23 +672,5 @@ namespace JzAPI.Controllers
             return r;
 
         }
-        /// <summary>
-        /// 客户详情
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("GetClientDetail")]
-        [Authorize(Roles = C_Role.all)]
-        public ResultModel GetClientDetail(int clientid)
-        {
-            ResultModel r = new ResultModel();
-            r.Status = RmStatus.OK;
-            var que = _quedal.GetList().Where(x => x.Answerer == clientid);
-            int good = que.Where(x => x.Sign == (int)questionSign.Good).Count();
-            int answer = que.Where(x => x.Status == (int)questionStatus.Answer).Count();
-            int inanswer = que.Where(x => x.Status == (int)questionStatus.Choose).Count();
-            r.Data = new { good, answer, inanswer };
-            return r;
-        }
     }
 }
