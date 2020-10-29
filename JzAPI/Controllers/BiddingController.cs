@@ -71,6 +71,38 @@ namespace JzAPI.Controllers
             return r;
         }
         /// <summary>
+        /// 编辑
+        /// </summary>
+        /// <param name="bidding"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("Edit")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Edit([FromBody] Bidding bidding)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                //竞拍的问题的状态为正在竞拍
+                var que = _quedal.GetQuestion(bidding.QuestionId);
+                if (que.Status == (int)questionStatus.Bidding)
+                {
+                    r.Data = _biddal.Edit(bidding);
+                }
+                else
+                {
+                    r.Status = RmStatus.Error;
+                    r.Msg = "竞拍价格不能修改。";
+                }
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
         ///我竞拍中问答
         /// </summary>
         /// <returns></returns>
@@ -111,6 +143,39 @@ namespace JzAPI.Controllers
                 page.Data = model;
                 page.PageTotal = ls.Count();
                 r.Data = page;
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 邀请竞拍
+        /// </summary>
+        /// <param name="questionid"></param>
+        /// <param name="biddingid">被邀请人id</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("Ask")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel Ask(int questionid, int biddingid)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                if (questionid != 0 && biddingid != 0)
+                {
+                    Bidding bidding = new Bidding();
+                    bidding.QuestionId = questionid;
+                    bidding.CreateBy = biddingid.ToString();
+                    r.Data = _biddal.Add(bidding);
+                }
+                else
+                {
+                    r.Status = RmStatus.Error;
+                }
             }
             catch (Exception ex)
             {

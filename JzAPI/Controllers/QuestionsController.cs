@@ -51,62 +51,58 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-
-                if (question.Id != 0)
+                string url = AppConfig.Configuration["imgurl"];
+                if (!string.IsNullOrEmpty(question.Title) && !string.IsNullOrEmpty(question.Content))
                 {
-                    if (question.Status == (int)questionStatus.Answer)
+                    question.Img = !string.IsNullOrEmpty(question.Img) ? question.Img.Replace(url, "") : question.Img;
+                    if (question.Id != 0)
                     {
-                        r.Msg = "该问题已经有人回答，不能重新发布。";
-                        r.Status = RmStatus.Error;
-                    }
-                    else if (question.Status == (int)questionStatus.ForService)
-                    {
-                        r.Msg = "该问题已经申请客服，不能重新发布。";
-                        r.Status = RmStatus.Error;
-                    }
-                    else if (question.Status == (int)questionStatus.Complete)
-                    {
-                        r.Msg = "该问题已经完成，不能重新发布。";
-                        r.Status = RmStatus.Error;
-                    }
-                    else if (question.Status == (int)questionStatus.Close)
-                    {
-                        r.Msg = "该问题已经关闭，不能重新发布。";
-                        r.Status = RmStatus.Error;
-                    }
-                    else if (question.Status == (int)questionStatus.Choose)
-                    {
-                        r.Msg = "该问题已选竞拍者，不能重新发布";
-                        r.Status = RmStatus.Error;
+                        if (question.Status == (int)questionStatus.Answer)
+                        {
+                            r.Msg = "该问题已经有人回答，不能重新发布。";
+                            r.Status = RmStatus.Error;
+                        }
+                        else if (question.Status == (int)questionStatus.ForService)
+                        {
+                            r.Msg = "该问题已经申请客服，不能重新发布。";
+                            r.Status = RmStatus.Error;
+                        }
+                        else if (question.Status == (int)questionStatus.Complete)
+                        {
+                            r.Msg = "该问题已经完成，不能重新发布。";
+                            r.Status = RmStatus.Error;
+                        }
+                        else if (question.Status == (int)questionStatus.Close)
+                        {
+                            r.Msg = "该问题已经关闭，不能重新发布。";
+                            r.Status = RmStatus.Error;
+                        }
+                        else if (question.Status == (int)questionStatus.Choose)
+                        {
+                            r.Msg = "该问题已选竞拍者，不能重新发布";
+                            r.Status = RmStatus.Error;
+                        }
+                        else
+                        {
+                            int num = _quedal.Edit(question);
+                            //有改动，去删除该问题下面的竞拍记录
+                            if (num == 1)
+                            {
+                                _biddal.DelLs(question.Id);
+                            }
+                        }
                     }
                     else
                     {
-                        int num = _quedal.Edit(question);
-                        //有改动，去删除该问题下面的竞拍记录
-                        if (num == 1)
-                        {
-                            _biddal.DelLs(question.Id);
-                        }
+                        question.CreateBy = ID.ToString();
+                        r.Data = _quedal.Add(question);
                     }
                 }
                 else
                 {
-                    if (!string.IsNullOrEmpty(question.Title) && !string.IsNullOrEmpty(question.Content))
-                    {
-
-                        question.CreateBy = ID.ToString();
-
-                        string url = AppConfig.Configuration["imgurl"];
-                        question.Img = !string.IsNullOrEmpty(question.Img) ? question.Img.Replace(url, "") : question.Img;
-                        r.Data = _quedal.Add(question);
-                    }
-                    else
-                    {
-                        r.Status = RmStatus.Error;
-                        r.Msg = "问题的标题和内容不能为空";
-                    }
+                    r.Status = RmStatus.Error;
+                    r.Msg = "问题的标题和内容不能为空";
                 }
-
             }
             catch (Exception ex)
             {
@@ -147,7 +143,7 @@ namespace JzAPI.Controllers
                 }
                 else if (type == "moods")
                 {
-                    ls = ls.Where(x => x.Status == (int)questionStatus.Bidding).OrderByDescending(x => x.Views).ToList();
+                    ls = ls.OrderByDescending(x => x.Views).ToList();
                 }
                 //后期是否需要图片显示
                 string url = AppConfig.Configuration["imgurl"];
@@ -223,7 +219,7 @@ namespace JzAPI.Controllers
                 }
                 else if (type == "moods")
                 {
-                    ls = ls.Where(x => x.Status == (int)questionStatus.Bidding).OrderByDescending(x => x.Views).ToList();
+                    ls = ls.OrderByDescending(x => x.Views).ToList();
                 }
                 foreach (var item in ls)
                 {
@@ -864,7 +860,51 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                //var ques
+                if (!string.IsNullOrEmpty(question.Img))
+                {
+                    string url = AppConfig.Configuration["imgurl"];
+                    question.Img = "|" + question.Img.Replace(url, "");
+                }
+                r.Data = _quedal.UpdateImg(question.Id, question.Img);
+                if ((int)r.Data == 0)
+                {
+                    r.Status = RmStatus.Error;
+                }
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        /// <summary>
+        /// 查询该客户竞拍中的问题
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("GetBiddingQuestions")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel GetBiddingQuestions(int biddingid)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            List<Question> ls = new List<Question>();
+            Question que = null;
+            try
+            {
+                var qls = _quedal.GetList().Where(x => x.EndTime >= DateTime.Now && x.Status == (int)questionStatus.Bidding && x.CreateBy == ID.ToString());
+                foreach (var item in qls)
+                {
+                    que = new Question();
+                    var bidding = _biddal.GetBidding(item.Id, biddingid);
+                    if (bidding == null)
+                    {
+                        que = item;
+                        ls.Add(que);
+                    }
+                }
+                r.Data = ls;
+
             }
             catch (Exception ex)
             {

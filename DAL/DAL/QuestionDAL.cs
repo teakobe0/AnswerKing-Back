@@ -323,6 +323,7 @@ namespace DAL.DAL
         public int ChangeStatus()
         {
             int num = 0;
+            //已经回答的问题
             var que = GetList().Where(x => x.Status == (int)questionStatus.Answer);
             foreach (var item in que)
             {
@@ -333,7 +334,7 @@ namespace DAL.DAL
                     if (answer.CreateTime.AddDays(7) <= DateTime.Now)
                     {
                         item.Status = (int)questionStatus.Complete;
-                        item.Content = "评价方未及时作出评价，系统默认好评!";
+                        item.Evaluate = "评价方未及时作出评价，系统默认好评!";
                         item.Sign = (int)questionSign.Good;
                         _context.Question.Update(item);
                         num += _context.SaveChanges();
@@ -357,6 +358,32 @@ namespace DAL.DAL
                         _context.SaveChanges();
 
                     }
+                }
+            }
+            //未按时回答的问题
+            var noque = GetList().Where(x => x.Status == (int)questionStatus.Choose);
+            foreach (var item in noque)
+            {
+                //已经到截止日
+                if (item.EndTime <= DateTime.Now)
+                {
+                    item.Status = (int)questionStatus.Close;
+                    item.Evaluate = "回答人未及时作答，系统确认超时!";
+                    item.Sign = (int)questionSign.Overtime;
+                    _context.Question.Update(item);
+                    num += _context.SaveChanges();
+                    //返还发布人积分
+                    var fclient = _context.Client.FirstOrDefault(x => x.Id == int.Parse(item.CreateBy));
+                    fclient.Integral += item.Currency;
+                    _context.Client.Update(fclient);
+                    //积分记录表
+                    IntegralRecords records = new IntegralRecords();
+                    records.ClientId = int.Parse(item.CreateBy);
+                    records.Integral = item.Currency;
+                    records.Source = "回答问题";
+                    records.CreateTime = DateTime.Now;
+                    _context.IntegralRecords.Add(records);
+                    _context.SaveChanges();
                 }
             }
             return num;
@@ -401,6 +428,26 @@ namespace DAL.DAL
 
             _context.Question.UpdateRange(ls);
             return _context.SaveChanges();
+        }
+        /// <summary>
+        /// 上传补充资料(img)
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="img"></param>
+        /// <returns></returns>
+        public int UpdateImg(int id, string img)
+        {
+            if (id != 0 && !string.IsNullOrEmpty(img))
+            {
+                var que = _context.Question.FirstOrDefault(x => x.Id == id);
+                que.Img += img;
+                _context.Question.Update(que);
+                return _context.SaveChanges();
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 }

@@ -118,5 +118,12 @@ namespace DAL.IDAL
         /// <param name="ls"></param>
         /// <returns></returns>
         int Update(List<Question> ls);
+        /// <summary>
+        /// 上传补充资料(img)
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="img"></param>
+        /// <returns></returns>
+        int UpdateImg(int id, string img);
     }
 }

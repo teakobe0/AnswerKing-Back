@@ -95,7 +95,16 @@ namespace DAL.DAL
             }
             return null;
         }
-
+        /// <summary>
+        /// 编辑
+        /// </summary>
+        /// <param name="bidding"></param>
+        /// <returns></returns>
+        public int Edit(Bidding bidding)
+        {
+            _context.Bidding.Update(bidding);
+            return _context.SaveChanges();
+        }
         /// <summary>
         /// 删除
         /// </summary>
@@ -130,6 +139,10 @@ namespace DAL.DAL
                 int bnum = biddings.Count();
                 var que = _context.Question.FirstOrDefault(x => x.Id == questionid);
                 que.BiddingNum -= bnum;
+                if (que.BiddingNum < 0)
+                {
+                    que.BiddingNum = 0;
+                }
                 _context.Question.Update(que);
                 _context.SaveChanges();
             }

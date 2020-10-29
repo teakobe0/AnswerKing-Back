@@ -49,8 +49,14 @@ namespace DAL.IDAL
         /// </summary>
         /// <param name="questionid"></param>
         /// <returns></returns>
-         int DelLs(int questionid);
+        int DelLs(int questionid);
+        /// <summary>
+        /// 编辑
+        /// </summary>
+        /// <param name="bidding"></param>
+        /// <returns></returns>
+        int Edit(Bidding bidding);
     }
 }
 
-        
+
