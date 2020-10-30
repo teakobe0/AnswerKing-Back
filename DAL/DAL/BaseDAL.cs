@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static DAL.Tools.EnumAll;
 
 namespace DAL.DAL
 {
@@ -52,7 +53,7 @@ namespace DAL.DAL
                     //计算好评率
                     qinfo.GoodReviewRate = Math.Round((decimal)qinfo.GoodReviews / (qinfo.GoodReviews + qinfo.BadReviews), 2);
                     //最近好评率(最近10个) 
-                    var que = _context.Question.Where(x => x.Answerer == qinfo.ClientId).Take(10);
+                    var que = _context.Question.Where(x => x.Answerer == qinfo.ClientId&&x.Status==(int) questionStatus.Complete).OrderByDescending(x=>x.Id).Take(10);
                     int good = 0;
                     int total = 0;
                     foreach (var item in que)

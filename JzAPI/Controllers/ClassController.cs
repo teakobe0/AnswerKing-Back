@@ -143,7 +143,6 @@ namespace JzAPI.Controllers
         public ResultModel Add([FromBody] Class clas)
         {
             ResultModel r = new ResultModel();
-            PageData page = new PageData();
             r.Status = RmStatus.OK;
             try
             {
@@ -216,7 +215,6 @@ namespace JzAPI.Controllers
         public ResultModel GetClass(int id)
         {
             ResultModel r = new ResultModel();
-            PageData page = new PageData();
             r.Status = RmStatus.OK;
             try
             {
@@ -240,7 +238,6 @@ namespace JzAPI.Controllers
         public ResultModel Edit([FromBody] Class clas)
         {
             ResultModel r = new ResultModel();
-            PageData page = new PageData();
             r.Status = RmStatus.OK;
             try
             {

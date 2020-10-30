@@ -61,14 +61,12 @@ namespace DAL.DAL
         /// </summary>
         /// <param name="question"></param>
         /// <returns></returns>
-        public Question Add(Question question)
+        public int Add(Question question)
         {
             question.Status = (int)questionStatus.Save;
             question.CreateTime = DateTime.Now;
             _context.Question.Add(question);
-            _context.SaveChanges();
-            return question;
-
+            return _context.SaveChanges();
         }
         /// <summary>
         /// 编辑
@@ -113,6 +111,7 @@ namespace DAL.DAL
                 que.Evaluate = content;
                 que.Status = (int)questionStatus.Complete;
                 que.Sign = grade;
+                _context.SaveChanges();
                 //更新ClientQuestionInfo
                 ClientQuestionInfo info = new ClientQuestionInfo();
                 info.ClientId = que.Answerer;
@@ -167,7 +166,14 @@ namespace DAL.DAL
         /// <returns></returns>
         public Question GetQuestion(int id)
         {
-            return _context.Question.FirstOrDefault(x => x.Id == id);
+            if (id != 0)
+            {
+                return _context.Question.FirstOrDefault(x => x.Id == id);
+            }
+            else
+            {
+                return null;
+            }
         }
         /// <summary>
         /// 根据问题id查询(接口),增加浏览次数
@@ -176,15 +182,19 @@ namespace DAL.DAL
         /// <returns></returns>
         public Question GetQuestionJk(int id)
         {
-            var que = _context.Question.FirstOrDefault(x => x.Id == id);
-            que.Views += 1;
-            _context.SaveChanges();
-            //更新ClientQuestionInfo
-            ClientQuestionInfo info = new ClientQuestionInfo();
-            info.ClientId = int.Parse(que.CreateBy);
-            info.Views = 1;
-            CommonUpdateInfo(info);
-            return que;
+            if (id != 0)
+            {
+                var que = _context.Question.FirstOrDefault(x => x.Id == id);
+                que.Views += 1;
+                _context.Question.Update(que);
+                _context.SaveChanges();
+                return que;
+            }
+            else
+            {
+                return null;
+            }
+
         }
         /// <summary>
         /// 查询列表

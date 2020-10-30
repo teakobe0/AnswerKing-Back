@@ -85,7 +85,7 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                var question = _quedal.GetListByClientid(ID);
+                var question = _quedal.GetListByClientid(ID).OrderByDescending(x=>x.Id).ToList();
                 if (status != 0)
                 {
                     question = question.Where(x => x.Status == status).ToList();

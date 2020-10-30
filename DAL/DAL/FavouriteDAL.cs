@@ -24,12 +24,15 @@ namespace DAL.DAL
             favourite.CreateTime = DateTime.Now;
             _context.Favourite.Add(favourite);
             num = _context.SaveChanges();
-            //更新ClientQuestionInfo
             var que = _context.Question.FirstOrDefault(x => x.Id == favourite.QuestionId);
-            ClientQuestionInfo info = new ClientQuestionInfo();
-            info.ClientId = int.Parse(que.CreateBy);
-            info.Favourites = 1;
-            CommonUpdateInfo(info);
+            //更新ClientQuestionInfo
+            if (que.Answerer != 0)
+            {
+                ClientQuestionInfo info = new ClientQuestionInfo();
+                info.ClientId = que.Answerer;
+                info.Favourites = 1;
+                CommonUpdateInfo(info);
+            }
             return num;
         }
 

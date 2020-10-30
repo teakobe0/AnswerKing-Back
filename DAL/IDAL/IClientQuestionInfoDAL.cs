@@ -14,10 +14,16 @@ namespace DAL.IDAL
         /// <returns></returns>
         int Add(ClientQuestionInfo cqi);
         /// <summary>
-        /// 根据客户id检索
+        /// 根据客户id查询(接口),增加浏览次数
         /// </summary>
         /// <param name="clientId"></param>
         /// <returns></returns>
-        ClientQuestionInfo GetById(int clientId);
+        ClientQuestionInfo GetClientQuestionInfoJK(int clientId);
+        /// <summary>
+        /// 根据客户id查询
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
+        ClientQuestionInfo GetClientQuestionInfo(int clientId);
     }
 }

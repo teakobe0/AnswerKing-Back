@@ -167,10 +167,19 @@ namespace JzAPI.Controllers
             {
                 if (questionid != 0 && biddingid != 0)
                 {
-                    Bidding bidding = new Bidding();
-                    bidding.QuestionId = questionid;
-                    bidding.CreateBy = biddingid.ToString();
-                    r.Data = _biddal.Add(bidding);
+                    var bid = _biddal.GetBidding(questionid, biddingid);
+                    if (bid== null)
+                    {
+                        Bidding bidding = new Bidding();
+                        bidding.QuestionId = questionid;
+                        bidding.CreateBy = biddingid.ToString();
+                        r.Data = _biddal.Add(bidding);
+                    }
+                    else
+                    {
+                        r.Status = RmStatus.Error;
+                        r.Msg = "该客户已经竞拍过该问题，不能重复竞拍";
+                    }
                 }
                 else
                 {

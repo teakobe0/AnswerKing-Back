@@ -25,19 +25,29 @@ namespace DAL.DAL
             return _context.SaveChanges();
         }
         /// <summary>
-        /// 根据客户id检索
+        /// 根据客户id查询(接口),增加浏览次数
         /// </summary>
         /// <param name="clientId"></param>
         /// <returns></returns>
-        public ClientQuestionInfo GetById( int clientId)
+        public ClientQuestionInfo GetClientQuestionInfoJK(int clientId)
         {
-
-            var cqinfo = _context.ClientQuestionInfo.FirstOrDefault(x =>x.ClientId == clientId && x.IsDel == false);
+            var cqinfo = _context.ClientQuestionInfo.FirstOrDefault(x => x.ClientId == clientId);
             cqinfo.Views += 1;
+            _context.ClientQuestionInfo.Update(cqinfo);
             _context.SaveChanges();
             return cqinfo;
         }
-       
+        /// <summary>
+        /// 根据客户id查询
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <returns></returns>
+        public ClientQuestionInfo GetClientQuestionInfo(int clientId)
+        {
+            var cqinfo = _context.ClientQuestionInfo.FirstOrDefault(x => x.ClientId == clientId);
+            return cqinfo;
+        }
+
         public List<ClientQuestionInfo> GetList()
         {
             return GetListData().ToList();

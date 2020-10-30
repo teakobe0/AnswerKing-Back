@@ -13,7 +13,7 @@ namespace DAL.IDAL
         /// </summary>
         /// <param name="question"></param>
         /// <returns></returns>
-        Question Add(Question question);
+        int Add(Question question);
         /// <summary>
         /// 编辑
         /// </summary>

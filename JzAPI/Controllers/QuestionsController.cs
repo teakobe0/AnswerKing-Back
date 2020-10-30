@@ -315,8 +315,7 @@ namespace JzAPI.Controllers
                         //扣除发布人积分
                         _clientdal.Deduct(ID, bidding.Currency);
                         //更新问题表
-                        _quedal.Update(questionid, bidding);
-                        r.Data = bidding.EndTime;
+                        r.Data=_quedal.Update(questionid, bidding);
                     }
                     else
                     {
@@ -404,16 +403,7 @@ namespace JzAPI.Controllers
             return r;
         }
 
-        public class binfo
-        {
-            public Bidding bidding { get; set; }
-            public string bname { get; set; }
-            public string bimage { get; set; }
-            public int integral { get; set; }
-            public decimal GoodReviewRate { get; set; }
-            public int qnum { get; set; }
-
-        }
+      
         public class que
         {
             public Question question { get; set; }
@@ -436,9 +426,6 @@ namespace JzAPI.Controllers
             r.Status = RmStatus.OK;
             try
             {
-                List<Answer> als = new List<Answer>();
-                List<binfo> bls = new List<binfo>();
-                binfo binfo = null;
                 que que = new que();
                 string url = AppConfig.Configuration["imgurl"];
                 //增加浏览次数
@@ -465,65 +452,7 @@ namespace JzAPI.Controllers
                 que.favourite = _favouritedal.GetNum(questionid);
                 que.qname = client.Name;
                 que.qimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
-                //已选竞拍者
-                if (question.Answerer != 0)
-                {
-                    als = _ansdal.GetLs(questionid);
-                    foreach (var item in als)
-                    {
-                        if (!string.IsNullOrEmpty(item.Img))
-                        {
-                            if (item.Img.Contains("|"))
-                            {
-                                Array aimgs = item.Img.Split("|");
-                                item.Img = "";
-                                foreach (var m in aimgs)
-                                {
-                                    item.Img += "|" + url + m;
-                                }
-                                item.Img = item.Img.Substring(1);
-                            }
-                            else
-                            {
-                                item.Img = url + item.Img;
-                            }
-                        }
-                    }
-                    var bidding = _biddal.GetBidding(questionid, question.Answerer);
-                    binfo = new binfo();
-                    binfo.bidding = bidding;
-                    if (ID == question.Answerer)
-                    {
-                        binfo.bname = que.qname;
-                        binfo.bimage = que.qimage;
-                    }
-                    else
-                    {
-                        client = _clientdal.GetClientById(int.Parse(bidding.CreateBy));
-                        binfo.bname = client.Name;
-                        binfo.bimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
-                    }
-                    bls.Add(binfo);
-                }
-                else
-                {
-                    var biddings = _biddal.GetList(questionid);
-                    foreach (var item in biddings)
-                    {
-                        binfo = new binfo();
-                        binfo.bidding = item;
-                        client = _clientdal.GetClientById(int.Parse(item.CreateBy));
-                        binfo.bname = client.Name;
-                        binfo.bimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
-                        binfo.integral = client.Integral;
-                        var clientinfo = _clientqidal.GetById(int.Parse(item.CreateBy));
-                        binfo.GoodReviewRate = clientinfo.GoodReviewRate;
-                        binfo.qnum = _quedal.GetListByClientid(int.Parse(item.CreateBy)).Count();
-                        bls.Add(binfo);
-                    }
-
-                }
-                r.Data = new { que, bls, als };
+                r.Data = que;
             }
             catch (Exception ex)
             {
@@ -888,29 +817,129 @@ namespace JzAPI.Controllers
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
-            List<Question> ls = new List<Question>();
-            Question que = null;
+            info info = null;
+            List<info> ls = new List<info>();
             try
             {
-                var qls = _quedal.GetList().Where(x => x.EndTime >= DateTime.Now && x.Status == (int)questionStatus.Bidding && x.CreateBy == ID.ToString());
+                var qls = _quedal.GetList().Where(x => x.EndTime > DateTime.Now && x.Status == (int)questionStatus.Bidding && x.CreateBy == ID.ToString());
                 foreach (var item in qls)
                 {
-                    que = new Question();
+                    info = new info();
                     var bidding = _biddal.GetBidding(item.Id, biddingid);
                     if (bidding == null)
                     {
-                        que = item;
-                        ls.Add(que);
+                        info.id = item.Id;
+                        info.title = item.Title;
+                        ls.Add(info);
                     }
                 }
                 r.Data = ls;
-
             }
             catch (Exception ex)
             {
                 r.Status = RmStatus.Error;
             }
             return r;
+        }
+        public class info
+        {
+            public string title { get; set; }
+            public int id { get; set; }
+        }
+        /// <summary>
+        /// 根据问题id查询竞拍信息
+        /// </summary>
+        /// <param name="questionid"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("BiddingInfo")]
+        [Authorize(Roles = C_Role.all)]
+        public ResultModel BiddingInfo(int questionid)
+        {
+            ResultModel r = new ResultModel();
+            r.Status = RmStatus.OK;
+            try
+            {
+                List<Answer> als = new List<Answer>();
+                List<binfo> bls = new List<binfo>();
+                binfo binfo = null;
+                string url = AppConfig.Configuration["imgurl"];
+                var question = _quedal.GetQuestion(questionid);
+                //已选竞拍者
+                if (question.Answerer != 0)
+                {
+                    als = _ansdal.GetLs(questionid);
+                    foreach (var item in als)
+                    {
+                        if (!string.IsNullOrEmpty(item.Img))
+                        {
+                            if (item.Img.Contains("|"))
+                            {
+                                Array aimgs = item.Img.Split("|");
+                                item.Img = "";
+                                foreach (var m in aimgs)
+                                {
+                                    item.Img += "|" + url + m;
+                                }
+                                item.Img = item.Img.Substring(1);
+                            }
+                            else
+                            {
+                                item.Img = url + item.Img;
+                            }
+                        }
+                    }
+                    var bidding = _biddal.GetBidding(questionid, question.Answerer);
+                    binfo = new binfo();
+                    binfo.bidding = bidding;
+                    if (ID == question.Answerer)
+                    {
+                        var client = _clientdal.GetClientById(int.Parse(question.CreateBy));
+                        binfo.bname = client.Name;
+                        binfo.bimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
+                    }
+                    else
+                    {
+                        var cli = _clientdal.GetClientById(int.Parse(bidding.CreateBy));
+                        binfo.bname = cli.Name;
+                        binfo.bimage = !string.IsNullOrEmpty(cli.Image) ? url + cli.Image : cli.Image;
+                    }
+                    bls.Add(binfo);
+                }
+                else
+                {
+                    var biddings = _biddal.GetList(questionid);
+                    foreach (var item in biddings)
+                    {
+                        binfo = new binfo();
+                        binfo.bidding = item;
+                        var client = _clientdal.GetClientById(int.Parse(item.CreateBy));
+                        binfo.bname = client.Name;
+                        binfo.bimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
+                        binfo.integral = client.Integral;
+                        var clientinfo = _clientqidal.GetClientQuestionInfo(int.Parse(item.CreateBy));
+                        binfo.GoodReviewRate = clientinfo.GoodReviewRate;
+                        binfo.qnum = _quedal.GetListByClientid(int.Parse(item.CreateBy)).Count();
+                        bls.Add(binfo);
+                    }
+                }
+                r.Data = new { bls, als };
+            }
+            catch (Exception ex)
+            {
+                r.Status = RmStatus.Error;
+            }
+            return r;
+        }
+        public class binfo
+        {
+            public Bidding bidding { get; set; }
+            public string bname { get; set; }
+            public string bimage { get; set; }
+            public int integral { get; set; }
+            public decimal GoodReviewRate { get; set; }
+            public int qnum { get; set; }
+
         }
     }
 }
