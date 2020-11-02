@@ -123,5 +123,16 @@ namespace DAL.IDAL
         /// <param name="id"></param>
         /// <returns></returns>
         int Deduct(int id, int currency);
+        /// <summary>
+        /// 积分充值
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        int UpdateIntegral(int id, int integral);
+        /// <summary>
+        /// 根据推荐机构id查询该机构下的客户
+        /// </summary>
+        /// <returns></returns>
+        List<Client> GetListByInviterid(string pid);
     }
 }

@@ -48,35 +48,35 @@ namespace JzAPI.Controllers
             info info = new info();
             try
             {
-                    string url = AppConfig.Configuration["imgurl"];
-                    info.cqinfo = _clientqidal.GetClientQuestionInfoJK(clientid);
-                    var client = _clientdal.GetClientById(clientid);
-                    info.qname = client.Name;
-                    info.qimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
-                    var overque = _quedal.GetListByClientid(clientid).Where(x => x.Status == (int)questionSign.Overtime);
-                    if (overque != null)
+                string url = AppConfig.Configuration["imgurl"];
+                info.cqinfo = _clientqidal.GetClientQuestionInfoJK(clientid);
+                var client = _clientdal.GetClientById(clientid);
+                info.qname = client.Name;
+                info.qimage = !string.IsNullOrEmpty(client.Image) ? url + client.Image : client.Image;
+                var overque = _quedal.GetListByClientid(clientid).Where(x => x.Status == (int)questionSign.Overtime);
+                if (overque != null)
+                {
+                    int num = overque.Count();
+                    int total = info.cqinfo.CompletedQuestions + num;
+                    info.overtimerate = total != 0 ? Math.Round((decimal)num / total, 2) : 0;
+                }
+                else
+                {
+                    info.overtimerate = 0;
+                }
+                //竞拍中的回答
+                int bidding = 0;
+                var bls = _biddal.GetListByCid(clientid);
+                foreach (var item in bls)
+                {
+                    var q = _quedal.GetQuestion(item.QuestionId);
+                    if (q.Status == (int)questionStatus.Bidding)
                     {
-                        int num = overque.Count();
-                        int total = info.cqinfo.CompletedQuestions + num;
-                        info.overtimerate = Math.Round((decimal)num / total, 2);
+                        bidding += 1;
                     }
-                    else
-                    {
-                        info.overtimerate = 0;
-                    }
-                    //竞拍中的回答
-                    int bidding = 0;
-                    var bls = _biddal.GetListByCid(clientid);
-                    foreach (var item in bls)
-                    {
-                        var q = _quedal.GetQuestion(item.QuestionId);
-                        if (q.Status == (int)questionStatus.Bidding)
-                        {
-                            bidding += 1;
-                        }
-                    }
-                    info.bunm = bidding;
-                    r.Data = info;
+                }
+                info.bunm = bidding;
+                r.Data = info;
             }
             catch (Exception ex)
             {

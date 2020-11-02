@@ -243,6 +243,13 @@ namespace DAL.DAL
                 que.Currency = bidding.Currency;
                 que.Status = (int)questionStatus.Choose;
                 _context.Update(que);
+                //发通知
+                Notice notice = new Notice();
+                notice.ContentsUrl = "你获取了问题"+que.Id+"的竞拍";
+                notice.SendId = int.Parse(que.CreateBy);
+                notice.ReceiveId = int.Parse(bidding.CreateBy);
+                notice.CreateTime = DateTime.Now;
+                _context.Notice.Add(notice);
                 return _context.SaveChanges();
             }
             return 0;

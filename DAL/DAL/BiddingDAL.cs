@@ -52,6 +52,15 @@ namespace DAL.DAL
             info.ClientId = int.Parse(bidding.CreateBy);
             info.BiddingQuestions = 1;
             CommonUpdateInfo(info);
+            //发通知
+            Notice notice = new Notice();
+            notice.Type = (int)noticeType.System;
+            notice.ContentsUrl = "您参与问题" + que.Id + "竞拍";
+            notice.SendId = int.Parse(que.CreateBy);
+            notice.ReceiveId = int.Parse(bidding.CreateBy);
+            notice.CreateTime = DateTime.Now;
+            _context.Notice.Add(notice);
+            _context.SaveChanges();
             return num;
 
         }

@@ -485,7 +485,7 @@ namespace JzAPI.Controllers
                 {
                     ac = new actioninfo();
                     ac.content = t.IsDel == true ? "删除评论" : "发表评论";
-                    classid = _clindal.GetClassInfo(t.ClassInfoId).ClassId;
+                    classid = _clindal.GetClassInfo(t.TypeId).ClassId;
                     ac.classname = _clasdal.GetClass(classid).Name;
                     ac.CreateTime = t.CreateTime;
                     ls.Add(ac);
@@ -672,5 +672,6 @@ namespace JzAPI.Controllers
             return r;
 
         }
+        
     }
 }

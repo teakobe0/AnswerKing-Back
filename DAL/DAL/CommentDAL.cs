@@ -21,12 +21,16 @@ namespace DAL.DAL
         /// 查询列表全部数据
         /// </summary>
         /// <returns></returns>
-        public List<Comment> GetListPage(int classinfoid)
+        public List<Comment> GetListPage(int type,int typeid)
         {
             var list = GetListData();
-            if (classinfoid != 0)
+            if (type != 0)
             {
-                list = list.Where(x => x.ClassInfoId == classinfoid);
+                list = list.Where(x => x.Type == type);
+            }
+            if (typeid != 0)
+            {
+                list = list.Where(x => x.TypeId == typeid);
             }
             return list.ToList();
         }
@@ -52,16 +56,16 @@ namespace DAL.DAL
         /// 查询列表全部数据 根据条件
         /// </summary>
         /// <returns></returns>
-        public List<Comment_v> GetList(int classInfoid)
+        public List<Comment_v> GetList(int type,int typeid)
         {
             List<Comment_v> ls = new List<Comment_v>();
             Comment_v cv = null;
 
-            var list = _context.Comment.Where(x=>x.IsDel==false).OrderBy(x => x.CreateTime).ToList();
+            var list = _context.Comment.Where(x=>x.IsDel==false&&x.Type==type).OrderBy(x => x.CreateTime).ToList();
 
-            if (classInfoid != 0)
+            if (typeid != 0)
             {
-                list = list.Where(x => x.ClassInfoId == classInfoid).ToList();
+                list = list.Where(x => x.TypeId == typeid).ToList();
                 var parent = list.Where(x => x.ParentId == "0");
                 foreach (var item in parent)
                 {
@@ -148,5 +152,6 @@ namespace DAL.DAL
         public string name { get; set; }//被回复昵称
         public string img { get; set; }//被回复图像
         public string contenturl { get; set; } //回复内容 地址
+        public string contenid { get; set; } //内容id
     }
 }

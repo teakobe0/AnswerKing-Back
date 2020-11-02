@@ -37,13 +37,13 @@ namespace JzAPI.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("Comments")]
-        public ResultModel Comments(int classinfoid)
+        public ResultModel Comments(int type,int typeid)
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _comdal.GetList(classinfoid);
+                r.Data = _comdal.GetList(type,typeid);
 
             }
             catch (Exception ex)
@@ -70,7 +70,6 @@ namespace JzAPI.Controllers
                 r.Data = _comdal.Add(comment);
                 if (comment.ParentId != "0")
                 {
-
                     r.Data = _notdal.Add(comment);
                 }
 

@@ -709,29 +709,6 @@ namespace JzAPI.Controllers
             return r;
         }
         /// <summary>
-        /// 查询科目
-        /// </summary>
-        /// <returns></returns>
-        [HttpGet]
-        [Route("Classes")]
-        public ResultModel Classes()
-        {
-            ResultModel r = new ResultModel();
-            r.Status = RmStatus.OK;
-            try
-            {
-                Dictionary<int, string> type = new Dictionary<int, string>();
-                type.Add(1, "经济 economic");
-                type.Add(2, "金融 finance");
-                r.Data = type;
-            }
-            catch (Exception ex)
-            {
-                r.Status = RmStatus.Error;
-            }
-            return r;
-        }
-        /// <summary>
         /// 完成的问题
         /// </summary>
         /// <returns></returns>

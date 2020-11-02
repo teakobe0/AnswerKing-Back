@@ -84,7 +84,11 @@ namespace DAL.Tools
             /// <summary>
             /// 聊天内容通知
             /// </summary>
-            Chat=2
+            Chat=2,
+            /// <summary>
+            /// 问题评论通知
+            /// </summary>
+            Question=3
         }
         /// <summary>
         /// 问题标记类别

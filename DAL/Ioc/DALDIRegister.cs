@@ -38,6 +38,7 @@ namespace DAL.Ioc
             services.AddTransient(typeof(IIntegralRecordsDAL), typeof(IntegralRecordsDAL));
             services.AddTransient(typeof(IClientQuestionInfoDAL), typeof(ClientQuestionInfoDAL));
             services.AddTransient(typeof(IFavouriteDAL), typeof(FavouriteDAL));
+            services.AddTransient(typeof(IPromotionDAL), typeof(PromotionDAL));
         }
     }
 }

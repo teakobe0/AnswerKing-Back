@@ -34,5 +34,7 @@ namespace DAL
         public DbSet<IntegralRecords> IntegralRecords { get; set; }
         public DbSet<Favourite> Favourite { get; set; }
         public DbSet<ClientQuestionInfo> ClientQuestionInfo { get; set; }
+        public DbSet<LoginIP> LoginIP { get; set; }
+        public DbSet<Promotion> Promotion { get; set; }
     }
 }

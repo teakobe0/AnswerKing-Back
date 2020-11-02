@@ -50,11 +50,11 @@ namespace DAL.DAL
         public int Register(Client client)
         {
             client.CreateTime = DateTime.Now;
-            if (client.Inviterid != 0)
+            if (!string.IsNullOrEmpty(client.Inviterid))
             {
                 client.Role = C_Role.vip;
                 client.EffectiveDate = DateTime.Now.AddDays(7);
-                var inviter = _context.Client.FirstOrDefault(x => x.Id == client.Inviterid);
+                var inviter = _context.Client.FirstOrDefault(x => x.Id == int.Parse(client.Inviterid));
                 if (inviter != null)
                 {
                     inviter.Role = C_Role.vip;
@@ -316,7 +316,7 @@ namespace DAL.DAL
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public int Deduct(int id,int currency)
+        public int Deduct(int id, int currency)
         {
             var client = _context.Client.FirstOrDefault(x => x.Id == id);
             client.Integral -= currency;
@@ -329,6 +329,39 @@ namespace DAL.DAL
             integral.Source = "发布问题";
             _context.IntegralRecords.Add(integral);
             return _context.SaveChanges();
+        }
+
+        /// <summary>
+        /// 积分充值
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public int UpdateIntegral(int id, int integral)
+        {
+            var client = _context.Client.FirstOrDefault(x => x.Id == id);
+            client.Integral += integral;
+            _context.Client.Update(client);
+            //积分记录表
+            IntegralRecords integrals = new IntegralRecords();
+            integrals.Integral = integral;
+            integrals.CreateBy = client.Id.ToString();
+            integrals.CreateTime = DateTime.Now;
+            integrals.Source = "积分充值";
+            _context.IntegralRecords.Add(integrals);
+            return _context.SaveChanges();
+        }
+        /// <summary>
+        /// 根据推荐机构id查询该机构下的客户
+        /// </summary>
+        /// <returns></returns>
+        public List<Client> GetListByInviterid(string pid)
+        {
+            var list= GetListData().ToList();
+            if (!string.IsNullOrEmpty(pid))
+            {
+                list = list.Where(x => x.Inviterid == pid).ToList();
+            }
+            return list;
         }
     }
 }
