@@ -21,7 +21,7 @@ namespace DAL.DAL
         /// 查询列表全部数据
         /// </summary>
         /// <returns></returns>
-        public List<Comment> GetListPage(int type,int typeid)
+        public List<Comment> GetListPage(int type, int typeid)
         {
             var list = GetListData();
             if (type != 0)
@@ -50,18 +50,18 @@ namespace DAL.DAL
         }
         private IQueryable<Comment> GetListData()
         {
-            return _context.Comment.Where(x =>x.IsDel==false);
+            return _context.Comment.Where(x => x.IsDel == false);
         }
         /// <summary>
         /// 查询列表全部数据 根据条件
         /// </summary>
         /// <returns></returns>
-        public List<Comment_v> GetList(int type,int typeid)
+        public List<Comment_v> GetList(int type, int typeid)
         {
             List<Comment_v> ls = new List<Comment_v>();
             Comment_v cv = null;
 
-            var list = _context.Comment.Where(x=>x.IsDel==false&&x.Type==type).OrderBy(x => x.CreateTime).ToList();
+            var list = _context.Comment.Where(x => x.IsDel == false && x.Type == type).OrderBy(x => x.CreateTime).ToList();
 
             if (typeid != 0)
             {
@@ -73,9 +73,9 @@ namespace DAL.DAL
                     cv = Utils.TransReflection<Comment, Comment_v>(item);
                     var model = _context.Client.FirstOrDefault(x => x.Id == item.ClientId);
                     cv.name = model.Name;
-                    cv.img = model.Image==null?null: AppConfig.Configuration["imgurl"] + model.Image;
+                    cv.img = model.Image == null ? null : AppConfig.Configuration["imgurl"] + model.Image;
                     ls.Add(cv);
-                   
+
                     var son = list.Where(x => x.ParentId.Contains("," + item.Id) && x.ParentId.Substring(x.ParentId.LastIndexOf(",") + 1) == item.Id.ToString());
                     foreach (var ea in son)
                     {
@@ -83,10 +83,10 @@ namespace DAL.DAL
                         cv = Utils.TransReflection<Comment, Comment_v>(ea);
                         var reply = _context.Client.FirstOrDefault(x => x.Id == ea.ClientId);
                         cv.replyname = reply.Name;
-                        cv.replyimg = reply.Image==null?null:AppConfig.Configuration["imgurl"]+reply.Image;
+                        cv.replyimg = reply.Image == null ? null : AppConfig.Configuration["imgurl"] + reply.Image;
                         var breply = _context.Client.FirstOrDefault(x => x.Id == item.ClientId);
                         cv.name = breply.Name;
-                        cv.img = breply.Image==null?null: AppConfig.Configuration["imgurl"]+ breply.Image;
+                        cv.img = breply.Image == null ? null : AppConfig.Configuration["imgurl"] + breply.Image;
                         ls.Add(cv);
                         var sonreply = list.Where(x => x.ParentId.Contains("," + ea.Id + ",") ||
                          (x.ParentId.Contains("," + ea.Id) && x.ParentId.Substring(x.ParentId.LastIndexOf(",") + 1) == ea.Id.ToString()));
@@ -95,12 +95,12 @@ namespace DAL.DAL
                             cv = new Comment_v();
                             cv = Utils.TransReflection<Comment, Comment_v>(cc);
                             var re = _context.Client.FirstOrDefault(x => x.Id == cc.ClientId);
-                            cv.replyname =re.Name;
-                            cv.replyimg =re.Image==null?null: AppConfig.Configuration["imgurl"]+ re.Image;
+                            cv.replyname = re.Name;
+                            cv.replyimg = re.Image == null ? null : AppConfig.Configuration["imgurl"] + re.Image;
                             int cid = _context.Comment.FirstOrDefault(x => x.Id == int.Parse(cc.ParentId.Substring(cc.ParentId.LastIndexOf(",") + 1))).ClientId;
                             var b = _context.Client.FirstOrDefault(x => x.Id == cid);
-                            cv.name =b .Name;
-                            cv.img = b.Image==null?null:AppConfig.Configuration["imgurl"]+ b.Image;
+                            cv.name = b.Name;
+                            cv.img = b.Image == null ? null : AppConfig.Configuration["imgurl"] + b.Image;
                             ls.Add(cv);
                         }
                     }
@@ -133,7 +133,7 @@ namespace DAL.DAL
              x.ParentId.Contains("," + co.Id + ",")
             || (x.ParentId.Contains("," + co.Id) && x.ParentId.Substring(x.ParentId.LastIndexOf(",") + 1) == co.Id.ToString()));
             Utils.WriteInfoLog("Comment:Delete" + co.ToJson() + dellist.ToJson());
-            foreach(var item in dellist)
+            foreach (var item in dellist)
             {
                 item.IsDel = true;
             }
@@ -151,7 +151,6 @@ namespace DAL.DAL
         public string replyimg { get; set; }//回复人图像
         public string name { get; set; }//被回复昵称
         public string img { get; set; }//被回复图像
-        public string contenturl { get; set; } //回复内容 地址
-        public string contenid { get; set; } //内容id
+        public string contentsid { get; set; } //内容id
     }
 }

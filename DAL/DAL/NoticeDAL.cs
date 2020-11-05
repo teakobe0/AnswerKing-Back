@@ -73,11 +73,12 @@ namespace DAL.DAL
             Notice notice = new Notice();
             notice.CreateTime = DateTime.Now;
             notice.SendId = comment_v.ClientId;
-            notice.Type =(int) noticeType.Comment;
+            notice.Type = comment_v.Type==1?(int) noticeType.Comment:(int)noticeType.Question;
             var cpid = int.Parse(comment_v.ParentId.Substring(comment_v.ParentId.LastIndexOf(",") + 1));
             var clientid = _context.Comment.FirstOrDefault(x => x.Id == cpid).ClientId;
             notice.ReceiveId = clientid;
-            notice.ContentsUrl = comment_v.contenturl;
+            notice.ContentsUrl = comment_v.Contents;
+            notice.ContentsId = comment_v.contentsid;
             _context.Notice.Add(notice);
             return _context.SaveChanges();
         }

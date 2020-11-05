@@ -94,6 +94,11 @@ namespace JzAPI.Controllers
 
                         r.Data = getToken(param);
                         Mail.SendMail(client.Email, client.Id);
+                        //登录IP表插入一条记录
+                        if (!string.IsNullOrEmpty(client.IP))
+                        {
+                            _clidal.AddIp(client.Id, client.IP);
+                        }
                     }
                     else
                     {
@@ -121,7 +126,7 @@ namespace JzAPI.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("Login")]
-        public ResultModel Login([FromBody] TokenRequest request)
+        public ResultModel Login([FromBody] TokenRequest request,string loginip)
         {
             ResultModel r = new ResultModel();
             r.Status = RmStatus.OK;
@@ -143,8 +148,12 @@ namespace JzAPI.Controllers
                 param.Role = client.Role;
                 param.configuration = _configuration;
 
-
                 r.Data = getToken(param);
+                //登录IP表插入一条记录以及更新客户表的登录ip
+                if (!string.IsNullOrEmpty(loginip))
+                {
+                    _clidal.UpdateIp(client.Id, loginip);
+                }
             }
             else
             {

@@ -37,13 +37,17 @@ namespace JzAPI.Controllers
         [HttpGet]
         [Route("Notices")]
         [Authorize(Roles = C_Role.all)]
-        public ResultModel Notices()
+        public ResultModel Notices(int pagenum = 1, int pagesize = 40)
         {
             ResultModel r = new ResultModel();
+            PageData page = new PageData();
             r.Status = RmStatus.OK;
             try
             {
-                r.Data = _notdal.GetList(ID);
+                var model = _notdal.GetList(ID).OrderByDescending(x => x.Id);
+                page.PageTotal = model.Count();
+                page.Data = model.Skip(pagesize * (pagenum - 1)).Take(pagesize).ToList();
+                r.Data = page;
 
             }
             catch (Exception ex)
@@ -138,7 +142,7 @@ namespace JzAPI.Controllers
                     }
                     ls.Add(ninfo);
                 }
-                r.Data =ls;
+                r.Data = ls;
             }
             catch (Exception ex)
             {

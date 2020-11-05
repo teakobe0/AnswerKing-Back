@@ -134,5 +134,15 @@ namespace DAL.IDAL
         /// </summary>
         /// <returns></returns>
         List<Client> GetListByInviterid(string pid);
+        /// <summary>
+        /// 更新客户登录ip以及登录ip表
+        /// </summary>
+        /// <returns></returns>
+        int UpdateIp(int id, string ip);
+        /// <summary>
+        /// 新增(登录ip表)
+        /// </summary>
+        /// <returns></returns>
+        int AddIp(int clientid, string ip);
     }
 }

@@ -227,7 +227,8 @@ namespace JzAPI.Controllers
                 if ((int)r.Data == 1)
                 {
                     //修改客户积分
-                    _clidal.UpdateIntegral(ID, int.Parse(order.Price));
+                    int integral = int.Parse(ordername.Substring(0, ordername.IndexOf('积')));
+                    _clidal.UpdateIntegral(ID, integral);
                     r.Status = RmStatus.OK;
                 }
                 else

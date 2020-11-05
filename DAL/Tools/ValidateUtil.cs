@@ -33,6 +33,10 @@ namespace DAL.Tools
                 }
             }
         }
+        public static bool IsInt(string value)
+        {
+            return Regex.IsMatch(value, @"^[+-]?\d*$");
+        }
 
     }
 }
