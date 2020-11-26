@@ -13,7 +13,7 @@ namespace DAL.Model
         public int ClientId { get; set; }//客户id
         public string OrderNo { get; set; } //订单号
         public DateTime PayTime { get; set; }//支付时间
-        public int PayType { get; set; }//支付方式 1:微信, 2:支付宝
+        public int PayType { get; set; }//支付方式 1:微信, 2:支付宝3.paypal
         public int Status { get; set; }//支付状态 0:未支付，1:已支付
         public string Price { get; set; }//订单金额
         public string Currency { get; set; }//订单支付货币

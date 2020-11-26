@@ -397,7 +397,7 @@ namespace DAL.DAL
                     IntegralRecords records = new IntegralRecords();
                     records.ClientId = int.Parse(item.CreateBy);
                     records.Integral = item.Currency;
-                    records.Source = "回答问题";
+                    records.Source = "系统退回发布问题积分";
                     records.CreateTime = DateTime.Now;
                     _context.IntegralRecords.Add(records);
                     _context.SaveChanges();
